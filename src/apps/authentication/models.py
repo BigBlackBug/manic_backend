@@ -9,10 +9,15 @@ from sphinx.locale import _
 
 
 class Registration(models.Model):
+    """
+    A temporary class that represents application login/registration process
+    """
     REGISTRATION_LIFETIME = timedelta(minutes=5)
 
     phone = models.CharField(max_length=40, unique=True)
     verification_code = models.CharField(max_length=4)
+
+    # TODO create a cron which cleans up expired registrations
     expires = models.DateTimeField(editable=False, default=timezone.now() + REGISTRATION_LIFETIME)
 
 
