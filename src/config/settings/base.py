@@ -54,7 +54,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'src.apps.main',
     'src.apps.core',
+    'src.apps.authentication',
+    'rest_framework.authtoken',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'src.apps.authentication.backend.TokenAuthentication',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    )
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
