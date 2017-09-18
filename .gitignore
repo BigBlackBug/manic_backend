@@ -1,4 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
+# local scripts
+run-tests.sh
+start-local-server.sh
+install-docker.sh
+
 #Idea
 .idea/
 ### Python template

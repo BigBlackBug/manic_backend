@@ -1,0 +1,12 @@
+version: "3.0"
+
+services:
+  base:
+    build: {context: ../, dockerfile: dockerfiles/base.Dockerfile}
+    image: bigblackbug/4hands2go-base
+
+  app:
+    build: {context: ../, dockerfile: dockerfiles/app.Dockerfile}
+    image: bigblackbug/4hands2go-app
+    depends_on:
+      - base

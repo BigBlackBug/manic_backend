@@ -3,7 +3,7 @@ from .base import *
 DEBUG = False
 
 # TODO temporary stub
-ALLOWED_HOSTS = ['4hands2go.bigblackbug.me', '35.195.227.131']
+ALLOWED_HOSTS = ['dev.4hands2go.bigblackbug.me', '35.195.227.131']
 
 DATABASES = {
     'default': {

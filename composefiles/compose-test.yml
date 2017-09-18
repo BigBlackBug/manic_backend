@@ -1,0 +1,21 @@
+version: "3.0"
+
+services:
+  app:
+    image: bigblackbug/4hands2go-app
+    environment:
+      - DJANGO_SETTINGS_MODULE=src.config.settings.test
+#      - DATABASE_HOST=pg
+#      - DATABASE_NAME=test
+#      - DATABASE_USER=test
+#      - DATABASE_PASSWORD=test
+    command: ["python", "manage.py", "test"]
+#    links:
+#      - pg
+
+#  pg:
+#    image: postgres:9.4-alpine
+#    environment:
+#      - POSTGRES_USER=test
+#      - POSTGRES_PASSWORD=test
+#    hostname: pg

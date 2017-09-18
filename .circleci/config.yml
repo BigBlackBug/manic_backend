@@ -1,0 +1,84 @@
+version: 2
+jobs:
+  build_prod:
+    working_directory: /code
+    docker:
+      - image: docker:17.05.0-ce-git
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip=9.0.0-r1
+            pip install \
+              docker-compose==1.12.0
+# TODO add caching, remove compose-build
+      - run:
+          name: Build
+          command: docker-compose -f composefiles/compose-build.yml build
+
+      - run:
+          name: Test
+          command: |
+            docker-compose -f composefiles/compose-test.yml up --abort-on-container-exit --exit-code-from app
+
+      - deploy:
+          name: Push and Deploy
+          command: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+            docker-compose -f composefiles/compose-build.yml push
+            chmod +x deploy.sh
+            REMOTE_HOST=4hands2go.bigblackbug.me FORHANDS_PROFILE=prod DEPLOY_PORT=80 source deploy.sh
+
+  build_dev:
+    working_directory: /code
+    docker:
+      - image: docker:17.05.0-ce-git
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip=9.0.0-r1
+            pip install \
+              docker-compose==1.12.0
+# TODO add caching, remove compose-build
+      - run:
+          name: Build
+          command: docker-compose -f composefiles/compose-build.yml build
+
+      - run:
+          name: Test
+          command: |
+            docker-compose -f composefiles/compose-test.yml up --abort-on-container-exit --exit-code-from app
+
+      - deploy:
+          name: Push and Deploy
+          command: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+            docker-compose -f composefiles/compose-build.yml push
+            chmod +x deploy.sh
+            REMOTE_HOST=dev.4hands2go.bigblackbug.me FORHANDS_PROFILE=dev DEPLOY_PORT=8000 source deploy.sh
+workflows:
+  version: 2
+
+  deploy_dev:
+    jobs:
+      - build_dev:
+          filters:
+            branches:
+              only:
+                - dev
+  deploy_prod:
+    jobs:
+      - build_prod:
+          filters:
+            branches:
+              only:
+                - master

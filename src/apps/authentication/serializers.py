@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from sphinx.locale import _
+from django.utils.translation import ugettext_lazy as _
 
 from src.apps.authentication.models import Registration
 

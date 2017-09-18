@@ -1,6 +1,6 @@
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
-from sphinx.locale import _
+from django.utils.translation import ugettext_lazy as _
 
 
 class TokenAuthentication(BaseAuthentication):
