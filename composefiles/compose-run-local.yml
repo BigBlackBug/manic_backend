@@ -1,0 +1,26 @@
+version: "3.0"
+
+services:
+  app:
+    image: bigblackbug/4hands2go-app:latest
+    environment:
+        - DJANGO_SETTINGS_MODULE=src.config.settings.local
+        - DATABASE_URL=postgres://4hands2go_local:4hands2go_local@pg/4hands2go_local
+        - DATABASE_HOST=pg
+        - DATABASE_NAME=4hands2go_local
+        - DATABASE_USER=4hands2go_local
+        - DATABASE_PASSWORD=4hands2go_local
+        - DJANGO_RUN_MIGRATIONS=yes
+    ports:
+      - "${DEPLOY_PORT-8000}:8000"
+    links:
+      - pg
+
+  pg:
+    image: postgres:9.4-alpine
+    environment:
+      - POSTGRES_USER=4hands2go_local
+      - POSTGRES_PASSWORD=4hands2go_local
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ~/4hands2go-local-data:/var/lib/postgresql/data/pgdata

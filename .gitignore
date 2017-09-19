@@ -1,8 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
 # local scripts
-run-tests.sh
-start-local-server.sh
-install-docker.sh
+#run-tests.sh
+#start-local-server.sh
+#install-docker.sh
+db.sqlite3
 
 #Idea
 .idea/
