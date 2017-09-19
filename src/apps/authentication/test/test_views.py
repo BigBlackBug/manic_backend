@@ -5,9 +5,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.test import APIRequestFactory, APIClient
 
-from src.apps.authentication.models import Registration, PhoneAuthUser, Token
+from src.apps.authentication.models import Registration
 from src.apps.authentication.views import CreateRegistrationView, UpdateRegistrationView
 
 
@@ -30,8 +29,23 @@ class LoginTest(TestCase):
                                     **make_json_body({'phone': '111'}))
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         registrations = list(Registration.objects.filter(phone='111'))
+
         # created succesfully
         self.assertEqual(1, len(registrations))
+        self.assertEqual(response.data['id'], registrations[0].id)
+
+    def test_create_two_registration(self):
+        # there is registration for this phone
+        Registration.objects.create(phone='111', verification_code='0000')
+        # creating a new one
+        response = self.client.post(reverse(CreateRegistrationView.view_name),
+                                    **make_json_body({'phone': '111'}))
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        registrations = list(Registration.objects.filter(phone='111'))
+
+        self.assertEqual(1, len(registrations))
+        self.assertEqual(response.data['id'], registrations[0].id)
 
     def test_confirm_registration_incorrect_reg_id(self):
         url = reverse(UpdateRegistrationView.view_name, args=[100])
@@ -61,7 +75,7 @@ class LoginTest(TestCase):
         # reg expired
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_confirm_registration(self):
+    def test_confirm_registration_ok(self):
         reg = Registration.objects.create(phone='111', verification_code='0000')
 
         response = self.client.patch(reverse(UpdateRegistrationView.view_name, args=[reg.id]),

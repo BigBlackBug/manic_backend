@@ -27,13 +27,19 @@ class CreateRegistrationView(NamedAPIView):
 
         """
         serializer = RegistrationSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            # TODO generate code
-            code = sms_verification.generate_code()
-            registration = serializer.save(verification_code=code)
-            return Response(data={'id': registration.id})
+        serializer.is_valid(raise_exception=True)
 
-        return Response(status=status.HTTP_200_OK)
+        # TODO generate code
+        code = sms_verification.generate_code()
+        # overwriting the existing registration
+        try:
+            registration = Registration.objects.filter(phone=serializer.validated_data['phone'])
+        except Registration.DoesNotExist:
+            registration = serializer.save(verification_code=code)
+        else:
+            registration.delete()
+            registration = serializer.save(verification_code=code)
+        return Response(data={'id': registration.id})
 
 
 class UpdateRegistrationView(NamedAPIView):
