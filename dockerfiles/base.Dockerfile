@@ -7,7 +7,7 @@ FROM python:3.6
 MAINTAINER Evgeny Shakhmaev <hello@bigblackbug.me>
 
 RUN apt-get update && \
-    apt-get install -y && \
+    apt-get install -y postgresql postgresql-client && \
     pip3 install uwsgi
 
 RUN mkdir /code/

@@ -5,6 +5,7 @@ services:
     image: bigblackbug/4hands2go-app:latest
     environment:
         - DJANGO_SETTINGS_MODULE=src.config.settings.dev
+        - DATABASE_URL=postgres://4hands2go_dev:4hands2go_dev@pg/4hands2go_dev
         - DATABASE_HOST=pg
         - DATABASE_NAME=4hands2go_dev
         - DATABASE_USER=4hands2go_dev
