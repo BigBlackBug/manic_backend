@@ -24,13 +24,17 @@ def get_env_variable(var_name):
         error_msg = "Set the {} environment variable".format(var_name)
         raise ImproperlyConfigured(error_msg)
 
-# TODO read about dirs in django
 BASE_DIR = Path(__file__).ancestor(3)
-MEDIA_ROOT = BASE_DIR.child("media")
-STATIC_ROOT = BASE_DIR.child("static")
-STATICFILES_DIRS = (
-    BASE_DIR.child("assets"),
-)
+
+# TODO really? the slash did it!
+MEDIA_ROOT = BASE_DIR.ancestor(1).child("media")+'/'
+MEDIA_URL = '/media/'
+
+STATIC_ROOT = BASE_DIR.ancestor(1).child("static")+'/'
+STATIC_URL = '/static/'
+# STATICFILES_DIRS = (
+#     BASE_DIR.ancestor(1).child("static"),
+# )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -47,8 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'src.apps.main',
     'src.apps.core',
+    'src.apps.categories',
     'src.apps.authentication',
     'rest_framework.authtoken',
 ]
@@ -133,11 +137,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-
-STATIC_URL = '/static/'
 
 LOGGING = {
     'version': 1,

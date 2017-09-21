@@ -1,5 +1,6 @@
 version: "3.0"
 
+#TODO map media volumes
 services:
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -11,10 +12,13 @@ services:
         - DATABASE_USER=4hands2go_local
         - DATABASE_PASSWORD=4hands2go_local
         - DJANGO_RUN_MIGRATIONS=yes
+        - DJANGO_RUN_COLLECTSTATIC=yes
     ports:
       - "${DEPLOY_PORT-8000}:8000"
     links:
       - pg
+    volumes:
+      - ~/4hands2go-local-static-data:/code/media
 
   pg:
     image: postgres:9.4-alpine

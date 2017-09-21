@@ -15,8 +15,9 @@ if [ "X$DJANGO_RUN_MIGRATIONS" = 'Xyes' ]; then
     python manage.py migrate --noinput
 fi
 
-#if [ "X$DJANGO_RUN_COLLECTSTATIC" = 'Xyes' ]; then
-#    python manage.py collectstatic --noinput
-#fi
+if [ "X$DJANGO_RUN_COLLECTSTATIC" = 'Xyes' ]; then
+    echo "collecting static"
+    python manage.py collectstatic --noinput
+fi
 
 exec "$@"

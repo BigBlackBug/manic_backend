@@ -1,20 +1,20 @@
 import json
 from datetime import timedelta
 
-from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
 
-from src.apps.authentication.models import Registration
-from src.apps.authentication.views import CreateRegistrationView, UpdateRegistrationView
+from ..models import Registration, PhoneAuthUser, Token
+from ..views import CreateRegistrationView, UpdateRegistrationView, LogoutView
 
 
 def make_json_body(body):
     return {'data': json.dumps(body), 'content_type': 'application/json'}
 
 
-class LoginTest(TestCase):
+class LoginTest(APITestCase):
     # def setUp(self):
     #     # Every test needs access to the request factory.
     #     self.factory = APIRequestFactory()
@@ -87,3 +87,22 @@ class LoginTest(TestCase):
 
         with self.assertRaises(Registration.DoesNotExist):
             Registration.objects.get(phone='111')
+
+    def test_logout_ok(self):
+        user = PhoneAuthUser.objects.create(phone='777')
+        token, _ = Token.objects.get_or_create(user=user)
+
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+        # first time ok
+        response = self.client.post(reverse(LogoutView.view_name))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # second time gives unauthorized
+        response = self.client.post(reverse(LogoutView.view_name))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_logout_unauthorized(self):
+        response = self.client.post(reverse(LogoutView.view_name))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

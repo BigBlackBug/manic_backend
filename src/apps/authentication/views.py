@@ -10,10 +10,10 @@ from .models import Registration, PhoneAuthUser, Token
 from .serializers import RegistrationSerializer, UpdateRegistrationSerializer
 
 
-class Logout(NamedAPIView):
+class LogoutView(NamedAPIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request: Request):
+    def post(self, request: Request):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
 
