@@ -4,7 +4,9 @@
 #start-local-server.sh
 #install-docker.sh
 *.sqlite3
-/media
+media/
+etc/
+
 #Idea
 .idea/
 ### Python template

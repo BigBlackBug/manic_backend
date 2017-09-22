@@ -1,4 +1,5 @@
 import io
+import uuid
 
 from PIL import Image
 from django.core.files.base import ContentFile
@@ -14,3 +15,13 @@ def make_in_memory_image(filename):
     f = ContentFile(buff_val)
     return InMemoryUploadedFile(f, None, filename, 'image/jpeg',
                                 f.tell, None)
+
+
+class Folders:
+    @staticmethod
+    def avatars(instance, filename):
+        return 'avatars/' + str(uuid.uuid4())
+
+    @staticmethod
+    def categories(instance, filename):
+        return 'categories/' + str(uuid.uuid4())

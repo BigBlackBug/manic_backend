@@ -1,6 +1,19 @@
 version: "3.0"
 
 services:
+  nginx:
+    image: bigblackbug/4hands2go-nginx:dev
+    links:
+      - app
+    ports:
+      - ${DEPLOY_PORT-8000}:80
+      - ${DEPLOY_HTTPS_PORT-4433}:443
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/ssl/certs/dhparam.pem:/etc/ssl/certs/dhparam.pem:ro
+      - /var/lib/4hands2go/dev-media:/var/lib/4hands2go/media
+
+# app is available on port 8000 by default
   app:
     image: bigblackbug/4hands2go-app:latest
     environment:
@@ -11,10 +24,11 @@ services:
         - DATABASE_USER=4hands2go_dev
         - DATABASE_PASSWORD=4hands2go_dev
         - DJANGO_RUN_MIGRATIONS=yes
-    ports:
-      - "${DEPLOY_PORT-8000}:8000"
     links:
       - pg
+    volumes:
+      - /var/lib/4hands2go/dev-media:/code/media
+
 
   pg:
     image: postgres:9.4-alpine
@@ -23,4 +37,4 @@ services:
       - POSTGRES_PASSWORD=4hands2go_dev
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - ~/4hands2go-dev-data:/var/lib/postgresql/data/pgdata
+      - /var/lib/4hands2go/dev-db-data:/var/lib/postgresql/data/pgdata

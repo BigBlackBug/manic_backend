@@ -1,6 +1,5 @@
 version: "3.0"
 
-#TODO map media volumes
 services:
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -18,7 +17,7 @@ services:
     links:
       - pg
     volumes:
-      - ~/4hands2go-local-static-data:/code/media
+      - ~/4hands2go-local-media-data:/code/media
 
   pg:
     image: postgres:9.4-alpine

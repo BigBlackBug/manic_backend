@@ -10,3 +10,11 @@ services:
     image: bigblackbug/4hands2go-app
     depends_on:
       - base
+
+  nginx_dev:
+    build: {context: ../, dockerfile: dockerfiles/nginx.Dockerfile, args:{profile: dev}}
+    image: bigblackbug/4hands2go-nginx:dev
+
+#  nginx_prod:
+#    build: {context: ../, dockerfile: dockerfiles/nginx.Dockerfile, args:{profile: prod}}
+#    image: bigblackbug/4hands2go-nginx:prod

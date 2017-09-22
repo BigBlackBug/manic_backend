@@ -54,8 +54,12 @@ INSTALLED_APPS = [
     'src.apps.core',
     'src.apps.categories',
     'src.apps.authentication',
+    'src.apps.masters',
     'rest_framework.authtoken',
 ]
+
+USER_MODEL = 'authentication.PhoneAuthUser'
+SERVICE_MODEL = 'categories.Service'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

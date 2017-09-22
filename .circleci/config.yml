@@ -64,7 +64,8 @@ jobs:
             docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
             docker-compose -f composefiles/compose-build.yml push
             chmod +x deploy.sh
-            REMOTE_HOST=dev.4hands2go.bigblackbug.me FORHANDS_PROFILE=dev DEPLOY_PORT=8000 source deploy.sh
+            REMOTE_HOST=dev.4hands2go.bigblackbug.me FORHANDS_PROFILE=dev \
+            DEPLOY_PORT=8000 DEPLOY_HTTPS_PORT=4433 source deploy.sh
 workflows:
   version: 2
 
@@ -75,10 +76,10 @@ workflows:
             branches:
               only:
                 - dev
-  deploy_prod:
-    jobs:
-      - build_prod:
-          filters:
-            branches:
-              only:
-                - master
+#  deploy_prod:
+#    jobs:
+#      - build_prod:
+#          filters:
+#            branches:
+#              only:
+#                - master

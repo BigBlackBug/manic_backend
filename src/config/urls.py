@@ -21,7 +21,8 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^auth/', include('src.apps.authentication.urls')),
-    url(r'^categories/', include('src.apps.categories.urls'))
+    url(r'^categories/', include('src.apps.categories.urls')),
+    url(r'^masters/', include('src.apps.masters.urls'))
 ]\
 + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
 + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

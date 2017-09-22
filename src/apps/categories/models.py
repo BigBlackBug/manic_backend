@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-import uuid
-
 from django.db import models
 
-
-def make_id(instance, filename):
-    return 'categories/' + str(uuid.uuid4())
+from src.apps.core.utils import Folders
 
 
 class ServiceCategory(models.Model):
@@ -20,7 +16,7 @@ class ServiceCategory(models.Model):
     # services
     name = models.CharField(max_length=64)
     # TODO what about file extensions?
-    image = models.ImageField(upload_to=make_id, blank=True)
+    image = models.ImageField(upload_to=Folders.categories, blank=True)
 
     def __str__(self):
         return self.name
