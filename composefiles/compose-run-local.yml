@@ -12,6 +12,9 @@ services:
         - DATABASE_PASSWORD=4hands2go_local
         - DJANGO_RUN_MIGRATIONS=yes
         - DJANGO_RUN_COLLECTSTATIC=yes
+        - DJANGO_RUN_CREATESUPERUSER=yes
+        - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+        - ADMIN_USERNAME=${ADMIN_USERNAME}
     ports:
       - "${DEPLOY_PORT-8000}:8000"
     links:
@@ -25,5 +28,7 @@ services:
       - POSTGRES_USER=4hands2go_local
       - POSTGRES_PASSWORD=4hands2go_local
       - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
     volumes:
       - ~/4hands2go-local-data:/var/lib/postgresql/data/pgdata

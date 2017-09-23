@@ -27,8 +27,10 @@ services:
         - DATABASE_PASSWORD=4hands2go_dev
         - DJANGO_RUN_MIGRATIONS=yes
         # needed for admin pages
-        # let django serve static files, since only admin pages have those
         - DJANGO_RUN_COLLECTSTATIC=yes
+        - DJANGO_RUN_CREATESUPERUSER=yes
+        - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+        - ADMIN_USERNAME=${ADMIN_USERNAME}
     links:
       - pg
     volumes:

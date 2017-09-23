@@ -2,12 +2,12 @@
 set -e
 
 if [ -z ${REMOTE_HOST+x} ]; then
-    echo "Please set the REMOTE_HOST variable";
+    echo "Please set the REMOTE_HOST env variable";
     exit 1
 fi
 
 if [ -z ${FORHANDS_PROFILE+x} ]; then
-    echo "Please set the FORHANDS_PROFILE variable";
+    echo "Please set the FORHANDS_PROFILE env variable";
     exit 1
 fi
 
