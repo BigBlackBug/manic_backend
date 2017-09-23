@@ -10,9 +10,11 @@ services:
       - ${DEPLOY_HTTPS_PORT-443}:443
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /etc/ssl/certs/dhparam.pem:/etc/ssl/certs/dhparam.pem:ro
+#      - /etc/ssl/certs:/etc/ssl/certs:ro
       - /var/lib/4hands2go/prod-media:/var/lib/4hands2go/media
+      - /var/lib/4hands2go/prod-static:/var/lib/4hands2go/static
 
+# TODO gotta change ownership of the media folder on the host to the current user
 # app is available on port 8000 by default
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -24,11 +26,16 @@ services:
         - DATABASE_USER=4hands2go
         - DATABASE_PASSWORD=4hands2go
         - DJANGO_RUN_MIGRATIONS=${DJANGO_RUN_MIGRATIONS:-no}
+        - DJANGO_RUN_CREATESUPERUSER=yes
+        # needed for admin pages
+        - DJANGO_RUN_COLLECTSTATIC=yes
+        - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+        - ADMIN_USERNAME=${ADMIN_USERNAME}
     links:
       - pg
     volumes:
       - /var/lib/4hands2go/prod-media:/code/media
-
+      - /var/lib/4hands2go/prod-static:/code/static
 
   pg:
     image: postgres:9.4-alpine

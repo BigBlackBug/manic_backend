@@ -26,9 +26,9 @@ services:
         - DATABASE_USER=4hands2go_dev
         - DATABASE_PASSWORD=4hands2go_dev
         - DJANGO_RUN_MIGRATIONS=yes
+        - DJANGO_RUN_CREATESUPERUSER=yes
         # needed for admin pages
         - DJANGO_RUN_COLLECTSTATIC=yes
-        - DJANGO_RUN_CREATESUPERUSER=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
     links:
