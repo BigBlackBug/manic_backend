@@ -24,11 +24,13 @@ services:
         - DATABASE_USER=4hands2go_dev
         - DATABASE_PASSWORD=4hands2go_dev
         - DJANGO_RUN_MIGRATIONS=yes
+        # needed for admin pages
+        # let django serve static files, since only admin pages have those
+        - DJANGO_RUN_COLLECTSTATIC=yes
     links:
       - pg
     volumes:
       - /var/lib/4hands2go/dev-media:/code/media
-
 
   pg:
     image: postgres:9.4-alpine
