@@ -28,7 +28,8 @@ ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
     cd ~/${FORHANDS_PROFILE}
     docker-compose ${COMPOSE_OPTS} pull
     docker-compose ${COMPOSE_OPTS} down
-    DEPLOY_PORT=${DEPLOY_PORT} docker-compose ${COMPOSE_OPTS} up -d
+    DEPLOY_PORT=${DEPLOY_PORT} DEPLOY_HTTPS_PORT=${DEPLOY_HTTPS_PORT} \
+    docker-compose ${COMPOSE_OPTS} up -d
 EOF
 
 echo "Done!"

@@ -10,7 +10,7 @@ services:
       - ${DEPLOY_HTTPS_PORT-4433}:443
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /etc/ssl/certs:/etc/ssl/certs:ro
+#      - /etc/ssl/certs:/etc/ssl/certs:ro
       - /var/lib/4hands2go/dev-media:/var/lib/4hands2go/media
 
 # app is available on port 8000 by default
