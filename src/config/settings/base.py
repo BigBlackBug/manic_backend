@@ -54,8 +54,7 @@ INSTALLED_APPS = [
     'src.apps.core',
     'src.apps.categories',
     'src.apps.authentication',
-    'src.apps.masters',
-    'rest_framework.authtoken',
+    'src.apps.masters'
 ]
 
 USER_MODEL = 'authentication.PhoneAuthUser'
