@@ -12,7 +12,9 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
 #      - /etc/ssl/certs:/etc/ssl/certs:ro
       - /var/lib/4hands2go/dev-media:/var/lib/4hands2go/media
+      - /var/lib/4hands2go/dev-static:/var/lib/4hands2go/static
 
+# TODO gotta change ownership of the media folder on the host to the current user
 # app is available on port 8000 by default
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -31,6 +33,7 @@ services:
       - pg
     volumes:
       - /var/lib/4hands2go/dev-media:/code/media
+      - /var/lib/4hands2go/dev-static:/code/static
 
   pg:
     image: postgres:9.4-alpine
