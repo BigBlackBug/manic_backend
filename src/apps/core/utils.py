@@ -19,6 +19,10 @@ def make_in_memory_image(filename):
 
 class Folders:
     @staticmethod
+    def portfolio(instance, filename):
+        return f'portfolio/{instance.master.id}/{uuid.uuid4()}'
+
+    @staticmethod
     def avatars(instance, filename):
         return 'avatars/' + str(uuid.uuid4())
 

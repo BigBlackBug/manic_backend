@@ -54,8 +54,10 @@ INSTALLED_APPS = [
     'src.apps.core',
     'src.apps.categories',
     'src.apps.authentication',
-    'src.apps.masters'
+    'src.apps.masters',
+    'django_filters',
 ]
+
 
 USER_MODEL = 'authentication.PhoneAuthUser'
 SERVICE_MODEL = 'categories.Service'
@@ -66,7 +68,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 MIDDLEWARE = [

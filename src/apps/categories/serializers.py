@@ -3,7 +3,15 @@ from rest_framework import serializers
 from .models import ServiceCategory, Service
 
 
+class SimpleServiceCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceCategory
+        fields = ('name', 'image', 'id')
+
+
 class ServiceSerializer(serializers.ModelSerializer):
+    category = SimpleServiceCategorySerializer()
+
     class Meta:
         model = Service
         fields = '__all__'
@@ -11,10 +19,9 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class ServiceCategorySerializer(serializers.ModelSerializer):
-    # image = serializers.ImageField(read_only=True)
-    # name = serializers.CharField(max_length=64, read_only=True)
     services = ServiceSerializer(many=True, read_only=True)
 
     class Meta:
         model = ServiceCategory
         fields = ('name', 'image', 'services')
+        depth = 1

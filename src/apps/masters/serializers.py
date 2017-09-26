@@ -1,9 +1,84 @@
 from rest_framework import serializers
 
-from .models import Master
+from src.apps.categories.serializers import ServiceSerializer
+from .models import Master, Location, Schedule, TimeSlot
+
+
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        exclude = ('id',)
+
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    class TimeSlotSerializer(serializers.ModelSerializer):
+        time = serializers.SerializerMethodField('time_value')
+
+        def time_value(self, time_slot: TimeSlot):
+            # chopping off seconds
+            return str(time_slot.time.value)[:-3]
+
+        class Meta:
+            model = TimeSlot
+            exclude = ('id', 'schedule')
+
+    time_slots = TimeSlotSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Schedule
+        exclude = ('id', 'master')
 
 
 class MasterSerializer(serializers.ModelSerializer):
+    """
+    Provides a complete representation of a master
+    """
+
+    class PortfolioImageField(serializers.RelatedField):
+        def to_representation(self, instance):
+            url = instance.image.url
+            request = self.context.get('request', None)
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+
+    location = LocationSerializer(read_only=True)
+    services = ServiceSerializer(many=True, read_only=True)
+    schedule = ScheduleSerializer(many=True, read_only=True)
+    portfolio = PortfolioImageField(many=True, read_only=True)
+
     class Meta:
         model = Master
-        fields = '__all__'
+        exclude = ('user',)
+
+
+class MasterScheduleSerializer(serializers.BaseSerializer):
+    """
+    Given a master instance, serializes only his schedule to a list
+    """
+
+    def to_representation(self, instance: Master):
+        return ScheduleSerializer(instance.schedule, many=True, read_only=True).data
+
+
+class MasterListSerializer(serializers.ModelSerializer):
+    """
+    Provides a short representation of a master, to be used in the
+    main list of masters
+    """
+    DISTANCE_NOT_AVAILABLE = -1
+
+    services = ServiceSerializer(many=True, read_only=True)
+    location = LocationSerializer(read_only=True)
+    distance = serializers.SerializerMethodField('_distance', read_only=True)
+
+    def _distance(self, master: Master):
+        coordinates = self.context.get('coordinates')
+        if not coordinates:
+            return self.DISTANCE_NOT_AVAILABLE
+        else:
+            return master.distance(*coordinates)
+
+    class Meta:
+        model = Master
+        fields = ('id', 'first_name', 'avatar', 'services', 'location', 'distance')

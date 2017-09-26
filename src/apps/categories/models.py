@@ -40,7 +40,8 @@ class Service(models.Model):
     cost = models.PositiveIntegerField()
 
     # in minutes
-    duration = models.PositiveIntegerField()
+    min_duration = models.PositiveIntegerField()
+    max_duration = models.PositiveIntegerField()
 
     def __str__(self):
         return f'{self.name} from category {self.category.name}'

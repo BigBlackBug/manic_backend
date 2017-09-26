@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from math import acos, cos, radians, sin
+
 from django.conf import settings
 from django.db import models
 
 from src.apps.core.utils import Folders
-from src.apps.masters.utils import Gender
+from .utils import Gender
 
 
 class UserProfile(models.Model):
@@ -36,18 +38,30 @@ class Location(models.Model):
     lat = models.FloatField()
     lon = models.FloatField()
 
+    def distance(self, lat, lon):
+        # Great circle distance formula
+        return 6371 * acos(
+            cos(radians(lat)) * cos(radians(self.lat)) *
+            cos(radians(self.lon) - radians(lon)) +
+            sin(radians(lat)) * sin(radians(self.lat))
+        )
+
     def __str__(self):
         return "lat:{}, lon:{}".format(self.lat, self.lon)
 
 
+
 class Master(UserProfile):
-    coords = models.OneToOneField(Location, on_delete=models.CASCADE,
-                                  related_name='+')
+    location = models.OneToOneField(Location, on_delete=models.CASCADE, related_name='+')
+
     services = models.ManyToManyField(settings.SERVICE_MODEL, related_name='masters')
 
     # FK fields
-    # services
-    # working_hours - list of 'availabilities'
+    # schedule - list of 'created schedules'
+    # portfolio - list of 'portfolio images'
+
+    def distance(self, lat, lon):
+        return self.location.distance(lat, lon)
 
     def is_client(self):
         return False
@@ -56,36 +70,45 @@ class Master(UserProfile):
         db_table = 'master'
 
 
+class PortfolioImage(models.Model):
+    image = models.ImageField(upload_to=Folders.portfolio)
+    master = models.ForeignKey(Master, related_name='portfolio', on_delete=models.CASCADE)
+
+
 class Time(models.Model):
     """
     data is generated once on startup
     filled with 00:30
     """
-    # FK fields
-    # masters
     hour = models.IntegerField()
     minute = models.IntegerField()
+    # populated at insertion time
+    # used only for filtering
+    value = models.TimeField(blank=True, null=True)
 
     def __str__(self):
         return '{}:{}'.format(self.hour, self.minute)
 
 
-class Availability(models.Model):
-    time = models.ForeignKey(Time, on_delete=models.CASCADE)
-    working_hours = models.ForeignKey('WorkingHours', on_delete=models.CASCADE)
+class TimeSlot(models.Model):
+    DURATION = 30
+
+    time = models.ForeignKey(Time, on_delete=models.CASCADE, related_name='+')
     taken = models.BooleanField(default=False)
+    schedule = models.ForeignKey('Schedule', related_name='time_slots')
 
 
-class WorkingHours(models.Model):
+class Schedule(models.Model):
     """
     master sets his availability dates himself
+
+    date and list of availabilities
     """
+    # FK fields
+    # time_slots
     master = models.ForeignKey(Master, on_delete=models.CASCADE,
-                               related_name='working_hours')
-    # TODO date settings
+                               related_name='schedule')
     date = models.DateField()
-    times = models.ManyToManyField(Time, through=Availability,
-                                   through_fields=('working_hours', 'time'))
 
 # TODO referrals
 # TODO feedbacks
