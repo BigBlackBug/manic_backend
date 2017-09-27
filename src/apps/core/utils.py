@@ -4,6 +4,7 @@ import uuid
 from PIL import Image
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from rest_framework.views import exception_handler
 
 
 def make_in_memory_image(filename):
@@ -29,3 +30,10 @@ class Folders:
     @staticmethod
     def categories(instance, filename):
         return 'categories/' + str(uuid.uuid4())
+
+
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+
+    # TODO custom handler
+    return response
