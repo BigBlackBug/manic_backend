@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
-from src.apps.masters import utils
+from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import MasterListSerializer
 from src.apps.masters.test import make_everything, make_token

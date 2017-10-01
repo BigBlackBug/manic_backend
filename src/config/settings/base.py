@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'src.apps.categories',
     'src.apps.authentication',
     'src.apps.masters',
+    'src.apps.clients',
     'django_filters',
 ]
 

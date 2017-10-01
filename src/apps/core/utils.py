@@ -1,9 +1,11 @@
 import io
 import uuid
+from datetime import timedelta
 
 from PIL import Image
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils import timezone
 from rest_framework.views import exception_handler
 
 
@@ -37,3 +39,8 @@ def custom_exception_handler(exc, context):
 
     # TODO custom handler
     return response
+
+
+def get_date(days: int):
+    # TODO UNIFY DATE_FORMAT
+    return (timezone.now() + timedelta(days=days)).strftime('%Y-%m-%d')

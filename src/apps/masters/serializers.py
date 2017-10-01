@@ -1,13 +1,8 @@
 from rest_framework import serializers
 
 from src.apps.categories.serializers import ServiceSerializer
+from src.apps.core.serializers import LocationSerializer
 from .models import Master, Location, Schedule, TimeSlot
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        exclude = ('id',)
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):

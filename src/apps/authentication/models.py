@@ -29,6 +29,25 @@ class PhoneAuthUser(models.Model):
     """
     phone = models.CharField(max_length=40, unique=True)
 
+    def is_client(self):
+        try:
+            self.client
+        except AttributeError as e:
+            return False
+        else:
+            return True
+
+    def is_master(self):
+        try:
+            self.master
+        except AttributeError as e:
+            return False
+        else:
+            return True
+
+    def has_account(self):
+        return self.is_client() or self.is_master()
+
     @property
     def is_active(self):
         """
@@ -86,7 +105,7 @@ class UserProfile(models.Model):
                                 related_query_name="%(class)s", )
 
     first_name = models.CharField(max_length=32)
-    avatar = models.ImageField(upload_to=Folders.avatars)
+    avatar = models.ImageField(upload_to=Folders.avatars, blank=True, null=True)
 
     gender = models.CharField(
         max_length=1,
@@ -98,9 +117,6 @@ class UserProfile(models.Model):
 
     # FK fields
     # debit_cards
-
-    def is_client(self):
-        raise NotImplementedError()
 
     class Meta:
         abstract = True

@@ -23,9 +23,6 @@ class Master(UserProfile):
     def distance(self, lat, lon):
         return self.location.distance(lat, lon)
 
-    def is_client(self):
-        return False
-
     def __str__(self):
         return self.first_name
 
