@@ -4,6 +4,8 @@ from django.db import models
 from src.apps.core.utils import Folders
 
 
+# TODO WHAT A BUG. Categories don't delete images!!!!
+
 class ServiceCategory(models.Model):
     """
     A category for a number of services
