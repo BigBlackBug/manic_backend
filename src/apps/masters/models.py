@@ -50,11 +50,14 @@ class Location(models.Model):
         return "lat:{}, lon:{}".format(self.lat, self.lon)
 
 
-
 class Master(UserProfile):
+    MAX_RATING = 5.0
+
     location = models.OneToOneField(Location, on_delete=models.CASCADE, related_name='+')
 
     services = models.ManyToManyField(settings.SERVICE_MODEL, related_name='masters')
+
+    rating = models.FloatField(default=0.0)
 
     # FK fields
     # schedule - list of 'created schedules'
@@ -65,6 +68,9 @@ class Master(UserProfile):
 
     def is_client(self):
         return False
+
+    def __str__(self):
+        return self.first_name
 
     class Meta(UserProfile.Meta):
         db_table = 'master'
@@ -97,6 +103,13 @@ class TimeSlot(models.Model):
     taken = models.BooleanField(default=False)
     schedule = models.ForeignKey('Schedule', related_name='time_slots')
 
+    @property
+    def value(self):
+        return self.time.value
+
+    def __str__(self):
+        return f'{self.time} - taken: {self.taken}'
+
 
 class Schedule(models.Model):
     """
@@ -110,10 +123,12 @@ class Schedule(models.Model):
                                related_name='schedule')
     date = models.DateField()
 
+    def __str__(self):
+        return f'schedule for date {self.date}'
+
 # TODO referrals
 # TODO feedbacks
 # TODO orders
-# TODO master's portfolio
 # TODO payments
 
 # class Address(models.Model):

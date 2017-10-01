@@ -1,68 +1,42 @@
-import heapq
-
-from rest_framework import generics, filters, permissions
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from .filters import MasterListFilter
+from src.apps.categories.models import Service
+from src.apps.masters import time_slot_utils, master_utils
+from . import filtering
 from .models import Master
-from .serializers import MasterSerializer, MasterListSerializer, MasterScheduleSerializer
-
-
-class MasterComparable:
-    def __init__(self, master, value):
-        self.master = master
-        self.value = value
-
-    def __lt__(self, other):
-        return self.value < other.value
+from .serializers import MasterSerializer, MasterListSerializer, TimeSlotSerializer
 
 
 class MasterListView(generics.ListAPIView):
     view_name = 'master-list'
 
-    queryset = Master.objects.all()
-    serializer_class = MasterListSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
-    filter_class = MasterListFilter
-    # date, time, service,  distance,
-    filter_backends = (filters.DjangoFilterBackend,)
+    def get(self, request, **kwargs):
+        # TODO use drf serializer for validation
+        params = filtering.prepare_filtering_params(request.query_params)
+        result = filtering.search_for_masters(params)
+        masters = master_utils.sort_masters(result, params['coordinates'], params['distance'])
+        serializer = MasterListSerializer(masters, many=True, context={
+            'coordinates': params['coordinates']
+        })
+        # TODO add favourites
+        return Response(serializer.data)
+
+
+class MasterSearchView(generics.ListAPIView):
+    view_name = 'master-search'
+
+    queryset = Master.objects.all()
 
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        target_distance = request.query_params.get('distance')
-        if target_distance:
-            coordinates = request.query_params.get('coordinates')
-            if not coordinates:
-                raise ValidationError('Please specify \'coordinates\' query param')
-            try:
-                lat, lon = map(float, coordinates.split(','))
-            except:
-                raise ValidationError('\'coordinates\' query param is not valid. '
-                                      'It should be a comma-separated tuple of two floats')
-            data = self.filter_by_distance(queryset, float(target_distance), lat, lon)
-
-            serializer_class = self.get_serializer_class()
-            kwargs['context'] = self.get_serializer_context()
-            kwargs['context']['coordinates'] = (lat, lon)
-
-            serializer = serializer_class(data, many=True, **kwargs)
-        else:
-            data = queryset
-            serializer = self.get_serializer(data, many=True)
-        # TODO add favourites
-        return Response(serializer.data)
-
-    def filter_by_distance(self, queryset, target_distance: float, lat: float, lon: float):
-        result = []
-        for master in queryset:
-            distance = master.distance(lat, lon)
-            if distance < target_distance:
-                heapq.heappush(result, MasterComparable(master, target_distance - distance))
-        return [comp.master for comp in result]
+        # service_id, client_id, date(optional), time(optional)
+        # TODO implement me, yo!
+        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
 class MasterDetailView(generics.RetrieveAPIView):
@@ -75,6 +49,34 @@ class MasterDetailView(generics.RetrieveAPIView):
 class MasterScheduleView(generics.RetrieveAPIView):
     view_name = 'master-schedule'
     queryset = Master.objects.all()
-    serializer_class = MasterScheduleSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
+    def get(self, request, **kwargs):
+        """
+        Returns dates and time slots of a master when he can do the specified service
+        """
+        master = self.get_object()
+        service_id = request.query_params.get('service')
+        if not service_id:
+            raise ValidationError("'service' parameter is not specified")
+        try:
+            service = Service.objects.get(pk=service_id)
+        except Service.DoesNotExist as ex:
+            raise ValidationError(f"Service with id={service_id} doesn't exist")
+        else:
+            result = []
+            # TODO return only those who can make it to the current client
+            for schedule in master.schedule.all():
+                available_slots = time_slot_utils \
+                    .find_available_starting_slots(service, schedule.time_slots.all())
+
+                slots_json = TimeSlotSerializer(instance=available_slots,
+                                                many=True).data
+                # TODO unify date format
+                if slots_json:
+                    result.append({
+                        'time_slots': slots_json,
+                        'date': schedule.date.strftime('%Y-%m-%d')
+                    })
+            # TODO what if he can't make it at any time? return empty list or warning?
+            return Response(data=result)

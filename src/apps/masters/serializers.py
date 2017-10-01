@@ -10,18 +10,19 @@ class LocationSerializer(serializers.ModelSerializer):
         exclude = ('id',)
 
 
+class TimeSlotSerializer(serializers.ModelSerializer):
+    time = serializers.SerializerMethodField('time_value')
+
+    def time_value(self, time_slot: TimeSlot):
+        # chopping off seconds
+        return str(time_slot.time.value)[:-3]
+
+    class Meta:
+        model = TimeSlot
+        exclude = ('id', 'schedule')
+
+
 class ScheduleSerializer(serializers.ModelSerializer):
-    class TimeSlotSerializer(serializers.ModelSerializer):
-        time = serializers.SerializerMethodField('time_value')
-
-        def time_value(self, time_slot: TimeSlot):
-            # chopping off seconds
-            return str(time_slot.time.value)[:-3]
-
-        class Meta:
-            model = TimeSlot
-            exclude = ('id', 'schedule')
-
     time_slots = TimeSlotSerializer(many=True, read_only=True)
 
     class Meta:
