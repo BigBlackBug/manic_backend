@@ -1,53 +1,10 @@
 # -*- coding: utf-8 -*-
-from math import acos, cos, radians, sin
-
 from django.conf import settings
 from django.db import models
 
+from src.apps.authentication.models import UserProfile
+from src.apps.core.models import Location
 from src.apps.core.utils import Folders
-from .utils import Gender
-
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(settings.USER_MODEL,
-                                related_name="%(class)s",
-                                related_query_name="%(class)s", )
-
-    first_name = models.CharField(max_length=32)
-    avatar = models.ImageField(upload_to=Folders.avatars)
-
-    gender = models.CharField(
-        max_length=1,
-        choices=Gender.CHOICES,
-        default=Gender.FEMALE,
-    )
-
-    date_of_birth = models.DateField()
-
-    # FK fields
-    # debit_cards
-
-    def is_client(self):
-        raise NotImplementedError()
-
-    class Meta:
-        abstract = True
-
-
-class Location(models.Model):
-    lat = models.FloatField()
-    lon = models.FloatField()
-
-    def distance(self, lat, lon):
-        # Great circle distance formula
-        return 6371 * acos(
-            cos(radians(lat)) * cos(radians(self.lat)) *
-            cos(radians(self.lon) - radians(lon)) +
-            sin(radians(lat)) * sin(radians(self.lat))
-        )
-
-    def __str__(self):
-        return "lat:{}, lon:{}".format(self.lat, self.lon)
 
 
 class Master(UserProfile):
@@ -130,27 +87,3 @@ class Schedule(models.Model):
 # TODO feedbacks
 # TODO orders
 # TODO payments
-
-# class Address(models.Model):
-#     # FK fields
-#     # client
-#     city = models.CharField(max_length=64)
-#     street_name = models.CharField(max_length=64)
-#     building = models.CharField(max_length=16)
-#     floor = models.IntegerField()
-#     apt_number = models.IntegerField()
-#     entrance = models.IntegerField()
-#     has_intercom = models.BooleanField()
-#
-#
-# class Client(UserProfile):
-#     tip = models.IntegerField(default=5)
-#
-#     address = models.OneToOneField('Address', on_delete=models.CASCADE,
-#                                    related_name='client')
-#
-#     def is_client(self):
-#         return True
-#
-#     class Meta(UserProfile.Meta):
-#         db_table = 'client'

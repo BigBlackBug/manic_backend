@@ -4,11 +4,11 @@ from datetime import timedelta
 from django.utils import timezone
 
 from src.apps.authentication.models import PhoneAuthUser, Token
+from src.apps.authentication.utils import Gender
 from src.apps.categories.models import ServiceCategory, Service
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot
 from src.apps.masters.receivers import *
-from src.apps.masters.utils import Gender
 
 
 def make_category(category_name):

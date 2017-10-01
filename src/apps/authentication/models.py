@@ -2,10 +2,12 @@ import binascii
 import os
 from datetime import timedelta
 
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+from src.apps.core.utils import Folders
+from .utils import Gender
 
 
 class Registration(models.Model):
@@ -76,3 +78,29 @@ class Token(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(PhoneAuthUser,
+                                related_name="%(class)s",
+                                related_query_name="%(class)s", )
+
+    first_name = models.CharField(max_length=32)
+    avatar = models.ImageField(upload_to=Folders.avatars)
+
+    gender = models.CharField(
+        max_length=1,
+        choices=Gender.CHOICES,
+        default=Gender.FEMALE,
+    )
+
+    date_of_birth = models.DateField()
+
+    # FK fields
+    # debit_cards
+
+    def is_client(self):
+        raise NotImplementedError()
+
+    class Meta:
+        abstract = True

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from src.apps.masters.views import MasterListView, MasterDetailView, MasterScheduleView, \
+from .views import MasterListView, MasterDetailView, MasterScheduleView, \
     MasterSearchView
 
 urlpatterns = [
