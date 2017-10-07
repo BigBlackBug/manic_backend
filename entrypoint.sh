@@ -10,6 +10,8 @@ if [[ ${DATABASE_URL} ]]; then
     >&2 echo "Postgres is up - continuing"
 fi
 
+psql $DATABASE_URL -d template1 -c 'create extension hstore;'
+
 if [ "X$DJANGO_RUN_MIGRATIONS" = 'Xyes' ]; then
     echo "running migrations"
     python manage.py migrate --noinput

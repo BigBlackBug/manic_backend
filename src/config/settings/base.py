@@ -56,7 +56,9 @@ INSTALLED_APPS = [
     'src.apps.authentication',
     'src.apps.masters',
     'src.apps.clients',
+    'src.apps.orders',
     'django_filters',
+    'django.contrib.postgres'
 ]
 
 
