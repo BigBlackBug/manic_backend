@@ -21,6 +21,7 @@ class Master(UserProfile):
     # FK fields
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
+    # order_items - list of 'order items'
 
     def distance(self, lat, lon):
         return self.location.distance(lat, lon)
