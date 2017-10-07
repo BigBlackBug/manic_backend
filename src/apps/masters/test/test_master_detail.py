@@ -14,9 +14,6 @@ class MasterDetailTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
-    def tearDown(self):
-        self.token.user.delete()
-
     def test_master_does_not_exist(self):
         resp = self.client.get(reverse(MasterDetailView.view_name, args=[10]))
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

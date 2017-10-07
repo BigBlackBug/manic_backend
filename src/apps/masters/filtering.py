@@ -122,8 +122,8 @@ def search_for_masters(filtering_params):
         service = min(master.services.all(),
                       key=lambda service_: service_.max_duration)
         for schedule in master.schedule.all():
-            if time_slot_utils.fits_into_schedule(service, schedule, time_range[0],
-                                                  time_range[1]):
+            if time_slot_utils.service_fits_into_slots(service, schedule.time_slots.all(),
+                                                       time_range[0], time_range[1]):
                 result.add(master)
 
     # готовых пацанов уже в питоне фильтруем по расстоянию

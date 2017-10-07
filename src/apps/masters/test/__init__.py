@@ -1,6 +1,7 @@
+import datetime
 import random
+from datetime import timedelta as delta
 
-from datetime import timedelta
 from django.utils import timezone
 
 from src.apps.authentication.models import PhoneAuthUser, Token
@@ -59,7 +60,7 @@ def make_everything():
         petya.services.add(service)
     petya.save()
 
-    # VASYA works on 0,+1, does manicure, got two slots
+    # VASYA works on 0,+1, does manicure, got three slots
     schedule = Schedule.objects.create(master=vasya, date=timezone.now())
     schedule.save()
 
@@ -69,10 +70,10 @@ def make_everything():
                             taken=False, schedule=schedule)
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
                             taken=False, schedule=schedule)
-    TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
-                            taken=True, schedule=schedule)
+    TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=00),
+                            taken=False, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=vasya, date=timezone.now()+timedelta(days=1))
+    schedule = Schedule.objects.create(master=vasya, date=timezone.now() + delta(days=1))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
@@ -83,7 +84,7 @@ def make_everything():
                             taken=False, schedule=schedule)
 
     # PETYA works on +2th, +3th does pedicure, got all slots on +2, none on +3
-    schedule = Schedule.objects.create(master=petya, date=timezone.now()+timedelta(days=2))
+    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -95,8 +96,12 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                             taken=True, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=petya, date=timezone.now()+timedelta(days=3))
+    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=3))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=16, minute=30),
                             taken=False, schedule=schedule)
+
+
+def _make_time(hour: int, minute: int) -> Time:
+    return Time(hour=hour, minute=minute, value=datetime.time(hour=hour, minute=minute))

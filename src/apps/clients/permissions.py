@@ -1,12 +1,11 @@
-from rest_framework.permissions import BasePermission
+from src.apps.core.permissions import IsClient
 
 
-class IsClient(BasePermission):
+class IsClientIDCorrect(IsClient):
     """
     Allows access only to users which are clients and whose id matches with url id
     """
 
     def has_permission(self, request, view):
-        return request.user.is_client() and \
+        return super().has_permission(request, view) and \
                int(view.kwargs['pk']) == request.user.client.id
-

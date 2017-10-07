@@ -30,10 +30,6 @@ class UploadTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def tearDown(self):
-        self.client_object.delete()
-        self.user.delete()
-
     def test_upload(self):
         self.assertEqual(self.client_object.avatar, None)
         resp = self.client.patch(reverse(ClientAvatarUpdateView.view_name,

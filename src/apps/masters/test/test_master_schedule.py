@@ -15,9 +15,6 @@ class MasterScheduleTestCase(TestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
-    def tearDown(self):
-        self.token.user.delete()
-
     def test_master_schedule(self):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.all()[0]

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from django.conf import settings
 from django.db import models
 
@@ -22,6 +24,14 @@ class Master(UserProfile):
 
     def distance(self, lat, lon):
         return self.location.distance(lat, lon)
+
+    def get_schedule(self, date):
+        """
+        Gets the schedule at `date`
+        :param date:
+        :return: schedule
+        """
+        return self.schedule.get(date=date)
 
     def __str__(self):
         return self.first_name
@@ -80,7 +90,42 @@ class Schedule(models.Model):
     def __str__(self):
         return f'schedule for date {self.date}'
 
+    def assign_time(self, time: datetime.time, number_of_slots: int):
+        """
+        Sets the `number_of_slots` number of time slots
+        to 'taken' starting at 'time'
+
+        :param time:
+        :param number_of_slots:
+        :return: time <datetime> of the next available time slot or None if
+        the last processed slot marks the end of the work day
+        """
+        if not time:
+            raise ValueError('time argument should not be None')
+
+        time_slots = sorted(self.time_slots.all(), key=lambda slot: slot.value)
+
+        # looking for the first timeslot
+        for first_slot_index, time_slot in enumerate(time_slots):
+            if time_slot.value == time:
+                break
+        else:
+            raise ValueError('time not found')
+
+        # TODO index error
+        # TODO this method blows, potential performance issues
+        shift = 0
+        for shift in range(number_of_slots):
+            ts = self.time_slots.get(pk=time_slots[first_slot_index + shift].id)
+            ts.taken = True
+            ts.save()
+
+        next_index = first_slot_index + shift + 1
+        if next_index == len(time_slots):
+            return None
+
+        return time_slots[next_index].value
+
 # TODO referrals
 # TODO feedbacks
-# TODO orders
 # TODO payments

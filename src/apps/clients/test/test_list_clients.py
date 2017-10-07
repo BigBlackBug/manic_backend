@@ -28,9 +28,6 @@ class ClientListTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def tearDown(self):
-        self.user.delete()
-
     def test_create_client_existing_account(self):
         resp = self.client.post(reverse(ClientCreateView.view_name), data={
             'first_name': 'VASYA',

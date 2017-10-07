@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from src.apps.core.serializers import ImageSerializer
 from .models import Client
-from .permissions import IsClient
+from .permissions import IsClientIDCorrect
 from .serializers import ClientSerializer
 
 
@@ -24,7 +24,7 @@ class ClientCreateView(generics.CreateAPIView):
 
 class ClientUpdateView(generics.UpdateAPIView):
     view_name = 'client-update'
-    permission_classes = (IsAuthenticated, IsClient)
+    permission_classes = (IsAuthenticated, IsClientIDCorrect)
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
 
@@ -33,7 +33,7 @@ class ClientAvatarUpdateView(APIView):
     view_name = 'client-avatar-update'
 
     parser_classes = (parsers.MultiPartParser,)
-    permission_classes = (IsAuthenticated, IsClient)
+    permission_classes = (IsAuthenticated, IsClientIDCorrect)
 
     def patch(self, request, **kwargs):
         phone_user = request.user

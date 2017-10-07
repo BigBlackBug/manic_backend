@@ -1,13 +1,11 @@
 import datetime
-from typing import List
+from typing import Iterator
 
 from src.apps.categories.models import Service
-from .models import TimeSlot, Schedule
-
-MAX_DISTANCE = 2000
+from .models import TimeSlot
 
 
-def find_available_starting_slots(service: Service, time_slots: List[TimeSlot]):
+def find_available_starting_slots(service: Service, time_slots: Iterator[TimeSlot]):
     """
     Returns a list of TimeSlots which can be the first slots for `service` to be
     served
@@ -18,7 +16,9 @@ def find_available_starting_slots(service: Service, time_slots: List[TimeSlot]):
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
     block_size = 0
     start_index = 0
-    slot_number = service.max_duration / TimeSlot.DURATION
+
+    # +1 stands for extra slot, used to get to the next client
+    slot_number = int(service.max_duration / TimeSlot.DURATION + 1)
     indices = []
     for i in range(len(time_slots)):
         slot = time_slots[i]
@@ -31,41 +31,27 @@ def find_available_starting_slots(service: Service, time_slots: List[TimeSlot]):
                 indices.append(start_index)
                 start_index += 1
                 block_size -= 1
-    if slot_number == block_size:
+
+    # the last block may ignore +1 slot, because there can't be subsequent orders
+    if block_size >= slot_number - 1:
         indices.append(start_index)
     return [time_slots[index] for index in indices]
 
 
-def fits_into_schedule(service: Service, schedule: Schedule,
-                       time_from: datetime.time, time_to: datetime.time):
+def service_fits_into_slots(service: Service, time_slots: Iterator[TimeSlot],
+                            time_from: datetime.time, time_to: datetime.time):
     """
-    Returns true if `service` can be done in the given `schedule`
-    i.e. `schedule.time_slots` contains at least one sequence of available slots which is
-    `service.max_duration` minutes long within the given time frame
+    Returns true if `service` can be done in the given list of slots
+    i.e. `time_slots` contains at least one sequence of available slots which is
+    `service.max_duration + TimeSlot.DURATION` minutes long within the given time frame
+
+    *NOTE* slot at `time_to` is excluded
+
     :param service:
-    :param schedule:
+    :param time_slots:
     :param time_from:
     :param time_to:
     :return:
     """
-    max_duration = service.max_duration
-    time_slots = sorted(schedule.time_slots.all(), key=lambda slot: slot.value)
-
-    block_size = 0
-    slot_number = int(max_duration / TimeSlot.DURATION)
-    for slot in time_slots:
-        # ignore early slots
-        if slot.time.value < time_from:
-            continue
-        if slot.time.value > time_to:
-            break
-        if slot.taken:
-            if slot_number <= block_size:
-                return True
-            else:
-                block_size = 0
-        else:
-            block_size += 1
-    if block_size >= slot_number:
-        return True
-    return False
+    time_slots = filter(lambda slot: time_from <= slot.value < time_to, time_slots)
+    return len(find_available_starting_slots(service, time_slots)) != 0

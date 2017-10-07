@@ -6,9 +6,6 @@ from .serializers import ServiceCategorySerializer
 
 
 class CategoriesTestCase(APITestCase):
-    def tearDown(self):
-        self.category.delete()
-
     def setUp(self):
         self.category = ServiceCategory(name='category',
                                         image=utils.make_in_memory_image('testfile'))

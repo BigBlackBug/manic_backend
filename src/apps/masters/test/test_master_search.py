@@ -16,9 +16,6 @@ class MastersTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
-    def tearDown(self):
-        self.token.user.delete()
-
     def test_serializer(self):
         master = Master.objects.get(first_name='VASYA')
 
@@ -55,8 +52,9 @@ class MastersTestCase(APITestCase):
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # both can do any of his services on any day in the given time
-        self.assertEqual(len(resp.data), 2)
+        # only PETYA can do at least one of his services on any day in the given time
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['first_name'], 'PETYA')
 
     def test_filtering_date(self):
         url = f"{reverse(MasterListView.view_name)}?" \
