@@ -1,15 +1,18 @@
 #!/bin/bash
-set -e
+set -x
 
-if [[ ${DATABASE_URL} ]]; then
-    echo "${DATABASE_URL} is set"
-    until psql $DATABASE_URL -c '\l'; do
+if [[ ${DATABASE_HOST} ]]; then
+    export PGPASSWORD=${DATABASE_PASSWORD}
+    until psql -h $DATABASE_HOST -U $DATABASE_USER -d $DATABASE_NAME -c '\l'; do
       >&2 echo "Postgres is unavailable - sleeping"
       sleep 1
     done
     >&2 echo "Postgres is up - continuing"
-    psql $DATABASE_URL -d template1 -c 'create extension hstore;'
+    psql -h $DATABASE_HOST -U $DATABASE_USER -d template1 -c 'create extension hstore;'
+    unset $PGPASSWORD
 fi
+
+set -e
 
 if [ "X$DJANGO_RUN_MIGRATIONS" = 'Xyes' ]; then
     echo "running migrations"
