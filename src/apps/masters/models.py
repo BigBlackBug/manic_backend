@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 
 from src.apps.authentication.models import UserProfile
+from src.apps.clients.models import Client
 from src.apps.core.models import Location
 from src.apps.core.utils import Folders
 
@@ -40,6 +41,15 @@ class Master(UserProfile):
     class Meta(UserProfile.Meta):
         db_table = 'master'
 
+    def times_served(self, client: Client):
+        """
+        Returns a number of orders that this master had with the `client`
+        :param client:
+        :return:
+        """
+        # a pinch of python functional magic
+        return sum(map(lambda item: item.order.client == client, self.order_items.all()))
+
 
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
@@ -68,6 +78,8 @@ class TimeSlot(models.Model):
     taken = models.BooleanField(default=False)
     schedule = models.ForeignKey('Schedule', related_name='time_slots')
 
+    order_item = models.ForeignKey('orders.OrderItem', blank=True, null=True)
+
     @property
     def value(self):
         return self.time.value
@@ -91,11 +103,18 @@ class Schedule(models.Model):
     def __str__(self):
         return f'schedule for date {self.date}'
 
-    def assign_time(self, time: datetime.time, number_of_slots: int):
+    def get_slot(self, time: datetime.time):
+        try:
+            return self.time_slots.get(time__value=time)
+        except TimeSlot.DoesNotExist:
+            return None
+
+    def assign_time(self, time: datetime.time, number_of_slots: int, order_item=None):
         """
         Sets the `number_of_slots` number of time slots
         to 'taken' starting at 'time'
 
+        :param order_item:
         :param time:
         :param number_of_slots:
         :return: time <datetime> of the next available time slot or None if
@@ -119,6 +138,7 @@ class Schedule(models.Model):
         for shift in range(number_of_slots):
             ts = self.time_slots.get(pk=time_slots[first_slot_index + shift].id)
             ts.taken = True
+            ts.order_item = order_item
             ts.save()
 
         next_index = first_slot_index + shift + 1

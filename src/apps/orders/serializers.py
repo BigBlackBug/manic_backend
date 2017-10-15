@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
 from src.apps.masters.models import Master, TimeSlot
@@ -27,13 +28,18 @@ class OrderSerializer(serializers.Serializer):
         for item in order_items:
             master = Master.objects.prefetch_related('schedule').get(pk=item['master_id'])
             services = Service.objects.filter(pk__in=item['service_ids'])
-            next_time = None
+            if not services:
+                raise ValidationError(f'services with provided ids:{item["service_ids"]} '
+                                      f'are not found')
             schedule = master.get_schedule(validated_data['date'])
+            order_item = None
+            next_time = None
             for service in services:
+                order_item = OrderItem.objects.create(order=order, master=master, service=service)
                 next_time = schedule.assign_time(next_time or validated_data['time'],
-                                                 int(service.max_duration / TimeSlot.DURATION))
-                OrderItem.objects.create(order=order, master=master, service=service)
+                                                 int(service.max_duration / TimeSlot.DURATION),
+                                                 order_item)
             # add +1 if it's not end of the day
             if next_time:
-                schedule.assign_time(next_time, 1)
+                schedule.assign_time(next_time, 1, order_item)
         return order

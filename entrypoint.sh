@@ -8,9 +8,8 @@ if [[ ${DATABASE_URL} ]]; then
       sleep 1
     done
     >&2 echo "Postgres is up - continuing"
+    psql $DATABASE_URL -d template1 -c 'create extension hstore;'
 fi
-
-psql $DATABASE_URL -d template1 -c 'create extension hstore;'
 
 if [ "X$DJANGO_RUN_MIGRATIONS" = 'Xyes' ]; then
     echo "running migrations"

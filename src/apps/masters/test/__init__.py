@@ -7,9 +7,11 @@ from django.utils import timezone
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.authentication.utils import Gender
 from src.apps.categories.models import ServiceCategory, Service
+from src.apps.clients.models import Address, Client
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot
 from src.apps.masters.receivers import *
+from src.apps.orders.models import Order, OrderItem
 
 
 def make_category(category_name):
@@ -42,6 +44,21 @@ def make_master(name, lon):
 def make_token():
     token, _ = Token.objects.get_or_create(user=PhoneAuthUser.objects.create(phone='777'))
     return token
+
+
+def make_client(user=None):
+    if not user:
+        user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
+    return Client.objects.create(user=user, first_name='client',
+                                 avatar=utils.make_in_memory_image('supername'),
+                                 gender=Gender.MALE,
+                                 date_of_birth=timezone.now(),
+                                 address=Address.objects.create(
+                                     location=Location.objects.create(lat=10,
+                                                                      lon=10),
+                                     city='kazan', street_name='latstr',
+                                     building='4', floor=2, apt_number=79,
+                                     entrance=6, has_intercom=True))
 
 
 def make_everything():
@@ -101,6 +118,20 @@ def make_everything():
 
     TimeSlot.objects.create(time=Time.objects.create(hour=16, minute=30),
                             taken=False, schedule=schedule)
+
+
+def make_order(client, service, master, time):
+    order = Order.objects.create(client=client, date=timezone.now(),
+                                 time=time)
+    schedule = master.get_schedule(timezone.now().date())
+    slot = schedule.get_slot(time)
+
+    order_item = OrderItem.objects.create(service=service,
+                                          master=master,
+                                          order=order)
+    slot.order_item = order_item
+    slot.save()
+    return order, order_item
 
 
 def _make_time(hour: int, minute: int) -> Time:

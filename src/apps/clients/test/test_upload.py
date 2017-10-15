@@ -36,7 +36,6 @@ class UploadTestCase(APITestCase):
                                          args=[self.client_object.id]),
                                  data={'image': utils.make_in_memory_image('avatar')})
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        print(resp.data)
         updated_client = Client.objects.get(pk=self.client_object.id)
         self.assertNotEqual(updated_client.avatar, None)
 

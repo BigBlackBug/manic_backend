@@ -39,11 +39,13 @@ STATIC_URL = '/static/'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
+# TODO do smth about SECRET_KEY
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0n#gk&((m1y4crfx6hv-5_!$g0@g+*d_r&(e6^259arysd2wm='
 
-# Application definition
+GMAPS_API_KEY = 'AIzaSyBoKNDWTb5XPdY4k1Wx0kQDpZDm0GW0FTc'
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -150,6 +152,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+# TODO process logs
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

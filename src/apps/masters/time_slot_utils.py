@@ -53,5 +53,5 @@ def service_fits_into_slots(service: Service, time_slots: Iterator[TimeSlot],
     :param time_to:
     :return:
     """
-    time_slots = filter(lambda slot: time_from <= slot.value < time_to, time_slots)
+    time_slots = list(filter(lambda slot: time_from <= slot.value < time_to, time_slots))
     return len(find_available_starting_slots(service, time_slots)) != 0

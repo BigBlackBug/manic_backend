@@ -57,7 +57,7 @@ class MasterScheduleSerializer(serializers.BaseSerializer):
         return ScheduleSerializer(instance.schedule, many=True, read_only=True).data
 
 
-class MasterListSerializer(serializers.ModelSerializer):
+class SimpleMasterSerializer(serializers.ModelSerializer):
     """
     Provides a short representation of a master, to be used in the
     main list of masters

@@ -23,5 +23,8 @@ class Location(models.Model):
             sin(radians(lat)) * sin(radians(self.lat))
         )
 
+    def as_tuple(self):
+        return self.lat, self.lon
+
     def __str__(self):
         return "lat:{}, lon:{}".format(self.lat, self.lon)

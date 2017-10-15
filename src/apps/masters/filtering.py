@@ -1,130 +1,263 @@
 import datetime
 import time
-from django.utils import timezone
+from enum import Enum
+from typing import Iterable
+
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 
 from src.apps.categories.models import Service
-from src.apps.masters import time_slot_utils
+from . import time_slot_utils, gmaps_utils, utils
 from .models import Master
 
 MAX_DISTANCE_KM = 2000.0
 
-available_params = ['date_between', 'time_between', 'services', 'coordinates', 'distance']
+available_params = ['date_between', 'time_between', 'services',
+                    'service', 'coordinates', 'distance', 'date',
+                    'time']
 
 
-def prepare_filtering_params(query_params: dict):
-    unrecognized_params = []
-    for param in query_params:
-        if param not in available_params:
-            unrecognized_params.append(param)
+class FilteringParams:
+    def __init__(self, request: Request, coords_required=True):
+        query_params = request.query_params
+        self._validate(query_params)
+        self.services = self._parse_services(query_params)
+        self.service = self._parse_service(query_params)
+        self.date_range = self._parse_date(query_params)
+        self.date = self._parse_single_date(query_params)
+        self.time = self._parse_single_time(query_params)
+        self.time_range = self._parse_time(query_params)
+        if coords_required:
+            self.coordinates = self._parse_coordinates(query_params)
+        self.distance = self._parse_distance(query_params)
+        self.target_client = self._parse_client(request)
 
-    if unrecognized_params:
-        raise ValidationError(f'unrecognized parameters {unrecognized_params}')
+    @staticmethod
+    def _parse_service(query_params):
+        service = query_params.get('service')
+        if not service:
+            return None
+        try:
+            service = int(service)
+        except ValueError:
+            raise ValidationError("'service' parameters must be an integer")
+        else:
+            return service
 
-    result = {}
-    services = query_params.get('services')
-    if not services:
-        # TODO cache
-        result['services'] = [service.id for service in Service.objects.all()]
-    else:
-        services = services.split(',')
-        for service_id in services:
+    @staticmethod
+    def _validate(query_params):
+        unrecognized_params = []
+        for param in query_params:
+            if param not in available_params:
+                unrecognized_params.append(param)
+
+        if unrecognized_params:
+            raise ValidationError(f'unrecognized parameters {unrecognized_params}')
+
+    @staticmethod
+    def _parse_services(query_params):
+        service = FilteringParams._parse_service(query_params)
+        if service:
+            return [service]
+
+        services = query_params.get('services')
+        if not services:
+            # TODO cache
+            return [service.id for service in Service.objects.all()]
+        else:
+            services = services.split(',')
+            for service_id in services:
+                try:
+                    int(service_id)
+                except ValueError:
+                    raise ValidationError('invalid service string')
+            return services
+
+    @staticmethod
+    def _parse_date(query_params):
+        # TODO validate that it's a list
+        date_range = query_params.get('date_between')
+        if date_range:
+            dates = date_range.split(',')
+            if len(dates) != 2:
+                raise ValidationError('invalid date range')
             try:
-                int(service_id)
+                dates = (
+                    datetime.datetime.strptime(dates[0], '%Y-%m-%d'),
+                    datetime.datetime.strptime(dates[1], '%Y-%m-%d'))
             except ValueError:
-                raise ValidationError('invalid service string')
-        result['services'] = services
+                raise ValidationError('invalid date format')
+        else:
+            dates = utils.get_default_date_range()
+        return dates
 
-    # TODO validate that it's a list
-    date_range = query_params.get('date_between')
-    if date_range:
-        dates = date_range.split(',')
-        if len(dates) != 2:
-            raise ValidationError('invalid date range')
+    @staticmethod
+    def _parse_time(query_params):
+        time_range = query_params.get('time_between')
+        if time_range:
+            times = time_range.split(',')
+            if len(times) != 2:
+                raise ValidationError('invalid time range')
+
+            try:
+                time_0 = time.strptime(times[0], '%H:%M')
+                time_1 = time.strptime(times[1], '%H:%M')
+                times = (
+                    datetime.time(hour=time_0.tm_hour, minute=time_0.tm_min),
+                    datetime.time(hour=time_1.tm_hour, minute=time_1.tm_min))
+            except ValueError:
+                raise ValidationError('invalid time format')
+        else:
+            times = (datetime.time(hour=8, minute=0), datetime.time(hour=22, minute=30))
+        return times
+
+    @staticmethod
+    def _parse_coordinates(query_params):
+        # these could be either client's current coordinates
+        # or address coords (don't pay attention, it's an app's job)
+        coordinates = query_params.get('coordinates')
+        if not coordinates:
+            raise ValidationError("please send coordinates")
+
+        coordinates = coordinates.split(',')
+        if len(coordinates) != 2:
+            raise ValidationError('invalid coordinates range')
         try:
-            dates = (
-                datetime.datetime.strptime(dates[0], '%Y-%m-%d'),
-                datetime.datetime.strptime(dates[1], '%Y-%m-%d'))
+            return float(coordinates[0]), float(coordinates[1])
         except ValueError:
-            raise ValidationError('invalid date format')
-    else:
-        now = timezone.now()
-        dates = (now.date(), now.date() + datetime.timedelta(days=14))
-    result['date_range'] = dates
+            raise ValidationError('invalid coordinates format')
 
-    time_range = query_params.get('time_between')
-    if time_range:
-        times = time_range.split(',')
-        if len(times) != 2:
-            raise ValidationError('invalid time range')
+    @staticmethod
+    def _parse_distance(query_params):
+        # считаем расстояние до адреса
+        distance = query_params.get('distance')
+        if not distance:
+            return MAX_DISTANCE_KM
+        else:
+            return float(distance)
 
-        try:
-            time_0=time.strptime(times[0], '%H:%M')
-            time_1 = time.strptime(times[1], '%H:%M')
-            times = (
-                datetime.time(hour=time_0.tm_hour,minute=time_0.tm_min),
-                datetime.time(hour=time_1.tm_hour, minute=time_1.tm_min))
-        except ValueError:
-            raise ValidationError('invalid time format')
-    else:
-        times = (datetime.time(hour=8, minute=0), datetime.time(hour=22, minute=30))
-    result['time_range'] = times
+    @staticmethod
+    def _parse_client(request):
+        if not request.user.is_client():
+            # TODO proper exception
+            raise ValueError('not a client')
 
-    # these could be either client's current coordinates
-    # or address coords (don't pay attention, it's an app's job)
-    coordinates = query_params.get('coordinates')
-    if not coordinates:
-        raise ValidationError("please send coordinates")
+        return request.user.client
 
-    coordinates = coordinates.split(',')
-    if len(coordinates) != 2:
-        raise ValidationError('invalid coordinates range')
-    try:
-        result['coordinates'] = (float(coordinates[0]), float(coordinates[1]))
-    except ValueError:
-        raise ValidationError('invalid coords format')
+    @staticmethod
+    def _parse_single_date(query_params):
+        date = query_params.get('date')
+        if date:
+            try:
+                date = datetime.datetime.strptime(date, '%Y-%m-%d')
+                date_range = utils.get_default_date_range()
+                if date < date_range[0] or date > date_range[1]:
+                    raise ValidationError('date must be withing two weeks range')
+                return date
+            except ValueError:
+                raise ValidationError('invalid date format')
+        else:
+            return None
 
-    # считаем расстояние до адреса
-    distance = query_params.get('distance')
-    if not distance:
-        result['distance'] = MAX_DISTANCE_KM
-    else:
-        result['distance'] = float(distance)
-    return result
+    @staticmethod
+    def _parse_single_time(query_params):
+        time = query_params.get('time')
+        if time:
+            try:
+                time = time.strptime(time, '%H:%M')
+                return datetime.time(hour=time.tm_hour, minute=time.tm_min)
+            except ValueError:
+                raise ValidationError('invalid time format')
+        else:
+            return None
 
 
-def search_for_masters(filtering_params):
-    """
-    ДЛЯ ПОИСКА ВО ВКЛАДКЕ МАСТЕРА
-    :param filtering_params:
-    :return:
-    """
-    date_range = filtering_params['date_range']
-    time_range = filtering_params['time_range']
-    services = filtering_params['services']
-    coordinates = filtering_params['coordinates']
-    max_distance = filtering_params['distance']
+class FilteringFunctions(Enum):
+    @staticmethod
+    def datetime(masters: Iterable[Master], params: FilteringParams):
+        """
+        Returns a list of masters who can do the specific service
+        at specific date and time for the specific client, taking into account
+        the possibility to get to the client
 
-    # а вот теперь фильтруем.
-    # сначала по сервисам - все мастера, которые хотя б одну услугу оказывают
-    # работают хотя б в один день
-    queryset = Master.objects.filter(schedule__date__gte=date_range[0],
-                                     schedule__date__lte=date_range[1],
-                                     services__in=services, ).distinct() \
-        .prefetch_related('services').prefetch_related('schedule__time_slots') \
-        .select_related('location')
-    # а теперь смотрим, может ли он на самом деле это сделать судя по таймслотам
-    # то есть берем макс длительность сервиса и ищем такое вхождение в таймслотах шедуля
-    # то есть вася может сделать маникюр и работает во вторник, а петя в среду педикюр
-    result = set()
-    for master in queryset:
-        # хоть какую-нить услугу он успеет сделать во рабочее время
-        service = min(master.services.all(),
-                      key=lambda service_: service_.max_duration)
-        for schedule in master.schedule.all():
-            if time_slot_utils.service_fits_into_slots(service, schedule.time_slots.all(),
-                                                       time_range[0], time_range[1]):
+        :param masters: masters to filter
+        :param params:
+        :return:
+        """
+        service_id = params.service
+        date = params.date
+        time = params.time
+        target_client = params.target_client
+
+        result = set()
+        for master in masters:
+            service = master.services.get(pk=service_id)
+            schedule = master.get_schedule(date)
+            can_service = time_slot_utils.service_fits_into_slots(service,
+                                                                  schedule.time_slots.all(),
+                                                                  time, time)
+            # проверяем самый ближний заказ, который идёт перед временем time
+            if can_service and gmaps_utils.can_reach(schedule,
+                                                     target_client.address.location, time):
                 result.add(master)
+        return result
 
-    # готовых пацанов уже в питоне фильтруем по расстоянию
-    return filter(lambda m: m.distance(*coordinates) < max_distance, result)
+    @staticmethod
+    def anytime(masters: Iterable[Master], params: FilteringParams):
+        """
+        Returns a list of masters who can do the specific service
+        at any time in the `date_range` for the specific client,
+        taking into account the possibility to get to the client
+
+        :param masters: masters to filter
+        :param params:
+        :return:
+        """
+        date_range = params.date_range
+        service_id = params.service
+        target_client = params.target_client
+
+        result = set()
+        for master in masters:
+            service = master.services.get(pk=service_id)
+            for schedule in master.schedule.filter(date__gte=date_range[0],
+                                                   date__lte=date_range[1]):
+                # находим все слоты, в которые теоретически мастер может оказать услугу
+                start_slots = time_slot_utils.find_available_starting_slots(
+                    service, schedule.time_slots.all())
+                for slot in start_slots:
+                    # проверяем может ли мастер доехать от предыдушего заказа
+                    if gmaps_utils.can_reach(schedule, target_client.address.location,
+                                             slot.value):
+                        result.add(master)
+                        # since it's sorted we can break after the first match
+                        break
+        return result
+
+    @staticmethod
+    def search(masters: Iterable[Master], params: FilteringParams):
+        """
+        Returns a list of masters who can do any of his services
+        at any time in `time_range` and date in the `date_range`
+        for the specific client, taking into account the possibility
+        to get to the client
+
+        :param masters: masters to filter
+        :param params:
+        :return:
+        """
+        date_range = params.date_range
+        time_range = params.time_range
+        # а теперь смотрим, может ли он на самом деле это сделать судя по таймслотам
+        # то есть берем макс длительность сервиса и ищем такое вхождение в таймслотах шедуля
+        # то есть вася может сделать маникюр и работает во вторник, а петя в среду педикюр
+        result = set()
+        for master in masters:
+            # хоть какую-нить услугу он успеет сделать в рабочее время
+            service = min(master.services.all(), key=lambda _: _.max_duration)
+            for schedule in master.schedule.filter(date__gte=date_range[0],
+                                                   date__lte=date_range[1]):
+                if time_slot_utils.service_fits_into_slots(service, schedule.time_slots.all(),
+                                                           time_range[0], time_range[1]):
+                    result.add(master)
+        return result
