@@ -1,6 +1,7 @@
 import datetime
-import time
+from collections import defaultdict
 from enum import Enum
+from time import strptime
 from typing import Iterable
 
 from rest_framework.exceptions import ValidationError
@@ -100,8 +101,8 @@ class FilteringParams:
                 raise ValidationError('invalid time range')
 
             try:
-                time_0 = time.strptime(times[0], '%H:%M')
-                time_1 = time.strptime(times[1], '%H:%M')
+                time_0 = strptime(times[0], '%H:%M')
+                time_1 = strptime(times[1], '%H:%M')
                 times = (
                     datetime.time(hour=time_0.tm_hour, minute=time_0.tm_min),
                     datetime.time(hour=time_1.tm_hour, minute=time_1.tm_min))
@@ -190,6 +191,7 @@ class FilteringFunctions(Enum):
         target_client = params.target_client
 
         result = set()
+        good_slots = defaultdict(list)
         for master in masters:
             service = master.services.get(pk=service_id)
             schedule = master.get_schedule(date)
@@ -200,7 +202,11 @@ class FilteringFunctions(Enum):
             if can_service and gmaps_utils.can_reach(schedule,
                                                      target_client.address.location, time):
                 result.add(master)
-        return result
+            good_slots[master.id].append({
+                'date': schedule.date.strftime('%Y-%m-%d'),
+                'time_slots': [datetime.time.strftime(time, '%H:%M')]
+            })
+        return result, good_slots
 
     @staticmethod
     def anytime(masters: Iterable[Master], params: FilteringParams):
@@ -218,10 +224,12 @@ class FilteringFunctions(Enum):
         target_client = params.target_client
 
         result = set()
+        good_slots = defaultdict(list)
         for master in masters:
             service = master.services.get(pk=service_id)
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
+                schedule_slots = []
                 # находим все слоты, в которые теоретически мастер может оказать услугу
                 start_slots = time_slot_utils.find_available_starting_slots(
                     service, schedule.time_slots.all())
@@ -230,9 +238,15 @@ class FilteringFunctions(Enum):
                     if gmaps_utils.can_reach(schedule, target_client.address.location,
                                              slot.value):
                         result.add(master)
-                        # since it's sorted we can break after the first match
-                        break
-        return result
+                        schedule_slots.append(datetime.time.strftime(slot.value, '%H:%M'))
+
+                if schedule_slots:
+                    good_slots[master.id].append({
+                        'date': schedule.date.strftime('%Y-%m-%d'),
+                        'time_slots': schedule_slots
+                    })
+
+        return result, good_slots
 
     @staticmethod
     def search(masters: Iterable[Master], params: FilteringParams):
@@ -260,4 +274,4 @@ class FilteringFunctions(Enum):
                 if time_slot_utils.service_fits_into_slots(service, schedule.time_slots.all(),
                                                            time_range[0], time_range[1]):
                     result.add(master)
-        return result
+        return result, {}

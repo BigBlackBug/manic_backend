@@ -19,16 +19,14 @@ class MasterComparable:
 
 def sort_masters(masters: Iterable[Master], coordinates: tuple, max_distance: float):
     """
-    sorts `masters` according to rating and distance to `coordinates`
+    Sorts `masters` according to rating and distance to `coordinates`
+    Rating is responsible for 70% of the total value, and distance is for the other 30%
     :param max_distance:
     :param masters:
     :param coordinates:
     :return:
     """
     result = []
-    # 1-(master.distance(*coordinates)/max_distance) * 3 [1 - рядом]
-    # 1-(master.rating/max_rating) * 7 [1 - суперстар]
-    # distance and rating
     for master in masters:
         distance = master.distance(*coordinates) if coordinates else 0
         value = (1 - (distance / max_distance)) * 3 + (master.rating / Master.MAX_RATING) * 7
@@ -37,21 +35,22 @@ def sort_masters(masters: Iterable[Master], coordinates: tuple, max_distance: fl
 
 
 def search(params: FilteringParams, filter_function):
+    # TODO docs
     date_range = params.date_range
     services = params.services
     coordinates = params.coordinates
     max_distance = params.distance
 
     # queryset
-    masters = Master.objects.filter(schedule__date__gte=date_range[0],
-                                    schedule__date__lte=date_range[1],
-                                    services__in=services, ).distinct() \
+    queryset = Master.objects.filter(schedule__date__gte=date_range[0],
+                                     schedule__date__lte=date_range[1],
+                                     services__in=services, ).distinct() \
         .prefetch_related('services').prefetch_related('schedule__time_slots') \
         .select_related('location')
     # search filter
-    result = filter_function(masters, params)
+    masters, slots = filter_function(queryset, params)
     # distance filter
-    return filter(lambda m: m.distance(*coordinates) < max_distance, result)
+    return filter(lambda m: m.distance(*coordinates) < max_distance, masters), slots
 
 
 def split(masters: Iterable[Master], target_client: Client):
@@ -74,9 +73,20 @@ def split(masters: Iterable[Master], target_client: Client):
     return favorites, regular
 
 
-def sort_and_serialize_masters(masters: Iterable[Master], params: FilteringParams):
+def sort_and_serialize_masters(masters: Iterable[Master],
+                               params: FilteringParams,
+                               slots: dict):
+    """
+    Runs `master_utils.sort_master` and then serializes the list
+    :param masters:
+    :param params:
+    :param slots: a dict, which contains
+    :return:
+    """
     masters = sort_masters(masters, params.coordinates, params.distance)
+    # TODO JUNK!!!
     serializer = SimpleMasterSerializer(masters, many=True, context={
-        'coordinates': params.coordinates
+        'coordinates': params.coordinates,
+        'available_slots': slots
     })
     return serializer.data

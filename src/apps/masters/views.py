@@ -1,14 +1,13 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from src.apps.categories.models import Service
 from src.apps.core.exceptions import NoContentError
 from src.apps.core.permissions import IsClient
-from . import time_slot_utils, master_utils, gmaps_utils, utils
+from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master
-from .serializers import MasterSerializer, SimpleMasterSerializer, TimeSlotSerializer
+from .serializers import MasterSerializer
 
 
 class MasterListView(generics.ListAPIView):
@@ -35,12 +34,12 @@ class MasterListView(generics.ListAPIView):
         distance - maximum distance in km. default is 20km
         """
         params = FilteringParams(request)
-        result = master_utils.search(params, FilteringFunctions.search)
-        favorites, masters = master_utils.split(result, request.user.client)
+        masters, slots = master_utils.search(params, FilteringFunctions.search)
+        favorites, others = master_utils.split(masters, request.user.client)
 
         return Response(data={
-            'favorites': master_utils.sort_and_serialize_masters(favorites, params),
-            'others': master_utils.sort_and_serialize_masters(masters, params)
+            'favorites': master_utils.sort_and_serialize_masters(favorites, params, slots),
+            'others': master_utils.sort_and_serialize_masters(others, params, slots)
         })
 
 
@@ -61,20 +60,21 @@ class MasterSearchView(generics.ListAPIView):
 
         service - *required*
 
-        date - *optional*
-        time - *optional*
+        date - *optional* format: 2017-10-25
+
+        time - *optional* format 11:30
         """
         params = FilteringParams(request)
         if params.date and params.time:
-            result = master_utils.search(params, FilteringFunctions.datetime)
+            masters, slots = master_utils.search(params, FilteringFunctions.datetime)
         else:
-            result = master_utils.search(params, FilteringFunctions.anytime)
+            masters, slots = master_utils.search(params, FilteringFunctions.anytime)
 
-        favorites, masters = master_utils.split(result, request.user.client)
+        favorites, others = master_utils.split(masters, request.user.client)
 
         return Response(data={
-            'favorites': master_utils.sort_and_serialize_masters(favorites, params),
-            'others': master_utils.sort_and_serialize_masters(masters, params)
+            'favorites': master_utils.sort_and_serialize_masters(favorites, params, slots),
+            'others': master_utils.sort_and_serialize_masters(others, params, slots)
         })
 
 
@@ -93,12 +93,14 @@ class MasterBestMatchView(generics.ListAPIView):
         query params:
 
         date - *required*
+
         time - *required*
+
         service - *required*
         """
         params = FilteringParams(request)
         if params.date and params.time:
-            masters = master_utils.search(params, FilteringFunctions.datetime)
+            masters, slots = master_utils.search(params, FilteringFunctions.datetime)
         else:
             raise ValidationError('please provide date, time and service params')
 
@@ -110,66 +112,21 @@ class MasterBestMatchView(generics.ListAPIView):
         # I fucking love python magic
         masters = favorites or regular
 
+        # getting the top guy
         best_match = master_utils.sort_masters(masters, params.coordinates,
                                                params.distance)[0]
-        serializer = SimpleMasterSerializer(best_match, context={
-            'coordinates': params.coordinates
-        })
-        return Response(serializer.data)
+        # serializing him
+        output_data = master_utils.sort_and_serialize_masters([best_match], params, slots)
+
+        return Response(data=output_data[0])
 
 
 class MasterDetailView(generics.RetrieveAPIView):
-    # TODO docs
+    """
+    Returns the detailed view of a master
+
+    """
     view_name = 'master-detail'
     queryset = Master.objects.all()
     serializer_class = MasterSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-
-# TODO remove this view, merge business logic with search-view
-class MasterScheduleView(generics.RetrieveAPIView):
-    view_name = 'master-schedule'
-    queryset = Master.objects.all()
-    permission_classes = (permissions.IsAuthenticated, IsClient)
-
-    def get(self, request, **kwargs):
-        """
-        Returns dates and time slots of a master when he can do the specified service,
-        considering the current client's address
-        query_params:
-
-        service <int> *required*
-
-        Schedule is limited to the following two weeks
-        """
-        master = self.get_object()
-        params = FilteringParams(request, coords_required=False)
-        service = params.service
-        if not service:
-            raise ValidationError("'service' parameter is not specified")
-        try:
-            service = Service.objects.get(pk=service)
-        except Service.DoesNotExist as ex:
-            raise ValidationError(f"Service with id={service} doesn't exist")
-        else:
-            result = []
-            dates = utils.get_default_date_range()
-
-            for schedule in master.schedule.filter(date__gte=dates[0], date__lte=dates[1]):
-                available_slots = time_slot_utils \
-                    .find_available_starting_slots(service, schedule.time_slots.all())
-                good_slots = []
-                for slot in available_slots:
-                    # проверяем может ли мастер доехать от предыдушего заказа
-                    location = request.user.client.address.location
-                    if gmaps_utils.can_reach(schedule, location, slot.value):
-                        good_slots.append(slot)
-
-                slots_json = TimeSlotSerializer(instance=good_slots, many=True).data
-                # TODO unify date format
-                if slots_json:
-                    result.append({
-                        'time_slots': slots_json,
-                        'date': schedule.date.strftime('%Y-%m-%d')
-                    })
-            return Response(data=result)

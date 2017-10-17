@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from src.apps.categories.serializers import ServiceSerializer
 from src.apps.core.serializers import LocationSerializer
-from .models import Master, Location, Schedule, TimeSlot
+from .models import Master, Schedule, TimeSlot
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -68,6 +68,8 @@ class SimpleMasterSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     distance = serializers.SerializerMethodField('_distance', read_only=True)
 
+    available_slots = serializers.SerializerMethodField('_available_slots', read_only=True)
+
     def _distance(self, master: Master):
         coordinates = self.context.get('coordinates')
         if not coordinates:
@@ -75,6 +77,10 @@ class SimpleMasterSerializer(serializers.ModelSerializer):
         else:
             return master.distance(*coordinates)
 
+    def _available_slots(self, master: Master):
+        return self.context.get('available_slots', {}).get(master.id, [])
+
     class Meta:
         model = Master
-        fields = ('id', 'first_name', 'avatar', 'services', 'location', 'distance')
+        fields = ('id', 'first_name', 'avatar', 'services',
+                  'location', 'distance', 'available_slots')
