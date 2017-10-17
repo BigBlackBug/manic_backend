@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'src.apps.orders',
     'django_filters',
     'django.contrib.postgres',
-    'rest_framework_docs',
+    'rest_framework_swagger',
 ]
 
 REST_FRAMEWORK = {

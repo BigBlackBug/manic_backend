@@ -18,6 +18,8 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
+from src.apps.core.views import get_swagger_view
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^auth/', include('src.apps.authentication.urls')),
@@ -25,7 +27,7 @@ urlpatterns = [
     url(r'^masters/', include('src.apps.masters.urls')),
     url(r'^clients/', include('src.apps.clients.urls')),
     url(r'^orders/', include('src.apps.orders.urls')),
-    url(r'^docs/', include('rest_framework_docs.urls')),
+    url(r'^docs/', get_swagger_view(title='API Docs')),
 ]\
 + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
 + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
