@@ -7,3 +7,4 @@ requests
 Pillow
 django-filter
 googlemaps==2.5.1
+drfdocs

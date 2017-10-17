@@ -60,11 +60,10 @@ INSTALLED_APPS = [
     'src.apps.clients',
     'src.apps.orders',
     'django_filters',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
+    'rest_framework_docs',
 ]
 
-
-USER_MODEL = 'authentication.PhoneAuthUser'
 SERVICE_MODEL = 'categories.Service'
 
 REST_FRAMEWORK = {
