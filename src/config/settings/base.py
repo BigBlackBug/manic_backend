@@ -64,8 +64,6 @@ INSTALLED_APPS = [
     'rest_framework_docs',
 ]
 
-SERVICE_MODEL = 'categories.Service'
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'src.apps.authentication.backend.TokenAuthentication',

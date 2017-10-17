@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-from django.conf import settings
 from django.db import models
 
 from src.apps.authentication.models import UserProfile
+from src.apps.categories.models import Service
 from src.apps.clients.models import Client
 from src.apps.core.models import Location
 from src.apps.core.utils import Folders
@@ -15,7 +15,7 @@ class Master(UserProfile):
 
     location = models.OneToOneField(Location, on_delete=models.CASCADE, related_name='+')
 
-    services = models.ManyToManyField(settings.SERVICE_MODEL, related_name='masters')
+    services = models.ManyToManyField(Service, related_name='masters')
 
     rating = models.FloatField(default=0.0)
 
