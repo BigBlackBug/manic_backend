@@ -71,6 +71,9 @@ class PhoneAuthUser(models.Model):
         """
         return True
 
+    def __str__(self):
+        return self.phone
+
 
 class Token(models.Model):
     """
