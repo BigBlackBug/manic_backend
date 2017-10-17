@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('orders', '0001_initial'),
         ('categories', '0001_initial'),
-        ('masters', '0001_initial'),
+        ('masters', '0002_time_instance_creation'),
         ('authentication', '0001_initial'),
         ('core', '0001_initial'),
     ]

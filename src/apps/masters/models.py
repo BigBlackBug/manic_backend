@@ -65,7 +65,7 @@ class Time(models.Model):
     minute = models.IntegerField()
     # populated at insertion time
     # used only for filtering
-    value = models.TimeField(blank=True, null=True)
+    value = models.TimeField(blank=True, null=True, editable=False)
 
     def __str__(self):
         return '{}:{}'.format(self.hour, self.minute)
