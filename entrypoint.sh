@@ -9,7 +9,7 @@ if [[ ${DATABASE_HOST} ]]; then
     done
     >&2 echo "Postgres is up - continuing"
     psql -h $DATABASE_HOST -U $DATABASE_USER -d template1 -c 'create extension hstore;'
-    unset $PGPASSWORD
+    unset PGPASSWORD
 fi
 
 set -e
