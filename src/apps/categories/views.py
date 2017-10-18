@@ -22,7 +22,7 @@ class DisplayItemList(generics.ListAPIView):
         Response:
         200 OK
         ```
-        {
+        [{
           'name':'Super Service',
           'image':'url-to-image',
           'categories':[{
@@ -42,7 +42,7 @@ class DisplayItemList(generics.ListAPIView):
             'type':'',
             ...
           }
-        }
+        }]
         ```
 
         """
