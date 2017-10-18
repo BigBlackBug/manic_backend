@@ -27,7 +27,9 @@ urlpatterns = [
     url(r'^masters/', include('src.apps.masters.urls')),
     url(r'^clients/', include('src.apps.clients.urls')),
     url(r'^orders/', include('src.apps.orders.urls')),
-    url(r'^docs/', get_swagger_view(title='API Docs')),
 ]\
 + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
 + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns.append(url(r'^docs/', get_swagger_view(title='4Hands2Go API Docs')),)

@@ -77,6 +77,10 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'src.apps.core.utils.custom_exception_handler'
 }
 
+SWAGGER_SETTINGS = {
+    'DOC_EXPANSION': 'list'
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

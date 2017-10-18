@@ -41,7 +41,8 @@ class ClientListTestCase(APITestCase):
                 }, 'city': 'kazan', 'street_name': 'latstr',
                 'building': '4', 'floor': 2,
                 'apt_number': 79,
-                'entrance': 6, 'has_intercom': True}
+                'entrance': 6, 'has_intercom': True
+            }
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 

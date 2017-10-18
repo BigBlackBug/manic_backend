@@ -27,7 +27,7 @@ class LoginTest(APITestCase):
     def test_create_registration(self):
         response = self.client.post(reverse(CreateRegistrationView.view_name),
                                     **make_json_body({'phone': '111'}))
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         registrations = list(Registration.objects.filter(phone='111'))
 
         # created succesfully
@@ -41,7 +41,7 @@ class LoginTest(APITestCase):
         response = self.client.post(reverse(CreateRegistrationView.view_name),
                                     **make_json_body({'phone': '111'}))
 
-        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         registrations = list(Registration.objects.filter(phone='111'))
 
         self.assertEqual(1, len(registrations))

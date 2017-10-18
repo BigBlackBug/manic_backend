@@ -11,6 +11,14 @@ from .serializers import RegistrationSerializer, UpdateRegistrationSerializer
 
 
 class LogoutView(NamedAPIView):
+    """
+    Logs a client out
+
+    Response:
+    200 OK
+
+    401 Unauthorized
+    """
     permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request):
@@ -23,7 +31,14 @@ class CreateRegistrationView(NamedAPIView):
 
     def post(self, request: Request):
         """
-        Creates a registration
+        Creates or replaces a registration for the provided number
+
+        Input:
+        ```{ 'phone':'88005553535' }```
+
+        Response:
+        201 Created
+        ``` { 'id':100500 } ```
 
         """
         serializer = RegistrationSerializer(data=request.data)
@@ -39,13 +54,30 @@ class CreateRegistrationView(NamedAPIView):
         else:
             registration.delete()
             registration = serializer.save(verification_code=code)
-        return Response(data={'id': registration.id})
+        return Response(data={'id': registration.id}, status=status.HTTP_201_CREATED)
 
 
 class UpdateRegistrationView(NamedAPIView):
     permission_classes = ()
 
     def patch(self, request: Request, reg_id: str):
+        """
+        Confirms a registration
+
+        Provides an authentication token for the client that
+        is to be used in all subsequent requests to the API
+
+        Input:
+        ```{ 'verification_code':'0000' }```
+
+        Response:
+        200 OK
+        ``` { 'user_id':100500, 'token':'TOKEN' } ```
+
+        404 Not Found
+
+        400 Bad Request
+        """
         serializer = UpdateRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -73,8 +105,17 @@ class UpdateRegistrationView(NamedAPIView):
 
     def delete(self, request: Request, reg_id: str):
         """
-        Cancels the registration process, i.e. when a user declines the user agreement
+        Cancels the registration process,
+        i.e. when a user declines the user agreement
 
+        Input:
+
+        Response:
+        200 OK
+
+        404 Not Found
+
+        400 Bad Request
         """
         try:
             registration = Registration.objects.get(pk=reg_id)

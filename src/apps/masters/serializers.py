@@ -14,7 +14,7 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeSlot
-        exclude = ('id', 'schedule')
+        fields = ('time', 'taken')
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class MasterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Master
-        exclude = ('user',)
+        exclude = ('user', )
 
 
 class MasterScheduleSerializer(serializers.BaseSerializer):
