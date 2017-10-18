@@ -57,10 +57,6 @@ class PortfolioImage(models.Model):
 
 
 class Time(models.Model):
-    """
-    data is generated once on startup
-    filled with 00:30
-    """
     hour = models.IntegerField()
     minute = models.IntegerField()
     # populated at insertion time
