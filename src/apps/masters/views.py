@@ -201,4 +201,4 @@ class MasterDetailView(generics.RetrieveAPIView):
         }
         ```
         """
-        super().get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)

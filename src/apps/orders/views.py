@@ -57,4 +57,4 @@ class OrderCreateView(generics.CreateAPIView):
 
         400 Bad Request
         """
-        super().post(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
