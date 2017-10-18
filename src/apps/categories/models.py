@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.contrib.postgres.fields import HStoreField
 from django.db import models
 
 from src.apps.core.utils import Folders
@@ -47,3 +48,17 @@ class Service(models.Model):
 
     def __str__(self):
         return f'{self.name} from category {self.category.name}'
+
+
+class DisplayItem(models.Model):
+    """
+    A wrapper entity around ServiceCategory, which is displayed
+    on the Category screen
+    """
+    name = models.CharField(max_length=64)
+    image = models.ImageField(upload_to=Folders.display_items, blank=True)
+    categories = models.ManyToManyField(ServiceCategory, related_name='+')
+    special = HStoreField(blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.name}'

@@ -38,6 +38,10 @@ class Folders:
     def categories(instance, filename):
         return f'categories/{str(uuid.uuid4())}'
 
+    @staticmethod
+    def display_items(instance, filename):
+        return f'display_items/{str(uuid.uuid4())}'
+
 
 def custom_exception_handler(exc, context):
     if isinstance(exc, exceptions.APIException):
