@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = True
 
 # TODO temporary stub
 ALLOWED_HOSTS = ['dev.4hands2go.bigblackbug.me', '35.195.227.131']
