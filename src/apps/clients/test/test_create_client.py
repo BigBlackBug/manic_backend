@@ -87,7 +87,7 @@ class CreateClientTestCase(APITestCase):
             'gender': Gender.MALE,
             'date_of_birth': utils.get_date(-100),
         }, format='json')
-        print(resp.data)
+
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         new_client_object = Client.objects.get(first_name='VASYA')
