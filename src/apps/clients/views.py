@@ -1,5 +1,6 @@
-from rest_framework import generics, parsers, status
+from rest_framework import generics, parsers, status, mixins
 from rest_framework.exceptions import PermissionDenied, MethodNotAllowed
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -56,14 +57,11 @@ class ClientCreateView(generics.CreateAPIView):
         return super().post(request, **kwargs)
 
 
-class ClientUpdateView(generics.UpdateAPIView):
+class ClientUpdateView(mixins.UpdateModelMixin, GenericAPIView):
     view_name = 'client-update'
     permission_classes = (IsAuthenticated, IsClientIDCorrect)
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
-
-    def put(self, request, *args, **kwargs):
-        raise MethodNotAllowed('put')
 
     def patch(self, request, *args, **kwargs):
         """
@@ -95,7 +93,7 @@ class ClientUpdateView(generics.UpdateAPIView):
 
         400 Bad Request
         """
-        super().patch(request, *args, **kwargs)
+        super().partial_update(request, *args, **kwargs)
         # old token should not be valid
         request.user.auth_token.delete()
 
