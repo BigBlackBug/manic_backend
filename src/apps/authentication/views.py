@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
@@ -39,16 +40,24 @@ class CreateRegistrationView(NamedAPIView):
         Response:
         201 Created
         ``` { 'id':100500 } ```
+        500 Internal Server Error
 
+        If there was an issue sending an sms
         """
         serializer = RegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # TODO generate code
-        code = sms_verification.generate_code()
+        phone = serializer.validated_data['phone']
+        if not settings.DEBUG:
+            code = sms_verification.generate_code(phone)
+            # will raise exception
+            sms_verification.send_code(phone, code)
+        else:
+            code = '0000'
+
         # overwriting the existing registration
         try:
-            registration = Registration.objects.filter(phone=serializer.validated_data['phone'])
+            registration = Registration.objects.filter(phone=phone)
         except Registration.DoesNotExist:
             registration = serializer.save(verification_code=code)
         else:

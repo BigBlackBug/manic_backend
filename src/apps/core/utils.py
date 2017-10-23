@@ -61,7 +61,7 @@ def custom_exception_handler(exc, context):
 
         # TODO error_type
         return Response(data={
-            'error_type': None,
+            'error_code': None,
             'detail': detail
         }, status=exc.status_code, headers=headers)
     elif isinstance(exc, ApplicationError):
@@ -72,7 +72,7 @@ def custom_exception_handler(exc, context):
         else:
             message = None
         response = Response(data={
-            'erorr_type': None,
+            'error_code': exc.error_code,
             'detail': message
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:

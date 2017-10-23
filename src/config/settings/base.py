@@ -44,6 +44,7 @@ STATIC_URL = '/static/'
 SECRET_KEY = '0n#gk&((m1y4crfx6hv-5_!$g0@g+*d_r&(e6^259arysd2wm='
 
 GMAPS_API_KEY = 'AIzaSyBoKNDWTb5XPdY4k1Wx0kQDpZDm0GW0FTc'
+SMS_API_KEY = 'A6B3E402-4C0E-D9DF-2482-CFAF3D641DD2'
 
 # Application definition
 INSTALLED_APPS = [
