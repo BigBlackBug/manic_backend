@@ -1,5 +1,6 @@
 import json
 from datetime import timedelta
+from unittest import mock
 
 from django.urls import reverse
 from django.utils import timezone
@@ -14,15 +15,8 @@ def make_json_body(body):
     return {'data': json.dumps(body), 'content_type': 'application/json'}
 
 
+@mock.patch('src.apps.authentication.sms_verification.send_code', lambda phone, code: True)
 class LoginTest(APITestCase):
-    # def setUp(self):
-    #     # Every test needs access to the request factory.
-    #     self.factory = APIRequestFactory()
-    #     self.user = PhoneAuthUser.objects.create(phone='777')
-    #     token, _ = Token.objects.get_or_create(user=self.user)
-    #
-    #     self.client = APIClient()
-    #     self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
     def test_create_registration(self):
         response = self.client.post(reverse(CreateRegistrationView.view_name),

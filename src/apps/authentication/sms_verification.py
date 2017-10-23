@@ -1,11 +1,9 @@
+import random
+import string
 from urllib import parse
 
 import requests
 from django.conf import settings
-
-import random
-import string
-
 from rest_framework import status
 
 from src.apps.core.exceptions import ApplicationError
@@ -43,8 +41,8 @@ def send_code(phone: str, code: str):
         'msg': _SMS_TEMPLATE.format(code),
         'json': 1
     })
-    url = 'https://sms.ru/sms/send'
-    resp = requests.post(url + args)
+    url = 'https://sms.ru/sms/send/'
+    resp = requests.post(f'{url}?{args}')
 
     if resp.status_code != status.HTTP_200_OK:
         raise ApplicationError('Unable to send SMS. Unexpected error', error_type=SMS_ERROR)

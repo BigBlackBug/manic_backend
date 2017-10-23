@@ -6,12 +6,12 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client, Address
-from src.apps.clients.views import ClientCreateView
+from src.apps.clients.views import ClientCreateView, ClientUpdateView, Me
 from src.apps.core import utils
 from src.apps.core.models import Location
 
 
-class ClientListTestCase(APITestCase):
+class CreateClientTestCase(APITestCase):
     def setUp(self):
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = Client.objects.create(user=self.user, first_name='client',
@@ -68,6 +68,29 @@ class ClientListTestCase(APITestCase):
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        Client.objects.get(first_name='VASYA')
-        # TODO assert that evertything is fine
+        new_client_object = Client.objects.get(first_name='VASYA')
+        self.assertEqual(new_client_object.first_name, 'VASYA')
+        self.assertEqual(new_client_object.gender, Gender.MALE)
+        self.assertEqual(new_client_object.tip, 10)
+        self.assertEqual(new_client_object.address.city, 'kazan')
+        # ... etc
+        pass
+
+    def test_create_client_partial(self):
+        user = PhoneAuthUser.objects.create(phone='77777')
+        # login with a new user
+        token, _ = Token.objects.get_or_create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+        resp = self.client.post(reverse(ClientCreateView.view_name), data={
+            'first_name': 'VASYA',
+            'gender': Gender.MALE,
+            'date_of_birth': utils.get_date(-100),
+        }, format='json')
+        print(resp.data)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        new_client_object = Client.objects.get(first_name='VASYA')
+        self.assertEqual(new_client_object.first_name, 'VASYA')
+        self.assertEqual(new_client_object.gender, Gender.MALE)
         pass

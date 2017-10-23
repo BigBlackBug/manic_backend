@@ -26,7 +26,7 @@ class Client(UserProfile):
     tip = models.IntegerField(default=5)
 
     address = models.OneToOneField(Address, on_delete=models.CASCADE,
-                                   related_name='client')
+                                   related_name='client', blank=True, null=True)
 
     class Meta(UserProfile.Meta):
         db_table = 'client'
