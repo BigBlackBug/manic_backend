@@ -105,3 +105,13 @@ class CancelOrderView(generics.DestroyAPIView):
     view_name = 'cancel-order'
     queryset = Order.objects.all()
     permission_classes = (IsAuthenticated, IsClient)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Cancels an order
+
+        Response:
+
+        204 OK
+        """
+        return super().delete(request, *args, **kwargs)
