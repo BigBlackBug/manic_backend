@@ -35,6 +35,9 @@ class OrderListSerializer(serializers.Serializer):
     order_items = OrderItemListSerializer(many=True)
     special = serializers.DictField()
 
+    class Meta:
+        read_only_fields = ('date', 'time', 'order_items', 'special')
+
 
 class OrderItemCreateSerializer(serializers.Serializer):
     master_id = serializers.IntegerField(min_value=0)

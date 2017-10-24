@@ -62,6 +62,10 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return queryset.filter(client=self.request.user.client).order_by('-date')
 
     def get_serializer_class(self):
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return OrderListSerializer
+
         if self.request.method == 'POST':
             return OrderCreateSerializer
         return OrderListSerializer
