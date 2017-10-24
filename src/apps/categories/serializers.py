@@ -16,7 +16,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = '__all__'
         read_only_fields = ('category', 'name', 'description',
-                            'min_duration', 'max_duration' 'cost')
+                            'min_duration', 'max_duration', 'cost')
 
 
 class ServiceCategorySerializer(serializers.ModelSerializer):

@@ -121,7 +121,7 @@ def make_everything():
 
 
 def make_order(client, service, master, time):
-    order = Order.objects.create(client=client, date=timezone.now(),
+    order = Order.objects.create(client=client, date=timezone.now().date(),
                                  time=time)
     schedule = master.get_schedule(timezone.now().date())
     slot = schedule.get_slot(time)
