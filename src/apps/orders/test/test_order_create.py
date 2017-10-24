@@ -15,7 +15,7 @@ from src.apps.core.models import Location
 from src.apps.masters.models import Master, TimeSlot, Time, Schedule
 from src.apps.masters.test import make_everything, make_master
 from src.apps.orders.models import Order
-from src.apps.orders.views import OrderCreateView
+from src.apps.orders.views import OrderListCreateView
 
 
 class OrderCreateTestCase(TestCase):
@@ -40,7 +40,7 @@ class OrderCreateTestCase(TestCase):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.first()
         # one service 2+1 slots
-        resp = self.client.post(reverse(OrderCreateView.view_name), data={
+        resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
             'time': '11:00',
             'order_items': [{
@@ -79,7 +79,7 @@ class OrderCreateTestCase(TestCase):
                                 taken=False, schedule=schedule)
         services = master.services.all()
         # two services, 5 slots, no+1
-        resp = self.client.post(reverse(OrderCreateView.view_name), data={
+        resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
             'time': '11:00',
             'order_items': [{
@@ -133,7 +133,7 @@ class OrderCreateTestCase(TestCase):
                                 taken=False, schedule=schedule)
 
         # two services, 2+1 for vasya, 2 for sanya
-        resp = self.client.post(reverse(OrderCreateView.view_name), data={
+        resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
             'time': '11:00',
             'order_items': [{

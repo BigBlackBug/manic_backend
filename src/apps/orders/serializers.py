@@ -2,21 +2,52 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
+from src.apps.core.exceptions import ApplicationError
 from src.apps.masters.models import Master, TimeSlot
 from .models import Order, OrderItem
 
 
-class OrderItemSerializer(serializers.Serializer):
+class OrderItemListSerializer(serializers.BaseSerializer):
+    def to_representation(self, obj: OrderItem):
+        request = self.context.get('request', None)
+        if not request:
+            raise ApplicationError('A serializer was not provided with a request. '
+                                   'That\'s unexpected')
+        return {
+            'service': {
+                'category': {
+                    'name': obj.service.category.name,
+                },
+                'name': obj.service.name,
+                'cost': obj.service.cost
+            },
+            'master': {
+                'first_name': obj.master.first_name,
+                'avatar': request.build_absolute_uri(obj.master.avatar.url)
+            }
+        }
+
+
+# out
+class OrderListSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    time = serializers.TimeField()
+    order_items = OrderItemListSerializer(many=True)
+    special = serializers.DictField()
+
+
+class OrderItemCreateSerializer(serializers.Serializer):
     master_id = serializers.IntegerField(min_value=0)
     service_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=0)
     )
 
 
-class OrderSerializer(serializers.Serializer):
-    date = serializers.DateField(required=True)
-    time = serializers.TimeField(required=True, format='%H:%M')
-    order_items = OrderItemSerializer(many=True, required=True, write_only=True)
+# in
+class OrderCreateSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    time = serializers.TimeField(format='%H:%M')
+    order_items = OrderItemCreateSerializer(many=True, write_only=True)
     # if an order is special, contains data for the 'special' order handler
     special = serializers.DictField(required=False)
 
