@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from src.apps.core.mixins import FilterEmptyFieldsMixin
 from .models import ServiceCategory, Service, DisplayItem
 
 
@@ -28,7 +29,7 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class DisplayItemSerializer(serializers.ModelSerializer):
+class DisplayItemSerializer(FilterEmptyFieldsMixin, serializers.ModelSerializer):
     categories = ServiceCategorySerializer(many=True, read_only=True)
     special = serializers.DictField(required=False)
 

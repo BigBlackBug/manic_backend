@@ -55,10 +55,10 @@ class DisplayItem(models.Model):
     A wrapper entity around ServiceCategory, which is displayed
     on the Category screen
     """
-    name = models.CharField(max_length=64)
-    image = models.ImageField(upload_to=Folders.display_items, blank=True)
+    name = models.CharField(max_length=64, null=True)
+    image = models.ImageField(upload_to=Folders.display_items, null=True)
     categories = models.ManyToManyField(ServiceCategory, related_name='+')
-    special = HStoreField(blank=True, null=True)
+    special = HStoreField(null=True)
 
     def __str__(self):
         return f'{self.name}'

@@ -23,25 +23,52 @@ class DisplayItemList(generics.ListAPIView):
         200 OK
         ```
         [{
-          'name':'Super Service',
-          'image':'url-to-image',
+          //Optional
+          'name':'Four hands special',
+          //Optional
+          'image':'url-to-item-image',
           'categories':[{
-            'name':'category one',
+            'name':'Hand Job',
             'image':'url-to-image',
             'services':[{
-                'id':100,
-                'name':'Service'
-                'description':'Yeah!"
-                'cost':100,
-                'min_duration':30
-                'max_duration':60
+              'id':100,
+              'name':'Slow and steady'
+              'description':'Yeah!"
+              'cost':100,
+              'min_duration':30
+              'max_duration':60
+            }]
+          },{
+            'name':'Foot Job',
+            'image':'url-to-image',
+            'services':[{
+              'id':100,
+              'name':'Extra tender'
+              'description':'Oh Yeah!"
+              'cost':500,
+              'min_duration':30
+              'max_duration':60
             }]
           }],
           //attributes of a special order
           'special':{
-            'type':'',
+            'type':'composite',
             ...
           }
+        },
+        {
+          'categories':[{
+            'name':'Hand Job',
+            'image':'url-to-image',
+            'services':[{
+              'id':100,
+              'name':'Slow and steady'
+              'description':'Yeah!"
+              'cost':100,
+              'min_duration':30
+              'max_duration':60
+            }]
+          }]
         }]
         ```
 
