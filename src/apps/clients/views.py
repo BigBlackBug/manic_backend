@@ -89,8 +89,8 @@ class ClientUpdateView(mixins.UpdateModelMixin, GenericAPIView):
 
         Response:
         200 OK ```{'token': 'new-auth-token'}```
-        If the user updates his phone number, his old auth token is invalidated for the sake
-        of security.
+        If the user updates his phone number, his old auth token is invalidated
+        for the sake of security.
 
         400 Bad Request
         """
