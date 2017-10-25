@@ -54,14 +54,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+
     'src.apps.core',
     'src.apps.categories',
     'src.apps.authentication',
     'src.apps.masters',
     'src.apps.clients',
     'src.apps.orders',
-    'django_filters',
-    'django.contrib.postgres',
+    'src.utils.admin_commands',
+
     'rest_framework_swagger',
 ]
 

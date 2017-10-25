@@ -10,6 +10,7 @@ services:
         - DATABASE_USER=4hands2go_local
         - DATABASE_PASSWORD=4hands2go_local
         - DJANGO_RUN_MIGRATIONS=yes
+        - DJANGO_RECREATE_TEST_DATA=yes
         - DJANGO_RUN_COLLECTSTATIC=yes
         - DJANGO_RUN_CREATESUPERUSER=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
