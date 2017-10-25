@@ -24,7 +24,6 @@ class CategoriesTestCase(APITestCase):
         self.assertEqual(len(data['services']), 1)
         service = data['services'][0]
 
-        self.assertEqual(service['category']['id'], self.category.id)
         self.assertEqual(service['name'], self.service.name)
         self.assertEqual(service['description'], self.service.description)
         self.assertEqual(service['cost'], self.service.cost)
