@@ -189,7 +189,7 @@ class AddPaymentCardView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Adds a payment card to a user
+        Adds a payment card to the current client
 
         Input:
         ```
