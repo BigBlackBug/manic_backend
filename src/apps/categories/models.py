@@ -47,7 +47,7 @@ class Service(models.Model):
     max_duration = models.PositiveIntegerField()
 
     def __str__(self):
-        return f'{self.name} from category {self.category.name}'
+        return f'{self.name} from category {self.category.id}'
 
 
 class DisplayItem(models.Model):
@@ -61,4 +61,6 @@ class DisplayItem(models.Model):
     special = HStoreField(null=True)
 
     def __str__(self):
+        if not self.name:
+            return 'Unnamed parent item'
         return f'{self.name}'

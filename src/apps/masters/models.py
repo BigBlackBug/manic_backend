@@ -81,7 +81,8 @@ class TimeSlot(models.Model):
         return self.time.value
 
     def __str__(self):
-        return f'{self.time} - taken: {self.taken}'
+        taken = 'taken' if self.taken else 'avaiable'
+        return f'{self.time} {taken}. Item ID:{self.order_item.id}'
 
 
 class Schedule(models.Model):
