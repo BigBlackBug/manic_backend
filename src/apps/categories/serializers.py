@@ -20,8 +20,15 @@ class ServiceSerializer(serializers.ModelSerializer):
                             'min_duration', 'max_duration', 'cost')
 
 
+class SimpleServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ('id', 'name', 'description',
+                  'min_duration', 'max_duration', 'cost')
+
+
 class ServiceCategorySerializer(serializers.ModelSerializer):
-    services = ServiceSerializer(many=True, read_only=True)
+    services = SimpleServiceSerializer(many=True, read_only=True)
 
     class Meta:
         model = ServiceCategory
