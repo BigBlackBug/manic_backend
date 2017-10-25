@@ -22,16 +22,22 @@ class OrderCreateTestCase(TestCase):
     def setUp(self):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = Client.objects.create(user=self.user, first_name='client',
-                                                   avatar=utils.make_in_memory_image('supername'),
-                                                   gender=Gender.MALE,
-                                                   date_of_birth=timezone.now(),
-                                                   address=Address.objects.create(
-                                                       location=Location.objects.create(lat=10,
-                                                                                        lon=10),
-                                                       city='kazan', street_name='latstr',
-                                                       building='4', floor=2, apt_number=79,
-                                                       entrance=6, has_intercom=True))
+        self.client_object = Client.objects.create(
+            user=self.user,
+            first_name='client',
+            avatar=utils.make_in_memory_image('supername'),
+            gender=Gender.MALE,
+            date_of_birth=timezone.now(),
+            address=Address.objects.create(
+                location=Location.objects.create(lat=10, lon=10),
+                city='kazan',
+                street_name='latstr',
+                building='4', floor=2,
+                apt_number=79,
+                entrance=6,
+                has_intercom=True
+            )
+        )
         token, _ = Token.objects.get_or_create(user=self.user)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
@@ -53,7 +59,8 @@ class OrderCreateTestCase(TestCase):
         schedule = master.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
 
         # assert timeslots are correctly set
-        slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30', '12:00'], taken=True)
+        slots = schedule.time_slots.filter(
+            time__value__in=['11:00', '11:30', '12:00'], taken=True)
         self.assertEqual(len(slots), 3)
 
         # assert order is created
@@ -93,7 +100,8 @@ class OrderCreateTestCase(TestCase):
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30',
                                                             '12:00', '12:30',
-                                                            '13:00'], taken=True)
+                                                            '13:00'],
+                                           taken=True)
         self.assertEqual(len(slots), 5)
         # assert order is created
         orders = Order.objects.all()
@@ -153,7 +161,8 @@ class OrderCreateTestCase(TestCase):
         schedule = vasya.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30',
-                                                            '12:00'], taken=True)
+                                                            '12:00'],
+                                           taken=True)
         self.assertEqual(len(slots), 3)
 
         sanya = Master.objects.get(first_name='SANYA')

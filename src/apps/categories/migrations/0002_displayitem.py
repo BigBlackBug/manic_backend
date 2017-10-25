@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('categories', '0001_initial'),
     ]
@@ -18,10 +17,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DisplayItem',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=64)),
-                ('special', django.contrib.postgres.fields.hstore.HStoreField(blank=True, null=True)),
-                ('categories', models.ManyToManyField(related_name='_displayitem_categories_+', to='categories.ServiceCategory')),
+                ('special',
+                 django.contrib.postgres.fields.hstore.HStoreField(blank=True,
+                                                                   null=True)),
+                ('categories', models.ManyToManyField(
+                    related_name='_displayitem_categories_+',
+                    to='categories.ServiceCategory')),
             ],
         ),
     ]

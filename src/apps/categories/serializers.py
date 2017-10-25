@@ -36,7 +36,8 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class DisplayItemSerializer(FilterEmptyFieldsMixin, serializers.ModelSerializer):
+class DisplayItemSerializer(FilterEmptyFieldsMixin,
+                            serializers.ModelSerializer):
     categories = ServiceCategorySerializer(many=True, read_only=True)
     special = serializers.DictField(required=False)
 

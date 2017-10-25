@@ -47,4 +47,4 @@ class MasterSearchViewTestCase(TestCase):
         # two days with slots
         day_one_slots = others[0]['available_slots']
         self.assertEqual(len(day_one_slots), 2)
-    # TODO MORE TESTS
+        # TODO MORE TESTS

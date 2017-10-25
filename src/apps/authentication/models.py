@@ -20,7 +20,8 @@ class Registration(models.Model):
     verification_code = models.CharField(max_length=4)
 
     # TODO create a cron which cleans up expired registrations
-    expires = models.DateTimeField(editable=False, default=timezone.now() + REGISTRATION_LIFETIME)
+    expires = models.DateTimeField(editable=False,
+                                   default=timezone.now() + REGISTRATION_LIFETIME)
 
 
 class PhoneAuthUser(models.Model):

@@ -15,9 +15,9 @@ def make_json_body(body):
     return {'data': json.dumps(body), 'content_type': 'application/json'}
 
 
-@mock.patch('src.apps.authentication.sms_verification.send_code', lambda phone, code: True)
+@mock.patch('src.apps.authentication.sms_verification.send_code',
+            lambda phone, code: True)
 class LoginTest(APITestCase):
-
     def test_create_registration(self):
         response = self.client.post(reverse(CreateRegistrationView.view_name),
                                     **make_json_body({'phone': '111'}))
@@ -44,36 +44,42 @@ class LoginTest(APITestCase):
     def test_confirm_registration_incorrect_reg_id(self):
         url = reverse(UpdateRegistrationView.view_name, args=[100])
         response = self.client.patch(url,
-                                     **make_json_body({'verification_code': '0000'}))
+                                     **make_json_body(
+                                         {'verification_code': '0000'}))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_confirm_registration_incorrect_code(self):
         reg = Registration.objects.create(phone='111', verification_code='0000')
-        response = self.client.patch(reverse(UpdateRegistrationView.view_name, args=[reg.id]),
-                                     **make_json_body({'verification_code': '0001'}))
+        response = self.client.patch(
+            reverse(UpdateRegistrationView.view_name, args=[reg.id]),
+            **make_json_body({'verification_code': '0001'}))
         # wrong code
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_confirm_registration_long_code(self):
         reg = Registration.objects.create(phone='111', verification_code='0000')
-        response = self.client.patch(reverse(UpdateRegistrationView.view_name, args=[reg.id]),
-                                     **make_json_body({'verification_code': '00000'}))
+        response = self.client.patch(
+            reverse(UpdateRegistrationView.view_name, args=[reg.id]),
+            **make_json_body({'verification_code': '00000'}))
         # long code
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_confirm_registration_expired(self):
         reg = Registration.objects.create(phone='111', verification_code='0000',
-                                          expires=timezone.now() - timedelta(minutes=5))
-        response = self.client.patch(reverse(UpdateRegistrationView.view_name, args=[reg.id]),
-                                     **make_json_body({'verification_code': '0000'}))
+                                          expires=timezone.now() - timedelta(
+                                              minutes=5))
+        response = self.client.patch(
+            reverse(UpdateRegistrationView.view_name, args=[reg.id]),
+            **make_json_body({'verification_code': '0000'}))
         # reg expired
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_confirm_registration_ok(self):
         reg = Registration.objects.create(phone='111', verification_code='0000')
 
-        response = self.client.patch(reverse(UpdateRegistrationView.view_name, args=[reg.id]),
-                                     **make_json_body({'verification_code': '0000'}))
+        response = self.client.patch(
+            reverse(UpdateRegistrationView.view_name, args=[reg.id]),
+            **make_json_body({'verification_code': '0000'}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('user_id', response.data)

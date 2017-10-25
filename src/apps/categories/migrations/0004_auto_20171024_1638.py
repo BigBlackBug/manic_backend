@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 
 import django.contrib.postgres.fields.hstore
 from django.db import migrations, models
+
 import src.apps.core.utils
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('categories', '0003_displayitem_image'),
     ]
@@ -17,7 +17,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='displayitem',
             name='image',
-            field=models.ImageField(null=True, upload_to=src.apps.core.utils.Folders.display_items),
+            field=models.ImageField(null=True,
+                                    upload_to=src.apps.core.utils.Folders.display_items),
         ),
         migrations.AlterField(
             model_name='displayitem',

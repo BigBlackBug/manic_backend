@@ -9,7 +9,8 @@ from src.apps.core.models import Location
 class Address(models.Model):
     # FK fields
     # client
-    location = models.OneToOneField(Location, on_delete=models.CASCADE, related_name='+')
+    location = models.OneToOneField(Location, on_delete=models.CASCADE,
+                                    related_name='+')
     city = models.CharField(max_length=64)
     street_name = models.CharField(max_length=64)
     building = models.CharField(max_length=16)

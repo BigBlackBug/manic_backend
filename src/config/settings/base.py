@@ -24,13 +24,14 @@ def get_env_variable(var_name):
         error_msg = "Set the {} environment variable".format(var_name)
         raise ImproperlyConfigured(error_msg)
 
+
 BASE_DIR = Path(__file__).ancestor(3)
 
 # TODO really? the slash did it!
-MEDIA_ROOT = BASE_DIR.ancestor(1).child("media")+'/'
+MEDIA_ROOT = BASE_DIR.ancestor(1).child("media") + '/'
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = BASE_DIR.ancestor(1).child("static")+'/'
+STATIC_ROOT = BASE_DIR.ancestor(1).child("static") + '/'
 STATIC_URL = '/static/'
 # STATICFILES_DIRS = (
 #     BASE_DIR.ancestor(1).child("static"),

@@ -63,7 +63,8 @@ class CreateRegistrationView(NamedAPIView):
         else:
             registration.delete()
             registration = serializer.save(verification_code=code)
-        return Response(data={'id': registration.id}, status=status.HTTP_201_CREATED)
+        return Response(data={'id': registration.id},
+                        status=status.HTTP_201_CREATED)
 
 
 class UpdateRegistrationView(NamedAPIView):
@@ -104,7 +105,8 @@ class UpdateRegistrationView(NamedAPIView):
                 raise serializers.ValidationError(
                     {'verification_code': ['Verification code has expired']})
 
-            user, created = PhoneAuthUser.objects.get_or_create(phone=registration.phone)
+            user, created = PhoneAuthUser.objects.get_or_create(
+                phone=registration.phone)
             token, _ = Token.objects.get_or_create(user=user)
 
             # we don't need the registration anymore

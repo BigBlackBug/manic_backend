@@ -1,6 +1,7 @@
-from rest_framework import exceptions
-from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from django.utils.translation import ugettext_lazy as _
+from rest_framework import exceptions
+from rest_framework.authentication import BaseAuthentication, \
+    get_authorization_header
 
 
 class TokenAuthentication(BaseAuthentication):
@@ -39,13 +40,15 @@ class TokenAuthentication(BaseAuthentication):
             msg = _('Invalid token header. No credentials provided.')
             raise exceptions.AuthenticationFailed(msg)
         elif len(auth) > 2:
-            msg = _('Invalid token header. Token string should not contain spaces.')
+            msg = _('Invalid token header. '
+                    'Token string should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
 
         try:
             token = auth[1].decode()
         except UnicodeError:
-            msg = _('Invalid token header. Token string should not contain invalid characters.')
+            msg = _('Invalid token header. '
+                    'Token string should not contain invalid characters.')
             raise exceptions.AuthenticationFailed(msg)
 
         return self.authenticate_credentials(token)
@@ -58,7 +61,8 @@ class TokenAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
         if not token.user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(
+                _('User inactive or deleted.'))
 
         return token.user, token
 

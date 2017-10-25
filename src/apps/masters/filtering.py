@@ -53,7 +53,8 @@ class FilteringParams:
                 unrecognized_params.append(param)
 
         if unrecognized_params:
-            raise ValidationError(f'unrecognized parameters {unrecognized_params}')
+            raise ValidationError(
+                f'unrecognized parameters {unrecognized_params}')
 
     @staticmethod
     def _parse_services(query_params):
@@ -109,7 +110,8 @@ class FilteringParams:
             except ValueError:
                 raise ValidationError('invalid time format')
         else:
-            times = (datetime.time(hour=8, minute=0), datetime.time(hour=22, minute=30))
+            times = (datetime.time(hour=8, minute=0),
+                     datetime.time(hour=22, minute=30))
         return times
 
     @staticmethod
@@ -153,7 +155,8 @@ class FilteringParams:
                 date = datetime.datetime.strptime(date, '%Y-%m-%d')
                 date_range = utils.get_default_date_range()
                 if date < date_range[0] or date > date_range[1]:
-                    raise ValidationError('date must be withing two weeks range')
+                    raise ValidationError(
+                        'date must be withing two weeks range')
                 return date
             except ValueError:
                 raise ValidationError('invalid date format')
@@ -199,8 +202,8 @@ class FilteringFunctions(Enum):
                                                                   schedule.time_slots.all(),
                                                                   time, time)
             # проверяем самый ближний заказ, который идёт перед временем time
-            if can_service and gmaps_utils.can_reach(schedule,
-                                                     target_client.address.location, time):
+            if can_service and gmaps_utils.can_reach(
+                    schedule, target_client.address.location, time):
                 result.add(master)
             good_slots[master.id].append({
                 'date': schedule.date.strftime('%Y-%m-%d'),
@@ -235,10 +238,12 @@ class FilteringFunctions(Enum):
                     service, schedule.time_slots.all())
                 for slot in start_slots:
                     # проверяем может ли мастер доехать от предыдушего заказа
-                    if gmaps_utils.can_reach(schedule, target_client.address.location,
+                    if gmaps_utils.can_reach(schedule,
+                                             target_client.address.location,
                                              slot.value):
                         result.add(master)
-                        schedule_slots.append(datetime.time.strftime(slot.value, '%H:%M'))
+                        schedule_slots.append(
+                            datetime.time.strftime(slot.value, '%H:%M'))
 
                 if schedule_slots:
                     good_slots[master.id].append({
@@ -271,7 +276,8 @@ class FilteringFunctions(Enum):
             service = min(master.services.all(), key=lambda _: _.max_duration)
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
-                if time_slot_utils.service_fits_into_slots(service, schedule.time_slots.all(),
-                                                           time_range[0], time_range[1]):
+                if time_slot_utils.service_fits_into_slots(
+                        service, schedule.time_slots.all(),
+                        time_range[0], time_range[1]):
                     result.add(master)
         return result, {}

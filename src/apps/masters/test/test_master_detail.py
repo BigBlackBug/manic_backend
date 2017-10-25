@@ -20,5 +20,6 @@ class MasterDetailTestCase(APITestCase):
 
     def test_master_exists(self):
         master = Master.objects.get(first_name='VASYA')
-        resp = self.client.get(reverse(MasterDetailView.view_name, args=[master.id]))
+        resp = self.client.get(
+            reverse(MasterDetailView.view_name, args=[master.id]))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

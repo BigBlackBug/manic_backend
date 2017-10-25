@@ -10,7 +10,8 @@ class ApplicationError(Exception):
         UNEXPECTED_ERROR = -1
         SMS_ERROR = 100
 
-    def __init__(self, *args, error_type: ErrorTypes = ErrorTypes.UNEXPECTED_ERROR):
+    def __init__(self, *args,
+                 error_type: ErrorTypes = ErrorTypes.UNEXPECTED_ERROR):
         super().__init__(*args)
         self.error_code = error_type and error_type.value
 

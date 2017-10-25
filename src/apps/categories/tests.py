@@ -8,11 +8,13 @@ from .serializers import ServiceCategorySerializer, DisplayItemSerializer
 class CategoriesTestCase(APITestCase):
     def setUp(self):
         self.category = ServiceCategory(name='category',
-                                        image=utils.make_in_memory_image('testfile'))
+                                        image=utils.make_in_memory_image(
+                                            'testfile'))
         self.category.save()
         self.service = Service.objects.create(category=self.category, name='s1',
                                               description='desc', cost=100,
-                                              min_duration=100, max_duration=120)
+                                              min_duration=100,
+                                              max_duration=120)
 
     def test_serializer(self):
         serializer = ServiceCategorySerializer(instance=self.category)
@@ -32,7 +34,8 @@ class CategoriesTestCase(APITestCase):
 
     def test_display_items(self):
         di = DisplayItem.objects.create(name='DI',
-                                        image=utils.make_in_memory_image('avatar'),
+                                        image=utils.make_in_memory_image(
+                                            'avatar'),
                                         special={
                                             'type': 'supertype'
                                         })

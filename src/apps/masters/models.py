@@ -13,7 +13,8 @@ from src.apps.core.utils import Folders
 class Master(UserProfile):
     MAX_RATING = 5.0
 
-    location = models.OneToOneField(Location, on_delete=models.CASCADE, related_name='+')
+    location = models.OneToOneField(Location, on_delete=models.CASCADE,
+                                    related_name='+')
 
     services = models.ManyToManyField(Service, related_name='masters')
 
@@ -48,12 +49,14 @@ class Master(UserProfile):
         :return:
         """
         # a pinch of python functional magic
-        return sum(map(lambda item: item.order.client == client, self.order_items.all()))
+        return sum(map(lambda item: item.order.client == client,
+                       self.order_items.all()))
 
 
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
-    master = models.ForeignKey(Master, related_name='portfolio', on_delete=models.CASCADE)
+    master = models.ForeignKey(Master, related_name='portfolio',
+                               on_delete=models.CASCADE)
 
 
 class Time(models.Model):
@@ -106,7 +109,8 @@ class Schedule(models.Model):
         except TimeSlot.DoesNotExist:
             return None
 
-    def assign_time(self, time: datetime.time, number_of_slots: int, order_item=None):
+    def assign_time(self, time: datetime.time, number_of_slots: int,
+                    order_item=None):
         """
         Sets the `number_of_slots` number of time slots
         to 'taken' starting at 'time'

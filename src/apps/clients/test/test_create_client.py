@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client, Address
-from src.apps.clients.views import ClientCreateView, ClientUpdateView, Me
+from src.apps.clients.views import ClientCreateView
 from src.apps.core import utils
 from src.apps.core.models import Location
 
@@ -14,16 +14,22 @@ from src.apps.core.models import Location
 class CreateClientTestCase(APITestCase):
     def setUp(self):
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = Client.objects.create(user=self.user, first_name='client',
-                                                   avatar=utils.make_in_memory_image('supername'),
-                                                   gender=Gender.MALE,
-                                                   date_of_birth=timezone.now(),
-                                                   address=Address.objects.create(
-                                                       location=Location.objects.create(lat=10,
-                                                                                        lon=10),
-                                                       city='kazan', street_name='latstr',
-                                                       building='4', floor=2, apt_number=79,
-                                                       entrance=6, has_intercom=True))
+        self.client_object = Client.objects.create(
+            user=self.user,
+            first_name='client',
+            avatar=utils.make_in_memory_image('supername'),
+            gender=Gender.MALE,
+            date_of_birth=timezone.now(),
+            address=Address.objects.create(
+                location=Location.objects.create(lat=10, lon=10),
+                city='kazan',
+                street_name='latstr',
+                building='4', floor=2,
+                apt_number=79,
+                entrance=6,
+                has_intercom=True
+            )
+        )
         token, _ = Token.objects.get_or_create(user=self.user)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')

@@ -3,13 +3,13 @@
 from __future__ import unicode_literals
 
 import datetime
-from django.db import migrations, models
+
 import django.db.models.deletion
+from django.db import migrations, models
 from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,25 +19,34 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PhoneAuthUser',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('phone', models.CharField(max_length=40, unique=True)),
             ],
         ),
         migrations.CreateModel(
             name='Registration',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('phone', models.CharField(max_length=40, unique=True)),
                 ('verification_code', models.CharField(max_length=4)),
-                ('expires', models.DateTimeField(default=datetime.datetime(2017, 10, 9, 20, 54, 49, 571814, tzinfo=utc), editable=False)),
+                ('expires', models.DateTimeField(
+                    default=datetime.datetime(2017, 10, 9, 20, 54, 49, 571814,
+                                              tzinfo=utc), editable=False)),
             ],
         ),
         migrations.CreateModel(
             name='Token',
             fields=[
-                ('key', models.CharField(max_length=40, primary_key=True, serialize=False, verbose_name='Key')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Created')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='auth_token', to='authentication.PhoneAuthUser', verbose_name='User')),
+                ('key', models.CharField(max_length=40, primary_key=True,
+                                         serialize=False, verbose_name='Key')),
+                ('created', models.DateTimeField(auto_now_add=True,
+                                                 verbose_name='Created')),
+                ('user', models.OneToOneField(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='auth_token',
+                    to='authentication.PhoneAuthUser', verbose_name='User')),
             ],
             options={
                 'verbose_name': 'Token',

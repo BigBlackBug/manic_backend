@@ -59,7 +59,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
-        return queryset.filter(client=self.request.user.client).order_by('-date')
+        return queryset.filter(client=self.request.user.client)\
+            .order_by('-date')
 
     def get_serializer_class(self):
         if not self.request:

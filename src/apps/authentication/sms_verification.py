@@ -45,7 +45,8 @@ def send_code(phone: str, code: str):
     resp = requests.post(f'{url}?{args}')
 
     if resp.status_code != status.HTTP_200_OK:
-        raise ApplicationError('Unable to send SMS. Unexpected error', error_type=SMS_ERROR)
+        raise ApplicationError('Unable to send SMS. Unexpected error',
+                               error_type=SMS_ERROR)
 
     json = resp.json()
     status_code = json['status_code']
@@ -58,11 +59,13 @@ def send_code(phone: str, code: str):
     if status_code != SMS_RU_RESPONSE_OK:
         # 201 - no money
         # 220 - service unavailable
-        raise ApplicationError(f'Unable to send SMS. Reason: {json["status_text"]}',
-                               error_type=SMS_ERROR)
+        raise ApplicationError(
+            f'Unable to send SMS. Reason: {json["status_text"]}',
+            error_type=SMS_ERROR)
 
     sms_response = json['sms'][phone]
 
     if sms_response['status_code'] != SMS_RU_RESPONSE_OK:
         # TODO proper error handling
-        raise ApplicationError(sms_response['status_text'], error_type=SMS_ERROR)
+        raise ApplicationError(sms_response['status_text'],
+                               error_type=SMS_ERROR)

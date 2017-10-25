@@ -5,7 +5,8 @@ from src.apps.categories.models import Service
 from .models import TimeSlot
 
 
-def find_available_starting_slots(service: Service, time_slots: Iterator[TimeSlot]):
+def find_available_starting_slots(service: Service,
+                                  time_slots: Iterator[TimeSlot]):
     """
     Returns a list of TimeSlots which can be the first slots for `service` to be
     served
@@ -53,5 +54,6 @@ def service_fits_into_slots(service: Service, time_slots: Iterator[TimeSlot],
     :param time_to:
     :return:
     """
-    time_slots = list(filter(lambda slot: time_from <= slot.value < time_to, time_slots))
+    time_slots = list(
+        filter(lambda slot: time_from <= slot.value < time_to, time_slots))
     return len(find_available_starting_slots(service, time_slots)) != 0

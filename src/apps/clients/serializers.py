@@ -20,7 +20,8 @@ class AddressSerializer(serializers.ModelSerializer):
         new_location = validated_data.pop('location', None)
         if new_location:
             location_serializer = LocationSerializer(instance=instance.location,
-                                                     data=new_location, partial=True)
+                                                     data=new_location,
+                                                     partial=True)
             location_serializer.is_valid(raise_exception=True)
             instance.location = location_serializer.save()
 
@@ -65,7 +66,8 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         address = None
         if 'address' in validated_data:
-            address_serializer = AddressSerializer(data=validated_data.pop('address'))
+            address_serializer = AddressSerializer(
+                data=validated_data.pop('address'))
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save()
 
@@ -88,7 +90,8 @@ class ClientSerializer(serializers.ModelSerializer):
 
         if new_address:
             address_serializer = AddressSerializer(instance=instance.address,
-                                                   data=new_address, partial=True)
+                                                   data=new_address,
+                                                   partial=True)
             address_serializer.is_valid(raise_exception=True)
             # partial update of address
             instance.address = address_serializer.save()
@@ -106,5 +109,3 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = ('first_name', 'gender', 'date_of_birth', 'tip',
                   'address', 'phone', 'payment_cards')
-
-

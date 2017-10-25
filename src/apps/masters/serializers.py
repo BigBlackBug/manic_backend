@@ -45,7 +45,7 @@ class MasterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Master
-        exclude = ('user', )
+        exclude = ('user',)
 
 
 class MasterScheduleSerializer(serializers.BaseSerializer):
@@ -54,7 +54,8 @@ class MasterScheduleSerializer(serializers.BaseSerializer):
     """
 
     def to_representation(self, instance: Master):
-        return ScheduleSerializer(instance.schedule, many=True, read_only=True).data
+        return ScheduleSerializer(instance.schedule, many=True,
+                                  read_only=True).data
 
 
 class SimpleMasterSerializer(serializers.ModelSerializer):
@@ -68,7 +69,8 @@ class SimpleMasterSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     distance = serializers.SerializerMethodField('_distance', read_only=True)
 
-    available_slots = serializers.SerializerMethodField('_available_slots', read_only=True)
+    available_slots = serializers.SerializerMethodField('_available_slots',
+                                                        read_only=True)
 
     def _distance(self, master: Master):
         coordinates = self.context.get('coordinates')

@@ -12,13 +12,17 @@ from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot
 from src.apps.masters.receivers import *
 
+
 # TODO unify this and data creation for tests
 def make_master(name, lon):
     user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
     master = Master.objects.create(user=user, first_name=name,
-                                   avatar=utils.make_in_memory_image('supername'),
-                                   gender=Gender.MALE, date_of_birth=timezone.now(),
-                                   location=Location.objects.create(lat=10, lon=lon))
+                                   avatar=utils.make_in_memory_image(
+                                       'supername'),
+                                   gender=Gender.MALE,
+                                   date_of_birth=timezone.now(),
+                                   location=Location.objects.create(lat=10,
+                                                                    lon=lon))
     return master
 
 
@@ -28,8 +32,10 @@ def make_display_item(*categories, name=None, special=None):
         di.categories.add(categories[0])
     else:
         di = DisplayItem.objects.create(name=name,
-                                        image=utils.make_in_memory_image('supername'),
-                                        special=special and {'type': 'composite'})
+                                        image=utils.make_in_memory_image(
+                                            'supername'),
+                                        special=special and {
+                                            'type': 'composite'})
         for category in categories:
             di.categories.add(category)
     return di
@@ -68,7 +74,8 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=00),
                             taken=False, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=vasya, date=timezone.now() + delta(days=1))
+    schedule = Schedule.objects.create(master=vasya,
+                                       date=timezone.now() + delta(days=1))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
@@ -79,7 +86,8 @@ def make_everything():
                             taken=False, schedule=schedule)
 
     # PETYA works on +2th, +3th does pedicure, got all slots on +2, none on +3
-    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=2))
+    schedule = Schedule.objects.create(master=petya,
+                                       date=timezone.now() + delta(days=2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -91,13 +99,15 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                             taken=True, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=3))
+    schedule = Schedule.objects.create(master=petya,
+                                       date=timezone.now() + delta(days=3))
     schedule.save()
 
 
 def make_category(category_name):
     category = ServiceCategory.objects.create(name=category_name,
-                                              image=utils.make_in_memory_image('img'))
+                                              image=utils.make_in_memory_image(
+                                                  'img'))
 
     Service.objects.create(category=category, name=category_name + ' обычный',
                            description='d',

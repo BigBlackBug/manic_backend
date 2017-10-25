@@ -3,12 +3,12 @@
 from __future__ import unicode_literals
 
 import datetime
+
 from django.db import migrations, models
 from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('authentication', '0001_initial'),
     ]
@@ -17,6 +17,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='registration',
             name='expires',
-            field=models.DateTimeField(default=datetime.datetime(2017, 10, 17, 8, 44, 46, 440966, tzinfo=utc), editable=False),
+            field=models.DateTimeField(
+                default=datetime.datetime(2017, 10, 17, 8, 44, 46, 440966,
+                                          tzinfo=utc), editable=False),
         ),
     ]

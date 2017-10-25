@@ -1,4 +1,5 @@
 import datetime
+
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -86,7 +87,8 @@ class MastersTestCase(APITestCase):
     def test_filtering_date_favorites(self):
         # manually creating an order with vasya
         vasya = Master.objects.get(first_name='VASYA')
-        make_order(client=self.client_object, master=vasya, service=vasya.services.all()[0],
+        make_order(client=self.client_object, master=vasya,
+                   service=vasya.services.all()[0],
                    time=datetime.time(hour=10, minute=30))
 
         url = f"{reverse(MasterListView.view_name)}?" \

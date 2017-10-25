@@ -16,15 +16,18 @@ from src.apps.orders.models import Order, OrderItem
 
 def make_category(category_name):
     category = ServiceCategory.objects.create(name=category_name,
-                                              image=utils.make_in_memory_image('img'))
+                                              image=utils.make_in_memory_image(
+                                                  'img'))
 
-    service = Service.objects.create(category=category, name=category_name + ' обычный',
+    service = Service.objects.create(category=category,
+                                     name=category_name + ' обычный',
                                      description='d',
                                      cost=10,
                                      min_duration=30,
                                      max_duration=60)
 
-    service = Service.objects.create(category=category, name=category_name + ' топовый',
+    service = Service.objects.create(category=category,
+                                     name=category_name + ' топовый',
                                      description='d',
                                      cost=100,
                                      min_duration=60,
@@ -35,20 +38,25 @@ def make_category(category_name):
 def make_master(name, lon):
     user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
     master = Master.objects.create(user=user, first_name=name,
-                                   avatar=utils.make_in_memory_image('supername'),
-                                   gender=Gender.MALE, date_of_birth=timezone.now(),
-                                   location=Location.objects.create(lat=10, lon=lon))
+                                   avatar=utils.make_in_memory_image(
+                                       'supername'),
+                                   gender=Gender.MALE,
+                                   date_of_birth=timezone.now(),
+                                   location=Location.objects.create(lat=10,
+                                                                    lon=lon))
     return master
 
 
 def make_token():
-    token, _ = Token.objects.get_or_create(user=PhoneAuthUser.objects.create(phone='777'))
+    token, _ = Token.objects.get_or_create(
+        user=PhoneAuthUser.objects.create(phone='777'))
     return token
 
 
 def make_client(user=None):
     if not user:
-        user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
+        user = PhoneAuthUser.objects.create(
+            phone=str(random.randint(1000, 2000)))
     return Client.objects.create(user=user, first_name='client',
                                  avatar=utils.make_in_memory_image('supername'),
                                  gender=Gender.MALE,
@@ -90,7 +98,8 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=00),
                             taken=False, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=vasya, date=timezone.now() + delta(days=1))
+    schedule = Schedule.objects.create(master=vasya,
+                                       date=timezone.now() + delta(days=1))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
@@ -101,7 +110,8 @@ def make_everything():
                             taken=False, schedule=schedule)
 
     # PETYA works on +2th, +3th does pedicure, got all slots on +2, none on +3
-    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=2))
+    schedule = Schedule.objects.create(master=petya,
+                                       date=timezone.now() + delta(days=2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -113,7 +123,8 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                             taken=True, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=petya, date=timezone.now() + delta(days=3))
+    schedule = Schedule.objects.create(master=petya,
+                                       date=timezone.now() + delta(days=3))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=16, minute=30),
@@ -135,4 +146,5 @@ def make_order(client, service, master, time):
 
 
 def _make_time(hour: int, minute: int) -> Time:
-    return Time(hour=hour, minute=minute, value=datetime.time(hour=hour, minute=minute))
+    return Time(hour=hour, minute=minute,
+                value=datetime.time(hour=hour, minute=minute))

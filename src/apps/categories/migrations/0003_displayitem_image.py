@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+
 import src.apps.core.utils
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('categories', '0002_displayitem'),
     ]
@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='displayitem',
             name='image',
-            field=models.ImageField(blank=True, upload_to=src.apps.core.utils.Folders.display_items),
+            field=models.ImageField(blank=True,
+                                    upload_to=src.apps.core.utils.Folders.display_items),
         ),
     ]

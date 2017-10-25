@@ -68,8 +68,10 @@ class MasterListView(generics.ListAPIView):
         favorites, others = master_utils.split(masters, request.user.client)
 
         return Response(data={
-            'favorites': master_utils.sort_and_serialize_masters(favorites, params, slots),
-            'others': master_utils.sort_and_serialize_masters(others, params, slots)
+            'favorites': master_utils.sort_and_serialize_masters(
+                favorites, params, slots),
+            'others': master_utils.sort_and_serialize_masters(
+                others, params, slots)
         })
 
 
@@ -101,15 +103,19 @@ class MasterSearchView(generics.ListAPIView):
         """
         params = FilteringParams(request)
         if params.date and params.time:
-            masters, slots = master_utils.search(params, FilteringFunctions.datetime)
+            masters, slots = master_utils.search(
+                params, FilteringFunctions.datetime)
         else:
-            masters, slots = master_utils.search(params, FilteringFunctions.anytime)
+            masters, slots = master_utils.search(
+                params, FilteringFunctions.anytime)
 
         favorites, others = master_utils.split(masters, request.user.client)
 
         return Response(data={
-            'favorites': master_utils.sort_and_serialize_masters(favorites, params, slots),
-            'others': master_utils.sort_and_serialize_masters(others, params, slots)
+            'favorites': master_utils.sort_and_serialize_masters(
+                favorites, params, slots),
+            'others': master_utils.sort_and_serialize_masters(
+                others, params, slots)
         })
 
 
@@ -141,9 +147,11 @@ class MasterBestMatchView(generics.ListAPIView):
         """
         params = FilteringParams(request)
         if params.date and params.time:
-            masters, slots = master_utils.search(params, FilteringFunctions.datetime)
+            masters, slots = master_utils.search(
+                params, FilteringFunctions.datetime)
         else:
-            raise ValidationError('please provide date, time and service params')
+            raise ValidationError(
+                'please provide date, time and service params')
 
         if len(masters) == 0:
             raise NoContentError(detail='no masters found for query')
@@ -157,7 +165,8 @@ class MasterBestMatchView(generics.ListAPIView):
         best_match = master_utils.sort_masters(masters, params.coordinates,
                                                params.distance)[0]
         # serializing him
-        output_data = master_utils.sort_and_serialize_masters([best_match], params, slots)
+        output_data = master_utils.sort_and_serialize_masters(
+            [best_match], params, slots)
 
         return Response(data=output_data[0])
 

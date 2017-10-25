@@ -53,7 +53,8 @@ class ClientCreateView(generics.CreateAPIView):
         400 Bad Request
         """
         if request.user.has_account():
-            raise PermissionDenied(detail='This phone already has an associated account')
+            raise PermissionDenied(
+                detail='This phone already has an associated account')
         return super().post(request, **kwargs)
 
 

@@ -23,10 +23,12 @@ class ListOrderTestCse(APITestCase):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.all()[0]
         # manually creating an order
-        order_1, _ = make_order(client=self.client_object, master=master, service=service,
+        order_1, _ = make_order(client=self.client_object, master=master,
+                                service=service,
                                 time=datetime.time(hour=11, minute=00))
         # manually creating an order
-        order_2, _ = make_order(client=self.client_object, master=master, service=service,
+        order_2, _ = make_order(client=self.client_object, master=master,
+                                service=service,
                                 time=datetime.time(hour=12, minute=00))
 
         resp = self.client.get(reverse(OrderListCreateView.view_name))

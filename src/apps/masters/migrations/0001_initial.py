@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
+
 import src.apps.core.utils
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,10 +17,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Master',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('first_name', models.CharField(max_length=32)),
-                ('avatar', models.ImageField(blank=True, null=True, upload_to=src.apps.core.utils.Folders.avatars)),
-                ('gender', models.CharField(choices=[('M', 'Мужчина'), ('F', 'Женщина')], default='F', max_length=1)),
+                ('avatar', models.ImageField(blank=True, null=True,
+                                             upload_to=src.apps.core.utils.Folders.avatars)),
+                ('gender',
+                 models.CharField(choices=[('M', 'Мужчина'), ('F', 'Женщина')],
+                                  default='F', max_length=1)),
                 ('date_of_birth', models.DateField()),
                 ('rating', models.FloatField(default=0.0)),
             ],
@@ -32,21 +36,25 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PortfolioImage',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to=src.apps.core.utils.Folders.portfolio)),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
+                ('image', models.ImageField(
+                    upload_to=src.apps.core.utils.Folders.portfolio)),
             ],
         ),
         migrations.CreateModel(
             name='Schedule',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('date', models.DateField()),
             ],
         ),
         migrations.CreateModel(
             name='Time',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('hour', models.IntegerField()),
                 ('minute', models.IntegerField()),
                 ('value', models.TimeField(blank=True, null=True)),
@@ -55,7 +63,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TimeSlot',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, primary_key=True,
+                                        serialize=False, verbose_name='ID')),
                 ('taken', models.BooleanField(default=False)),
             ],
         ),
