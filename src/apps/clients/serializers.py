@@ -1,9 +1,11 @@
+import string
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
-from .models import Client, Address
+from .models import Client, Address, PaymentCard
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -30,6 +32,27 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PaymentCardSerializer(serializers.ModelSerializer):
+    def validate_card_number(self, card_number):
+        if len(card_number) != 16 and len(card_number) != 19:
+            raise ValidationError('Invalid Card Number. Incorrect Length')
+        for digit in card_number:
+            if digit not in string.digits:
+                raise ValidationError('Invalid Card Number. '
+                                      'It must only contain digits')
+        return card_number
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        client = request.user.client
+        return PaymentCard.objects.create(client=client, **validated_data)
+
+    class Meta:
+        model = PaymentCard
+        exclude = ('client',)
+        read_only_fields = ('id',)
+
+
 class ClientSerializer(serializers.ModelSerializer):
     address = AddressSerializer(required=False)
     tip = serializers.IntegerField(min_value=0, max_value=15, required=False)
@@ -37,6 +60,7 @@ class ClientSerializer(serializers.ModelSerializer):
     gender = serializers.CharField(max_length=1)
     first_name = serializers.CharField(max_length=32)
     phone = serializers.CharField(source='user.phone', required=False)
+    payment_cards = PaymentCardSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         address = None
@@ -59,7 +83,8 @@ class ClientSerializer(serializers.ModelSerializer):
         new_tip = validated_data.pop('tip', None)
 
         if len(validated_data) != 0:
-            raise ValidationError(f'The following fields may not be changed: {validated_data.keys()}')
+            raise ValidationError(f'The following fields may not be changed: '
+                                  f'{validated_data.keys()}')
 
         if new_address:
             address_serializer = AddressSerializer(instance=instance.address,
@@ -79,4 +104,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('first_name', 'gender', 'date_of_birth', 'tip', 'address', 'phone')
+        fields = ('first_name', 'gender', 'date_of_birth', 'tip',
+                  'address', 'phone', 'payment_cards')
+
+

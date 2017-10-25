@@ -48,19 +48,6 @@ class UpdateClientTestCase(APITestCase):
         # lat changed
         self.assertEqual(self.client_object.address.location.lat, 200)
 
-    def test_update_tip(self):
-        client_id = self.client_object.id
-        resp = self.client.patch(reverse(ClientUpdateView.view_name, args=[client_id]), data={
-            'tip': 3
-        }, format='json')
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # token hasn't changed
-        self.assertIn('token', resp.data)
-
-        self.client_object = Client.objects.get(pk=client_id)
-        # apt number changed
-        self.assertEqual(self.client_object.tip, 3)
-
     def test_update_phone(self):
         client_id = self.client_object.id
         resp = self.client.patch(reverse(ClientUpdateView.view_name, args=[client_id]), data={
@@ -90,3 +77,16 @@ class UpdateClientTestCase(APITestCase):
         }, format='json')
         # changing first_name is forbidden
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_tip(self):
+        client_id = self.client_object.id
+        resp = self.client.patch(reverse(ClientUpdateView.view_name, args=[client_id]), data={
+            'tip': 3
+        }, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # token hasn't changed
+        self.assertIn('token', resp.data)
+
+        self.client_object = Client.objects.get(pk=client_id)
+        # apt number changed
+        self.assertEqual(self.client_object.tip, 3)
