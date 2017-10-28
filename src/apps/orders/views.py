@@ -1,9 +1,10 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.response import Response
 
-from src.apps.core.permissions import IsClient
-from .models import Order
+from src.apps.core.permissions import IsClient, IsMaster
+from .models import Order, OrderStatus
 from .serializers import OrderCreateSerializer, OrderListSerializer
 
 
@@ -59,7 +60,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
     def filter_queryset(self, queryset):
-        return queryset.filter(client=self.request.user.client)\
+        return queryset.filter(client=self.request.user.client) \
             .order_by('-date')
 
     def get_serializer_class(self):
@@ -113,6 +114,25 @@ class CancelOrderView(generics.DestroyAPIView):
 
         Response:
 
-        204 OK
+        204 No Content
         """
         return super().delete(request, *args, **kwargs)
+
+
+class CompleteOrderView(generics.GenericAPIView):
+    view_name = 'complete-order'
+    queryset = Order.objects.all()
+    permission_classes = (IsAuthenticated, IsMaster)
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Marks an order as done and completes the payment procedure
+
+        Response:
+
+        204 No Content
+        """
+        order = self.get_object()
+        # TODO complete payment
+        order.status = OrderStatus.DONE
+        return Response(status=status.HTTP_204_NO_CONTENT)

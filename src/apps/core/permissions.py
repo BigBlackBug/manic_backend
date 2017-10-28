@@ -8,3 +8,12 @@ class IsClient(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_client()
+
+
+class IsMaster(BasePermission):
+    """
+    Allows access only to users which are masters
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_master()

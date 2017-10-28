@@ -7,6 +7,17 @@ from src.apps.clients.models import Client
 from src.apps.masters.models import Master
 
 
+class OrderStatus:
+    CREATED = 'CREATED'
+    ACCEPTED = 'ACCEPTED'
+    DONE = 'DONE'
+    CHOICES = (
+        (CREATED, 'Создан'),
+        (ACCEPTED, 'Принят Мастером'),
+        (DONE, 'Завершён')
+    )
+
+
 class Order(models.Model):
     # FK fields
     # order_items
@@ -18,6 +29,11 @@ class Order(models.Model):
     time = models.TimeField()
 
     special = HStoreField(blank=True, null=True)
+    status = models.CharField(
+        max_length=8,
+        choices=OrderStatus.CHOICES,
+        default=OrderStatus.CREATED,
+    )
 
     def __str__(self):
         return f'Order for client_id: {self.client.id} on {self.date}, {self.time}'
