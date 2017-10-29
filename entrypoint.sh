@@ -15,11 +15,15 @@ fi
 set -e
 
 if [ "X$DJANGO_RUN_MIGRATIONS" = 'Xyes' ]; then
+    if [ "X$DJANGO_RECREATE_TEST_DATA" = 'Xyes' ]; then
+        echo "clearing data from the database"
+        python manage.py flush --noinput
+    fi
     echo "running migrations"
     python manage.py migrate --noinput
 
     if [ "X$DJANGO_RECREATE_TEST_DATA" = 'Xyes' ]; then
-        python manage.py flush --noinput
+        echo "populating the database"
         python manage.py populate_db
     fi
 fi
