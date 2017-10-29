@@ -107,6 +107,8 @@ class CancelOrderView(generics.DestroyAPIView):
     view_name = 'cancel-order'
     queryset = Order.objects.all()
     permission_classes = (IsAuthenticated, IsClient)
+    # TODO needed by swagger
+    serializer_class = OrderListSerializer
 
     def delete(self, request, *args, **kwargs):
         """
@@ -123,6 +125,8 @@ class CompleteOrderView(generics.GenericAPIView):
     view_name = 'complete-order'
     queryset = Order.objects.all()
     permission_classes = (IsAuthenticated, IsMaster)
+    # TODO needed by swagger
+    serializer_class = OrderListSerializer
 
     def patch(self, request, *args, **kwargs):
         """
