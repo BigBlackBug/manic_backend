@@ -61,12 +61,36 @@ class PayForOrderView(generics.GenericAPIView):
                                              s3d_url)
 
 
-class CloudPaymentsTransactionView(generics.ListAPIView):
+class CloudPaymentsTransactionView(generics.RetrieveAPIView):
     view_name = 'cp-transaction-view'
     queryset = CloudPaymentsTransaction.objects.all()
     serializer_class = CloudPaymentsTransactionSerializer
     permission_classes = (IsAuthenticated, IsClient)
     lookup_field = 'transaction_id'
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns an instance of CloudPaymentsTransaction
+
+        Response:
+
+        200 OK
+        ```
+        {
+          "transaction_id": 500,
+          "transaction_info": {
+            //either an error description, or instance
+            //of an internal transaction in CloudPayments system
+          },
+          "status": "CREATED/FINISHED/S3D_FAILED"
+        }
+
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return super().get(request, *args, **kwargs)
 
 
 class FinishS3DView(generics.GenericAPIView):
