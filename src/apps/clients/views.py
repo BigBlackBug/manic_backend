@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import generics, parsers, status, mixins
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.generics import GenericAPIView
@@ -11,6 +13,8 @@ from src.apps.core.serializers import ImageSerializer
 from .models import Client, PaymentCard
 from .permissions import IsClientIDCorrect
 from .serializers import ClientSerializer, PaymentCardSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class ClientCreateView(generics.CreateAPIView):
@@ -124,6 +128,10 @@ class ClientAvatarUpdateView(APIView):
         400 Bad Request
         """
         phone_user = request.user
+
+        logger.info(f'Updating an avatar for'
+                    f'client {phone_user.client.first_name}, '
+                    f'id={phone_user.client.id}')
 
         serializer = ImageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -1,3 +1,4 @@
+import logging
 import string
 
 from rest_framework import serializers
@@ -6,6 +7,8 @@ from rest_framework.exceptions import ValidationError
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
 from .models import Client, Address, PaymentCard
+
+logger = logging.getLogger(__name__)
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -19,6 +22,7 @@ class AddressSerializer(serializers.ModelSerializer):
         # manually updating location
         new_location = validated_data.pop('location', None)
         if new_location:
+            logger.debug(f'Saving a new location for address {instance.id}')
             location_serializer = LocationSerializer(instance=instance.location,
                                                      data=new_location,
                                                      partial=True)
@@ -89,6 +93,8 @@ class ClientSerializer(serializers.ModelSerializer):
                                   f'{validated_data.keys()}')
 
         if new_address:
+            logger.debug(f'Saving a new address for '
+                         f'client {instance.first_name}, id={instance.id}')
             address_serializer = AddressSerializer(instance=instance.address,
                                                    data=new_address,
                                                    partial=True)
@@ -96,10 +102,14 @@ class ClientSerializer(serializers.ModelSerializer):
             # partial update of address
             instance.address = address_serializer.save()
         if new_phone:
+            logger.debug(f'Saving a new phone for '
+                         f'client {instance.first_name}, id={instance.id}')
             instance.user.phone = new_phone
             instance.user.save()
 
         if new_tip:
+            logger.debug(f'Updating tip for '
+                         f'client {instance.first_name}, id={instance.id}')
             instance.tip = new_tip
 
         instance.save()

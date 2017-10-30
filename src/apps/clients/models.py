@@ -19,6 +19,9 @@ class Address(models.Model):
     entrance = models.IntegerField()
     has_intercom = models.BooleanField()
 
+    def __str__(self):
+        return f'{self.city}, {self.street_name}, apt. {self.apt_number}'
+
 
 class Client(UserProfile):
     # FK fields
@@ -29,6 +32,9 @@ class Client(UserProfile):
 
     address = models.OneToOneField(Address, on_delete=models.CASCADE,
                                    related_name='client', blank=True, null=True)
+
+    def __str__(self):
+        return f'Client. {super().__str__()}'
 
     class Meta(UserProfile.Meta):
         db_table = 'client'
@@ -41,3 +47,6 @@ class PaymentCard(models.Model):
     card_number = models.CharField(max_length=19)
     client = models.ForeignKey(Client, on_delete=models.CASCADE,
                                related_name='payment_cards')
+
+    def __str__(self):
+        return f'Card {self.id} of {self.client.id}'

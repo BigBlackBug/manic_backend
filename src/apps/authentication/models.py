@@ -121,6 +121,9 @@ class UserProfile(models.Model):
 
     date_of_birth = models.DateField()
 
+    def __str__(self):
+        return f'{self.first_name}'
+
     # FK fields
     # debit_cards
 
