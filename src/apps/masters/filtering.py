@@ -1,4 +1,5 @@
 import datetime
+import logging
 from collections import defaultdict
 from enum import Enum
 from time import strptime
@@ -17,10 +18,14 @@ available_params = ['date_between', 'time_between', 'services',
                     'service', 'coordinates', 'distance', 'date',
                     'time']
 
+logger = logging.getLogger(__name__)
+
 
 class FilteringParams:
     def __init__(self, request: Request, coords_required=True):
         query_params = request.query_params
+        logger.info(f'Parsing {query_params}')
+
         self._validate(query_params)
         self.services = self._parse_services(query_params)
         self.service = self._parse_service(query_params)
@@ -198,10 +203,10 @@ class FilteringFunctions(Enum):
         for master in masters:
             service = master.services.get(pk=service_id)
             schedule = master.get_schedule(date)
-            can_service = time_slot_utils.service_fits_into_slots(service,
-                                                                  schedule.time_slots.all(),
-                                                                  time, time)
-            # проверяем самый ближний заказ, который идёт перед временем time
+            can_service = time_slot_utils \
+                .service_fits_into_slots(service, schedule.time_slots.all(),
+                                         time, time)
+            # checking the closest order that goes before `time`
             if can_service and gmaps_utils.can_reach(
                     schedule, target_client.address.location, time):
                 result.add(master)
@@ -233,11 +238,11 @@ class FilteringFunctions(Enum):
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
                 schedule_slots = []
-                # находим все слоты, в которые теоретически мастер может оказать услугу
+                # finding all slots that can be used to do the service
                 start_slots = time_slot_utils.find_available_starting_slots(
                     service, schedule.time_slots.all())
                 for slot in start_slots:
-                    # проверяем может ли мастер доехать от предыдушего заказа
+                    # checking if the master can get to the next address in time
                     if gmaps_utils.can_reach(schedule,
                                              target_client.address.location,
                                              slot.value):
@@ -267,12 +272,11 @@ class FilteringFunctions(Enum):
         """
         date_range = params.date_range
         time_range = params.time_range
-        # а теперь смотрим, может ли он на самом деле это сделать судя по таймслотам
-        # то есть берем макс длительность сервиса и ищем такое вхождение в таймслотах шедуля
-        # то есть вася может сделать маникюр и работает во вторник, а петя в среду педикюр
+        # taking the maximum duration of all services of the master and
+        # checking if there exists a required number of adjacent empty slots
         result = set()
         for master in masters:
-            # хоть какую-нить услугу он успеет сделать в рабочее время
+            # checking if a master can do any service during his work day
             service = min(master.services.all(), key=lambda _: _.max_duration)
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):

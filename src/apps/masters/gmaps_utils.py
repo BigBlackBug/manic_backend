@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 import googlemaps
@@ -9,6 +10,7 @@ from src.apps.core.models import Location
 from src.apps.masters.models import Schedule, TimeSlot
 
 gmaps = googlemaps.Client(key=settings.GMAPS_API_KEY)
+logger = logging.getLogger(__name__)
 
 
 # TODO exception handling
@@ -23,13 +25,15 @@ def _calculate_eta(coords_from: tuple, coords_to: tuple,
     :return:
     """
     try:
+        logger.info(f'Calling GMaps API to get traffic info. '
+                    f'From {coords_from} To {coords_to} at {departure_time}')
         directions_result = gmaps.directions(coords_from,
                                              coords_to,
                                              mode="driving", language='en',
                                              departure_time=departure_time)
         result = directions_result[0]['legs'][0]['duration_in_traffic']['value']
+        logger.info(f'GMaps returned {result}')
     except gmaps_exceptions.ApiError as error:
-        # TODO add detail info
         raise ApplicationError(error)
     except Exception as ex:
         raise ApplicationError(ex)
@@ -43,7 +47,8 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     :param schedule:
     :param location:
     :param time:
-    :return: True if it's possible to reach `location` at `time` considering `schedule`
+    :return: True if it's possible to reach `location` at `time`
+    considering `schedule`
     """
     dt = datetime.combine(schedule.date, time) - \
          timedelta(minutes=TimeSlot.DURATION)

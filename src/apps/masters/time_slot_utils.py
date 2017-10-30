@@ -33,7 +33,8 @@ def find_available_starting_slots(service: Service,
                 start_index += 1
                 block_size -= 1
 
-    # the last block may ignore +1 slot, because there can't be subsequent orders
+    # the last block may ignore +1 slot
+    # because there can't be subsequent orders
     if block_size >= slot_number - 1:
         indices.append(start_index)
     return [time_slots[index] for index in indices]

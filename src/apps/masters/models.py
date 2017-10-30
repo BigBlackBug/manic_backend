@@ -150,4 +150,3 @@ class Schedule(models.Model):
 
 # TODO referrals
 # TODO feedbacks
-# TODO payments
