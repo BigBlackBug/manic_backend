@@ -1,4 +1,5 @@
 import io
+import logging
 import uuid
 from datetime import timedelta
 
@@ -13,6 +14,11 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 from src.apps.core.exceptions import ApplicationError
+
+logger = logging.getLogger(__name__)
+
+# TODO make a separate handler for payment exception logging
+payment_logger = logging.getLogger(__name__)
 
 
 def make_in_memory_image(filename):
@@ -60,6 +66,8 @@ def custom_exception_handler(exc, context):
         if isinstance(detail, list) and len(detail) == 1:
             detail = detail[0]
 
+        logger.exception(f'Unexpected APIException')
+
         # TODO error_type
         return Response(data={
             'error_code': ApplicationError.ErrorTypes.UNEXPECTED_ERROR.value,
@@ -72,6 +80,8 @@ def custom_exception_handler(exc, context):
             message = str(parent_exc)
         else:
             message = None
+        logger.exception(f'Unexpected ApplicationError')
+
         return Response(data={
             'error_code': exc.error_code,
             'detail': message
@@ -83,6 +93,9 @@ def custom_exception_handler(exc, context):
             message = str(parent_exc)
         else:
             message = None
+
+        payment_logger.exception(f'Unexpected CloudPaymentsException')
+
         return Response(data={
             'error_code': ApplicationError.ErrorTypes.PAYMENT_ERROR.value,
             'detail': message
