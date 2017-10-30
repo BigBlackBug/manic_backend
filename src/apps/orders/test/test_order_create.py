@@ -48,6 +48,7 @@ class OrderCreateTestCase(TestCase):
         # one service 2+1 slots
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
+            'payment_type': 'CASH',
             'time': '11:00',
             'order_items': [{
                 'master_id': master.id,
@@ -88,6 +89,7 @@ class OrderCreateTestCase(TestCase):
         # two services, 5 slots, no+1
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
+            'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
                 'master_id': master.id,
@@ -143,6 +145,7 @@ class OrderCreateTestCase(TestCase):
         # two services, 2+1 for vasya, 2 for sanya
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
             'date': timezone.now().strftime('%Y-%m-%d'),
+            'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
                 'master_id': vasya.id,

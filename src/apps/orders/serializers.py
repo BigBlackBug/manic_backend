@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from src.apps.categories.models import Service
 from src.apps.core.exceptions import ApplicationError
 from src.apps.masters.models import Master, TimeSlot
-from .models import Order, OrderItem
+from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
 
 
 class OrderItemListSerializer(serializers.BaseSerializer):
@@ -54,6 +54,7 @@ class OrderCreateSerializer(serializers.Serializer):
     order_items = OrderItemCreateSerializer(many=True, write_only=True)
     # if an order is special, contains data for the 'special' order handler
     special = serializers.DictField(required=False)
+    payment_type = serializers.ChoiceField(choices=PaymentType.CHOICES)
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -83,3 +84,9 @@ class OrderCreateSerializer(serializers.Serializer):
             if next_time:
                 schedule.assign_time(next_time, 1, order_item)
         return order
+
+
+class CloudPaymentsTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CloudPaymentsTransaction
+        exclude = ('id',)

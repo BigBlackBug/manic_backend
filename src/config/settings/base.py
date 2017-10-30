@@ -44,8 +44,11 @@ STATIC_URL = '/static/'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '0n#gk&((m1y4crfx6hv-5_!$g0@g+*d_r&(e6^259arysd2wm='
 
+# TODO move this to env vars
 GMAPS_API_KEY = 'AIzaSyBoKNDWTb5XPdY4k1Wx0kQDpZDm0GW0FTc'
 SMS_API_KEY = 'A6B3E402-4C0E-D9DF-2482-CFAF3D641DD2'
+CLOUDPAYMENTS_PUBLIC_ID = 'pk_60c4e78f074563b799b61b0d36019'
+CLOUDPAYMENTS_API_SECRET = '5e9fb61716880f83b91a6ed928718baf'
 
 # Application definition
 INSTALLED_APPS = [

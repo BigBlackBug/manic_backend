@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 
 from PIL import Image
+from cloudpayments import CloudPaymentsError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
@@ -61,7 +62,7 @@ def custom_exception_handler(exc, context):
 
         # TODO error_type
         return Response(data={
-            'error_code': None,
+            'error_code': ApplicationError.ErrorTypes.UNEXPECTED_ERROR.value,
             'detail': detail
         }, status=exc.status_code, headers=headers)
     elif isinstance(exc, ApplicationError):
@@ -71,16 +72,34 @@ def custom_exception_handler(exc, context):
             message = str(parent_exc)
         else:
             message = None
-        response = Response(data={
+        return Response(data={
             'error_code': exc.error_code,
+            'detail': message
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    elif isinstance(exc, CloudPaymentsError):
+        set_rollback()
+        if len(exc.args) == 1:
+            parent_exc = exc.args[0]
+            message = str(parent_exc)
+        else:
+            message = None
+        return Response(data={
+            'error_code': ApplicationError.ErrorTypes.PAYMENT_ERROR.value,
             'detail': message
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     else:
         return exception_handler(exc, context)
 
-    return response
-
 
 def get_date(days: int):
     # TODO UNIFY DATE_FORMAT
     return (timezone.now() + timedelta(days=days)).strftime('%Y-%m-%d')
+
+
+def get_ip_address(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip_address = x_forwarded_for.split(',')[0]
+    else:
+        ip_address = request.META.get('REMOTE_ADDR')
+    return ip_address

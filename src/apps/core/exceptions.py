@@ -9,6 +9,7 @@ class ApplicationError(Exception):
     class ErrorTypes(Enum):
         UNEXPECTED_ERROR = -1
         SMS_ERROR = 100
+        PAYMENT_ERROR = 200
 
     def __init__(self, *args,
                  error_type: ErrorTypes = ErrorTypes.UNEXPECTED_ERROR):

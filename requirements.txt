@@ -8,4 +8,5 @@ Pillow==4.3.0
 django-filter==1.0.4
 googlemaps==2.5.1
 django-rest-swagger==2.1.2
-docutils
+docutils==0.14
+cloudpayments==1.4.0

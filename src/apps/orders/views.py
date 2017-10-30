@@ -4,7 +4,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.permissions import IsClient, IsMaster
-from .models import Order, OrderStatus
+from src.apps.orders import cloudpayments
+from .models import Order, OrderStatus, PaymentType
 from .serializers import OrderCreateSerializer, OrderListSerializer
 
 
@@ -23,6 +24,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
         ```
         {
           'date': '2017-10-18',
+          // could be CARD or CASH
+          'payment_type': 'CARD',
           'time': '11:00',
           'order_items': [{
             'master_id': 10,
@@ -43,6 +46,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         ```
         {
           'date': '2017-10-18',
+          'payment_type': 'CARD',
           'time': '11:00',
           'order_items': [{
             'master_id': 10,
@@ -82,6 +86,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         ```
         [{
           'date': '2017-10-18',
+          'payment_type':'CASH',
           'time': '11:00',
           'special': {},
           'order_items': [{
@@ -130,13 +135,18 @@ class CompleteOrderView(generics.GenericAPIView):
 
     def patch(self, request, *args, **kwargs):
         """
-        Marks an order as done and completes the payment procedure
+        Marks an order as done and completes the payment procedure.
+
+        If the order is paid by card, calls CloudPayments API and
+        confirms the transaction, meaning that money will be transferred
+        to the 4hands2go account.
 
         Response:
 
         204 No Content
         """
         order = self.get_object()
-        # TODO complete payment
+        if order.payment_type == PaymentType.CARD:
+            cloudpayments.confirm(order)
         order.status = OrderStatus.DONE
         return Response(status=status.HTTP_204_NO_CONTENT)

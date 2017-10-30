@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('orders', '0001_initial'),
     ]
@@ -15,6 +14,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='status',
-            field=models.CharField(choices=[('CREATED', 'Создан'), ('ACCEPTED', 'Принят Мастером'), ('DONE', 'Завершён')], default='CREATED', max_length=8),
+            field=models.CharField(
+                choices=[('CREATED', 'Создан'), ('ACCEPTED', 'Принят Мастером'),
+                         ('DONE', 'Завершён')], default='CREATED',
+                max_length=8),
         ),
     ]
