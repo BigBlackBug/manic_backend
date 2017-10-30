@@ -166,7 +166,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(asctime)s [%(levelname)s] (%(name)s) %(message)s'
+            'format': '[%(asctime)s] [%(levelname)-8s] '
+                      '[%(message)s] [%(name)s:%(lineno)s - %(funcName)s()]'
         },
         'simple': {
             'format': '%(asctime)s [%(levelname)s] %(message)s'
@@ -175,6 +176,17 @@ LOGGING = {
     'handlers': {
         'console': {
             'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'error_console': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'warning_email': {
+            'level': 'WARNING',
+            #TODO email handler
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -189,9 +201,15 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
-        'root': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        }
+        'src.apps': {
+            'level': 'DEBUG',
+            'handlers': ['console', 'error_console'],
+            'propagate': False
+        },
+
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     }
 }

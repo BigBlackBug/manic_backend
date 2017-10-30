@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 from urllib import parse
@@ -10,6 +11,8 @@ from src.apps.core.exceptions import ApplicationError
 
 SMS_ERROR = ApplicationError.ErrorTypes.SMS_ERROR
 SMS_RU_RESPONSE_OK = 100
+
+logger = logging.getLogger(__name__)
 
 
 def _id_generator(size=8,
@@ -41,8 +44,12 @@ def send_code(phone: str, code: str):
         'msg': _SMS_TEMPLATE.format(code),
         'json': 1
     })
+    logger.info(f'Sending code {code} to {phone}')
+
     url = 'https://sms.ru/sms/send/'
     resp = requests.post(f'{url}?{args}')
+
+    logger.debug(f'Response from sms.ru - {resp.status_code}')
 
     if resp.status_code != status.HTTP_200_OK:
         raise ApplicationError('Unable to send SMS. Unexpected error',
@@ -53,6 +60,8 @@ def send_code(phone: str, code: str):
     balance = json['balance']
 
     if balance < settings.MINIMUM_BALANCE:
+        logger.warning(f'Current Balance ({balance}) is low. '
+                       f'Consider refilling.')
         # TODO send a warning
         pass
 

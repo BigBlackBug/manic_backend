@@ -27,6 +27,9 @@ class PhoneAuthUser(models.Model):
     """
     A base class for a User who's authenticated through a phone number
     """
+    # FK fields
+    # auth_token
+
     phone = models.CharField(max_length=40, unique=True)
 
     def is_client(self):
