@@ -31,9 +31,7 @@ class Migration(migrations.Migration):
                                         serialize=False, verbose_name='ID')),
                 ('phone', models.CharField(max_length=40, unique=True)),
                 ('verification_code', models.CharField(max_length=4)),
-                ('expires', models.DateTimeField(
-                    default=datetime.datetime(2017, 10, 9, 20, 54, 49, 571814,
-                                              tzinfo=utc), editable=False)),
+                ('expires', models.DateTimeField()),
             ],
         ),
         migrations.CreateModel(

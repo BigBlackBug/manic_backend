@@ -30,7 +30,10 @@ class LoginTest(APITestCase):
 
     def test_create_two_registration(self):
         # there is registration for this phone
-        Registration.objects.create(phone='111', verification_code='0000')
+        Registration.objects.create(phone='111', verification_code='0000',
+                                    expires=timezone.now() + timedelta(
+                                        minutes=5)
+                                    )
         # creating a new one
         response = self.client.post(reverse(CreateRegistrationView.view_name),
                                     **make_json_body({'phone': '111'}))
@@ -49,7 +52,10 @@ class LoginTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_confirm_registration_incorrect_code(self):
-        reg = Registration.objects.create(phone='111', verification_code='0000')
+        reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          expires=timezone.now() + timedelta(
+                                              minutes=5)
+                                          )
         response = self.client.patch(
             reverse(UpdateRegistrationView.view_name, args=[reg.id]),
             **make_json_body({'verification_code': '0001'}))
@@ -57,7 +63,10 @@ class LoginTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_confirm_registration_long_code(self):
-        reg = Registration.objects.create(phone='111', verification_code='0000')
+        reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          expires=timezone.now() + timedelta(
+                                              minutes=5)
+                                          )
         response = self.client.patch(
             reverse(UpdateRegistrationView.view_name, args=[reg.id]),
             **make_json_body({'verification_code': '00000'}))
@@ -75,7 +84,10 @@ class LoginTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_confirm_registration_ok(self):
-        reg = Registration.objects.create(phone='111', verification_code='0000')
+        reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          expires=timezone.now() + timedelta(
+                                              minutes=5)
+                                          )
 
         response = self.client.patch(
             reverse(UpdateRegistrationView.view_name, args=[reg.id]),

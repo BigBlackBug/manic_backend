@@ -1,9 +1,7 @@
 import binascii
 import os
-from datetime import timedelta
 
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from src.apps.core.utils import Folders
@@ -14,14 +12,15 @@ class Registration(models.Model):
     """
     A temporary class that represents application login/registration process
     """
-    REGISTRATION_LIFETIME = timedelta(minutes=5)
-
     phone = models.CharField(max_length=40, unique=True)
     verification_code = models.CharField(max_length=4)
 
     # TODO create a cron which cleans up expired registrations
-    expires = models.DateTimeField(editable=False,
-                                   default=timezone.now() + REGISTRATION_LIFETIME)
+    expires = models.DateTimeField()
+
+    def __str__(self):
+        return f'Phone: {self.phone}, expires: {self.expires}, ' \
+               f'code: {self.verification_code}'
 
 
 class PhoneAuthUser(models.Model):
