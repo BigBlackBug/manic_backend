@@ -46,6 +46,7 @@ class ClientCreateView(generics.CreateAPIView):
             'apt_number': 10,
             'entrance': 6,
             'has_intercom': True,
+            //optional
             'comment': 'please call before knocking'
           }
         }
@@ -265,7 +266,8 @@ class AddAddressView(generics.CreateAPIView):
           'building': '4', 'floor': 2,
           'apt_number': 10,
           'entrance': 6,
-          'has_intercom': True
+          'has_intercom': True,
+          //optional
           'comment': 'please call before knocking'
         }
         ```
