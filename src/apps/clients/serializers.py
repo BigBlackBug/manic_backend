@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class AddressSerializer(serializers.ModelSerializer):
     location = LocationSerializer(required=True)
+    comment = serializers.CharField(max_length=1024, required=False)
 
     def create(self, validated_data):
         location = Location.objects.create(**validated_data.pop('location'))

@@ -44,11 +44,12 @@ class Address(models.Model):
     apt_number = models.IntegerField()
     entrance = models.IntegerField()
     has_intercom = models.BooleanField()
+    comment = models.CharField(max_length=1024, blank=True)
     is_default = models.BooleanField()
 
     def __str__(self):
         return f'{self.city}, {self.street_name}, apt. {self.apt_number}, ' \
-               f'home: {self.home_address}'
+               f'is_default: {self.is_default}'
 
 
 class PaymentCard(models.Model):

@@ -45,7 +45,8 @@ class ClientCreateView(generics.CreateAPIView):
             'building': '4', 'floor': 2,
             'apt_number': 10,
             'entrance': 6,
-            'has_intercom': True
+            'has_intercom': True,
+            'comment': 'please call before knocking'
           }
         }
         ```
@@ -161,8 +162,9 @@ class Me(generics.RetrieveAPIView):
             'building': '4', 'floor': 2,
             'apt_number': 10,
             'entrance': 6,
-            'has_intercom': True
-            'home_address': True/False
+            'has_intercom': True,
+            'home_address': True/False,
+            'comment': 'please call before knocking'
           }],
           'payment_cards': [{
             'id':1,
@@ -264,6 +266,7 @@ class AddAddressView(generics.CreateAPIView):
           'apt_number': 10,
           'entrance': 6,
           'has_intercom': True
+          'comment': 'please call before knocking'
         }
         ```
 
@@ -320,7 +323,8 @@ class AddressUpdateView(mixins.DestroyModelMixin,
           'apt_number': 10,
           'entrance': 6,
           'has_intercom': True,
-          'is_default': True/False
+          'is_default': True/False,
+          'comment': 'please call before knocking'
         }
         ```
 
