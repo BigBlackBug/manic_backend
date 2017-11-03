@@ -14,7 +14,7 @@ from .serializers import MasterSerializer
 class MasterListView(generics.ListAPIView):
     view_name = 'master-list'
 
-    permission_classes = (permissions.IsAuthenticated, IsClient)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, **kwargs):
         """
