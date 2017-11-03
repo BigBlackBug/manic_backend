@@ -57,16 +57,19 @@ def make_client(user=None):
     if not user:
         user = PhoneAuthUser.objects.create(
             phone=str(random.randint(1000, 2000)))
-    return Client.objects.create(user=user, first_name='client',
-                                 avatar=utils.make_in_memory_image('supername'),
-                                 gender=Gender.MALE,
-                                 date_of_birth=timezone.now(),
-                                 address=Address.objects.create(
-                                     location=Location.objects.create(lat=10,
-                                                                      lon=10),
-                                     city='kazan', street_name='latstr',
-                                     building='4', floor=2, apt_number=79,
-                                     entrance=6, has_intercom=True))
+    client = Client.objects.create(user=user, first_name='client',
+                                   avatar=utils.make_in_memory_image(
+                                       'supername'),
+                                   gender=Gender.MALE,
+                                   date_of_birth=timezone.now())
+    Address.objects.create(
+        location=Location.objects.create(lat=10,
+                                         lon=10),
+        city='kazan', street_name='latstr',
+        building='4', floor=2, apt_number=79,
+        entrance=6, has_intercom=True, client=client,
+        is_default=True)
+    return client
 
 
 def make_everything():

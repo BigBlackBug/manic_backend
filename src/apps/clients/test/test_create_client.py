@@ -5,10 +5,9 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.authentication.utils import Gender
-from src.apps.clients.models import Client, Address
-from src.apps.clients.views import ClientCreateView
+from src.apps.clients.models import Client
+from src.apps.clients.views import ClientCreateView, Me
 from src.apps.core import utils
-from src.apps.core.models import Location
 
 
 class CreateClientTestCase(APITestCase):
@@ -19,16 +18,7 @@ class CreateClientTestCase(APITestCase):
             first_name='client',
             avatar=utils.make_in_memory_image('supername'),
             gender=Gender.MALE,
-            date_of_birth=timezone.now(),
-            address=Address.objects.create(
-                location=Location.objects.create(lat=10, lon=10),
-                city='kazan',
-                street_name='latstr',
-                building='4', floor=2,
-                apt_number=79,
-                entrance=6,
-                has_intercom=True
-            )
+            date_of_birth=timezone.now()
         )
         token, _ = Token.objects.get_or_create(user=self.user)
         self.client = APIClient()
@@ -78,8 +68,34 @@ class CreateClientTestCase(APITestCase):
         self.assertEqual(new_client_object.first_name, 'VASYA')
         self.assertEqual(new_client_object.gender, Gender.MALE)
         self.assertEqual(new_client_object.tip, 10)
-        self.assertEqual(new_client_object.address.city, 'kazan')
+        self.assertEqual(len(new_client_object.addresses.all()), 1)
+        self.assertEqual(new_client_object.home_address.city, 'kazan')
         # ... etc
+        pass
+
+    def test_create_client2(self):
+        user = PhoneAuthUser.objects.create(phone='77777')
+        # login with a new user
+        token, _ = Token.objects.get_or_create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+        resp = self.client.post(reverse(ClientCreateView.view_name), data={
+            'first_name': 'VASYA',
+            'gender': Gender.MALE,
+            'date_of_birth': utils.get_date(-100),
+            'tip': 10,
+            'address': {
+                'location': {
+                    'lat': 100,
+                    'lon': 100,
+                }, 'city': 'kazan', 'street_name': 'latstr',
+                'building': '4', 'floor': 2,
+                'apt_number': 79,
+                'entrance': 6, 'has_intercom': True}
+        }, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        resp = self.client.get(reverse(Me.view_name))
+        print(resp.data)
         pass
 
     def test_create_client_partial(self):
@@ -99,4 +115,4 @@ class CreateClientTestCase(APITestCase):
         new_client_object = Client.objects.get(first_name='VASYA')
         self.assertEqual(new_client_object.first_name, 'VASYA')
         self.assertEqual(new_client_object.gender, Gender.MALE)
-        pass
+        self.assertEqual(len(new_client_object.addresses.all()), 0)

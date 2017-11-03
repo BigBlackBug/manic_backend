@@ -16,7 +16,12 @@ class AddressSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         location = Location.objects.create(**validated_data.pop('location'))
-        return Address.objects.create(location=location, **validated_data)
+        client = self.context.get('client', None)
+
+        is_default = len(client.addresses.all()) == 0
+        return Address.objects.create(location=location, client=client,
+                                      is_default=is_default,
+                                      **validated_data)
 
     def update(self, instance, validated_data):
         # manually updating location
@@ -67,17 +72,20 @@ class ClientSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(source='user.phone', required=False)
     payment_cards = PaymentCardSerializer(many=True, read_only=True)
 
-    def create(self, validated_data):
-        address = None
-        if 'address' in validated_data:
-            address_serializer = AddressSerializer(
-                data=validated_data.pop('address'))
-            address_serializer.is_valid(raise_exception=True)
-            address = address_serializer.save()
+    addresses = AddressSerializer(read_only=True, many=True)
 
-        return Client.objects.create(user=self.context['request'].user,
-                                     address=address,
-                                     **validated_data)
+    def create(self, validated_data):
+        address_data = validated_data.pop('address', None)
+        client = Client.objects.create(user=self.context['request'].user,
+                                       **validated_data)
+        if address_data:
+            address_serializer = AddressSerializer(data=address_data, context={
+                'client': client
+            })
+            address_serializer.is_valid(raise_exception=True)
+            address_serializer.save()
+
+        return client
 
     def validate_phone(self, phone):
         # TODO validate phone
@@ -113,4 +121,4 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ('first_name', 'gender', 'date_of_birth', 'tip',
-                  'address', 'phone', 'payment_cards')
+                  'address', 'phone', 'payment_cards', 'addresses')

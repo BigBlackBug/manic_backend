@@ -7,12 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from src.apps.authentication.models import Token
 from src.apps.core.permissions import IsClient
 from src.apps.core.serializers import ImageSerializer
-from .models import Client, PaymentCard
+from .models import Client, PaymentCard, Address
 from .permissions import IsClientIDCorrect
-from .serializers import ClientSerializer, PaymentCardSerializer
+from .serializers import ClientSerializer, PaymentCardSerializer, \
+    AddressSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,8 @@ class ClientCreateView(generics.CreateAPIView):
 
     def post(self, request, **kwargs):
         """
-        Creates a client
+        Creates a client. If an address is provided,
+        it automatically becomes the default
 
         Input:
         ```
@@ -150,7 +151,7 @@ class Me(generics.RetrieveAPIView):
           'gender': 'F/M',
           'date_of_birth': '1988-10-29',
           'tip': 5, //**optional**
-          'address': { //**optional**
+          'addresses': [{ //**optional**
             'location': {
                 'lat': 100,
                 'lon': 100,
@@ -161,7 +162,8 @@ class Me(generics.RetrieveAPIView):
             'apt_number': 10,
             'entrance': 6,
             'has_intercom': True
-          },
+            'home_address': True/False
+          }],
           'payment_cards': [{
             'id':1,
             'cryprogram':'cryptogram',
@@ -227,3 +229,104 @@ class DeletePaymentCardView(generics.DestroyAPIView):
         400 Bad Request
         """
         return super().delete(request, *args, **kwargs)
+
+
+class AddAddressView(generics.CreateAPIView):
+    view_name = 'add-address'
+    permission_classes = (IsAuthenticated, IsClientIDCorrect)
+    queryset = Client.objects.all()
+    serializer_class = AddressSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['client'] = self.request.user.client
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Adds an address to the current client.
+        If you want to make this address the default, please call
+        the update-address endpoint.
+        **IT WILL PROBABLY CHANGE**
+
+        Input:
+        ```
+        {
+          'location': {
+            'lat': 100,
+            'lon': 100,
+          },
+          'city': 'kazan',
+          'street_name': 'best street ever',
+          'building': '4', 'floor': 2,
+          'apt_number': 10,
+          'entrance': 6,
+          'has_intercom': True
+        }
+        ```
+
+        Response:
+
+        201 Created
+
+        400 Bad Request
+        """
+        return super().post(request, *args, **kwargs)
+
+
+class AddressUpdateView(mixins.DestroyModelMixin,
+                        mixins.UpdateModelMixin, GenericAPIView):
+    view_name = 'address-update'
+    permission_classes = (IsAuthenticated, IsClientIDCorrect)
+    queryset = Client.objects.all()
+    serializer_class = AddressSerializer
+
+    def get_object(self):
+        address_id = self.kwargs['address_id']
+        client = self.request.user.client
+        try:
+            return client.addresses.get(pk=address_id)
+        except Address.DoesNotExist:
+            raise NotFound(f'Address with id {address_id} is not found')
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Removes an address from a client
+
+        Response:
+        204 No Content
+
+        400 Bad Request
+        """
+        return super().destroy(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Updates an address.
+        All of the fields are optional
+
+        Input:
+        ```
+        {
+          'location': {
+            'lat': 100,
+            'lon': 100,
+          },
+          'city': 'kazan',
+          'street_name': 'best street ever',
+          'building': '4', 'floor': 2,
+          'apt_number': 10,
+          'entrance': 6,
+          'has_intercom': True,
+          'is_default': True/False
+        }
+        ```
+
+        Response:
+        200 OK
+
+        400 Bad Request
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+

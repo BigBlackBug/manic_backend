@@ -23,15 +23,6 @@ class UploadTestCase(APITestCase):
             first_name='client',
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
-            address=Address.objects.create(
-                location=Location.objects.create(lat=10, lon=10),
-                city='kazan',
-                street_name='latstr',
-                building='4', floor=2,
-                apt_number=79,
-                entrance=6,
-                has_intercom=True
-            )
         )
         token, _ = Token.objects.get_or_create(user=self.user)
         self.client = APIClient()

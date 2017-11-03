@@ -208,7 +208,7 @@ class FilteringFunctions(Enum):
                                          time, time)
             # checking the closest order that goes before `time`
             if can_service and gmaps_utils.can_reach(
-                    schedule, target_client.address.location, time):
+                    schedule, target_client.home_address.location, time):
                 result.add(master)
             good_slots[master.id].append({
                 'date': schedule.date.strftime('%Y-%m-%d'),
@@ -244,7 +244,7 @@ class FilteringFunctions(Enum):
                 for slot in start_slots:
                     # checking if the master can get to the next address in time
                     if gmaps_utils.can_reach(schedule,
-                                             target_client.address.location,
+                                             target_client.home_address.location,
                                              slot.value):
                         result.add(master)
                         schedule_slots.append(

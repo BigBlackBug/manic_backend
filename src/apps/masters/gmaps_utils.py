@@ -58,7 +58,7 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
         # we assume that a person can get anywhere within an hour
         if not prev_slot.taken:
             return True
-        prev_address = prev_slot.order_item.order.client.address
+        prev_address = prev_slot.order_item.order.client.home_address
         eta = _calculate_eta(prev_address.location.as_tuple(),
                              location.as_tuple(), dt)
         # can get to the point in 30 minutes
