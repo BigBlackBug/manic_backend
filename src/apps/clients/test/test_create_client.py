@@ -73,31 +73,6 @@ class CreateClientTestCase(APITestCase):
         # ... etc
         pass
 
-    def test_create_client2(self):
-        user = PhoneAuthUser.objects.create(phone='77777')
-        # login with a new user
-        token, _ = Token.objects.get_or_create(user=user)
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
-
-        resp = self.client.post(reverse(ClientCreateView.view_name), data={
-            'first_name': 'VASYA',
-            'gender': Gender.MALE,
-            'date_of_birth': utils.get_date(-100),
-            'tip': 10,
-            'address': {
-                'location': {
-                    'lat': 100,
-                    'lon': 100,
-                }, 'city': 'kazan', 'street_name': 'latstr',
-                'building': '4', 'floor': 2,
-                'apt_number': 79,
-                'entrance': 6, 'has_intercom': True}
-        }, format='json')
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        resp = self.client.get(reverse(Me.view_name))
-        print(resp.data)
-        pass
-
     def test_create_client_partial(self):
         user = PhoneAuthUser.objects.create(phone='77777')
         # login with a new user
