@@ -78,34 +78,18 @@ class ClientUpdateView(mixins.UpdateModelMixin, GenericAPIView):
         Input:
         ```
         {
-          'phone': '88005553535',
+          'first_name': 'Anna',
           'tip': 5,
-          'address': {
-            'location': {
-                'lon': 100,
-            },
-            'city': 'kazan',
-            'street_name': 'best street ever',
-            'has_intercom': True
-          }
+          'date_of_birth': '1989-10-29',
         }
         ```
 
         Response:
-        200 OK ```{'token': 'new-auth-token'}```
-        If the user updates his phone number, his old auth token is invalidated
-        for the sake of security.
+        200 OK
 
         400 Bad Request
         """
-        super().partial_update(request, *args, **kwargs)
-        # old token should not be valid
-        request.user.auth_token.delete()
-
-        token, _ = Token.objects.get_or_create(user=request.user)
-        return Response(data={
-            'token': token.key
-        })
+        return super().partial_update(request, *args, **kwargs)
 
 
 class ClientAvatarUpdateView(APIView):

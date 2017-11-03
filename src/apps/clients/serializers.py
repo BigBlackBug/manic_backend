@@ -84,33 +84,28 @@ class ClientSerializer(serializers.ModelSerializer):
         return phone
 
     def update(self, instance, validated_data):
-        new_address = validated_data.pop('address', None)
-        new_phone = validated_data.pop('user', {}).pop('phone', None)
+        new_date_of_birth = validated_data.pop('date_of_birth', None)
         new_tip = validated_data.pop('tip', None)
+        new_name = validated_data.pop('first_name', None)
 
         if len(validated_data) != 0:
             raise ValidationError(f'The following fields may not be changed: '
                                   f'{validated_data.keys()}')
 
-        if new_address:
-            logger.debug(f'Saving a new address for '
+        if new_name:
+            logger.debug(f'Updating name for '
                          f'client {instance.first_name}, id={instance.id}')
-            address_serializer = AddressSerializer(instance=instance.address,
-                                                   data=new_address,
-                                                   partial=True)
-            address_serializer.is_valid(raise_exception=True)
-            # partial update of address
-            instance.address = address_serializer.save()
-        if new_phone:
-            logger.debug(f'Saving a new phone for '
-                         f'client {instance.first_name}, id={instance.id}')
-            instance.user.phone = new_phone
-            instance.user.save()
+            instance.first_name = new_name
 
         if new_tip:
             logger.debug(f'Updating tip for '
                          f'client {instance.first_name}, id={instance.id}')
             instance.tip = new_tip
+
+        if new_date_of_birth:
+            logger.debug(f'Updating date_of_birth for '
+                         f'client {instance.first_name}, id={instance.id}')
+            instance.date_of_birth = new_date_of_birth
 
         instance.save()
         return instance
