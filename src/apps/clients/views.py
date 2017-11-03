@@ -239,7 +239,9 @@ class AddAddressView(generics.CreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['client'] = self.request.user.client
+        # TODO this is a fucking bug of the schema generation module
+        if self.request:
+            context['client'] = self.request.user.client
         return context
 
     def post(self, request, *args, **kwargs):
