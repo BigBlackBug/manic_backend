@@ -184,7 +184,7 @@ class AddPaymentCardView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Adds a payment card to the current client
+        Adds a payment card to the client
 
         Input:
         ```
@@ -246,7 +246,7 @@ class AddAddressView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Adds an address to the current client.
+        Adds an address to the client.
         If you want to make this address the default, please call
         the update-address endpoint.
         **IT WILL PROBABLY CHANGE**
