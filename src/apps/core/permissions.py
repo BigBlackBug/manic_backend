@@ -5,7 +5,7 @@ class IsClient(BasePermission):
     """
     Allows access only to users which are clients
     """
-    message = "An user must be a Client to access this endpoint"
+    message = "A user must be a Client to access this endpoint"
 
     def has_permission(self, request, view):
         return request.user.is_client()
@@ -15,7 +15,7 @@ class IsMaster(BasePermission):
     """
     Allows access only to users which are masters
     """
-    message = "An user must be a Master to access this endpoint"
+    message = "A user must be a Master to access this endpoint"
 
     def has_permission(self, request, view):
         return request.user.is_master()
