@@ -28,6 +28,7 @@ class DisplayItemList(generics.ListAPIView):
           //Optional
           'image':'url-to-item-image',
           'categories':[{
+            'id': 500,
             'name':'Hand Job',
             'image':'url-to-image',
             'services':[{
@@ -39,6 +40,7 @@ class DisplayItemList(generics.ListAPIView):
               'max_duration':60
             }]
           },{
+            'id': 700,
             'name':'Foot Job',
             'image':'url-to-image',
             'services':[{
@@ -58,6 +60,7 @@ class DisplayItemList(generics.ListAPIView):
         },
         {
           'categories':[{
+            'id': 800,
             'name':'Hand Job',
             'image':'url-to-image',
             'services':[{

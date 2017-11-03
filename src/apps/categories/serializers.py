@@ -32,7 +32,7 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceCategory
-        fields = ('name', 'image', 'services')
+        fields = ('id', 'name', 'image', 'services')
         depth = 1
 
 
