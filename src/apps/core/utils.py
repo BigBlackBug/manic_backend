@@ -10,6 +10,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils import timezone
 from rest_framework import status, exceptions
 from rest_framework.compat import set_rollback
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
@@ -21,33 +22,47 @@ logger = logging.getLogger(__name__)
 payment_logger = logging.getLogger(__name__)
 
 
-def make_in_memory_image(filename):
+def make_in_memory_image(filename, ext='png'):
     img = Image.new('RGB', size=(16, 16))
     buffer = io.BytesIO()
     img.save(fp=buffer, format='JPEG')
 
     buff_val = buffer.getvalue()
     f = ContentFile(buff_val)
-    return InMemoryUploadedFile(f, None, filename, 'image/jpeg',
+    return InMemoryUploadedFile(f, None, f'{filename}.{ext}', 'image/jpeg',
                                 f.tell, None)
+
+
+# TODO a better implementation?
+_supported_formats = ['jpg', 'png', 'jpeg']
+
+
+def get_file_ext(filename: str):
+    split = filename.split('.')
+    if len(split) == 1:
+        raise ValidationError('Unsupported file extension')
+    if split[-1].lower() not in _supported_formats:
+        raise ValidationError('Unsupported file extension')
+    return split[-1]
 
 
 class Folders:
     @staticmethod
     def portfolio(instance, filename):
-        return f'portfolio/{instance.master.id}/{uuid.uuid4()}'
+        return f'portfolio/{instance.master.id}/' \
+               f'{uuid.uuid4()}.{get_file_ext(filename)}'
 
     @staticmethod
     def avatars(instance, filename):
-        return f'avatars/{str(uuid.uuid4())}'
+        return f'avatars/{str(uuid.uuid4())}.{get_file_ext(filename)}'
 
     @staticmethod
     def categories(instance, filename):
-        return f'categories/{str(uuid.uuid4())}'
+        return f'categories/{str(uuid.uuid4())}.{get_file_ext(filename)}'
 
     @staticmethod
     def display_items(instance, filename):
-        return f'display_items/{str(uuid.uuid4())}'
+        return f'display_items/{str(uuid.uuid4())}.{get_file_ext(filename)}'
 
 
 def custom_exception_handler(exc, context):
