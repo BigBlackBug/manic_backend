@@ -1,8 +1,8 @@
 from django.conf.urls import url
 
+from .views import CancelOrderView, CompleteOrderView, OrderListCreateView
 from .views_payment import PayForOrderView, FinishS3DView, \
     CloudPaymentsTransactionView
-from .views import OrderListCreateView, CancelOrderView, CompleteOrderView
 
 urlpatterns = [
     url(r'^$', OrderListCreateView.as_view(),

@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
-from src.apps.core.exceptions import ApplicationError
 from src.apps.masters.models import Master, TimeSlot
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
 
@@ -10,10 +9,11 @@ from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
 class OrderItemListSerializer(serializers.BaseSerializer):
     def to_representation(self, obj: OrderItem):
         request = self.context.get('request', None)
-        if not request:
-            raise ApplicationError(
-                'A serializer was not provided with a request. '
-                'That\'s unexpected')
+
+        avatar_url = obj.master.avatar.url
+        if request:
+            avatar_url = request.build_absolute_uri(avatar_url)
+
         return {
             'service': {
                 'category': {
@@ -24,23 +24,19 @@ class OrderItemListSerializer(serializers.BaseSerializer):
             },
             'master': {
                 'first_name': obj.master.first_name,
-                'avatar': request.build_absolute_uri(obj.master.avatar.url)
+                'avatar': avatar_url
             }
         }
 
 
 # out
 class OrderListSerializer(serializers.Serializer):
-    date = serializers.DateField()
-    time = serializers.TimeField()
-    order_items = OrderItemListSerializer(many=True)
-    special = serializers.DictField()
-    payment_type = serializers.CharField()
-    status = serializers.CharField()
-
-    class Meta:
-        read_only_fields = ('date', 'time', 'order_items', 'special',
-                            'payment_type', 'status')
+    date = serializers.DateField(read_only=True)
+    time = serializers.TimeField(read_only=True)
+    order_items = OrderItemListSerializer(many=True, read_only=True)
+    special = serializers.DictField(read_only=True)
+    payment_type = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
 
 
 class OrderItemCreateSerializer(serializers.Serializer):

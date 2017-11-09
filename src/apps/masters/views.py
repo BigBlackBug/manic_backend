@@ -1,10 +1,11 @@
 from rest_framework import generics, permissions
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.exceptions import NoContentError
-from src.apps.core.permissions import IsClient
+from src.apps.core.permissions import IsClient, IsMaster
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master

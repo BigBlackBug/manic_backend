@@ -1,18 +1,19 @@
 from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.apps.core.permissions import IsClient, IsMaster
-from src.apps.orders import cloudpayments
-from .models import Order, OrderStatus, PaymentType
+from src.apps.core.permissions import IsClient, IsMaster, HasAccount
+from src.apps.orders import cloudpayments, order_utils
+from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
     view_name = 'order-list-create'
     queryset = Order.objects.all()
-    permission_classes = (IsAuthenticated, IsClient)
+    permission_classes = (IsAuthenticated, HasAccount)
 
     def post(self, request: Request, *args, **kwargs):
         """
@@ -61,11 +62,10 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
         400 Bad Request
         """
+        # only clients may create orders
+        if not request.user.is_client():
+            raise PermissionDenied(detail=IsClient.message)
         return super().post(request, *args, **kwargs)
-
-    def filter_queryset(self, queryset):
-        return queryset.filter(client=self.request.user.client) \
-            .order_by('-date')
 
     def get_serializer_class(self):
         if not self.request:
@@ -76,37 +76,59 @@ class OrderListCreateView(generics.ListCreateAPIView):
             return OrderCreateSerializer
         return OrderListSerializer
 
+    def get_queryset(self):
+        if self.request.user.is_master():
+            order_items = OrderItem.objects.filter(
+                master=self.request.user.master).select_related(
+                'order').order_by('-order__date').all()
+            orders = []
+            for item in order_items:
+                orders.append(item.order)
+            return orders
+        else:
+            return Order.objects.filter(client=self.request.user.client) \
+                .order_by('-date').all()
+
     def get(self, request, *args, **kwargs):
         """
-        Returns a list of orders of the current client, ordered by date
+        Returns a list of active and past orders
+        of the current client or master ordered by date
 
         Response:
 
         200 OK
         ```
-        [{
-          'date': '2017-10-18',
-          'payment_type':'CASH',
-          'time': '11:00',
-          'status': 'CREATED/ACCEPTED/DONE',
-          'special': {},
-          'order_items': [{
-            'service': {
-              'name': 'super service',
-              'cost': 100,
-              'category':{
-                'name': 'super category'
-              }
-            },
-            'master': {
-                'first_name': 'Vasya',
-                'avatar': 'url-to-avatar'
-            }]
-        }]
+        {
+          'active': [{
+            'date': '2017-10-18',
+            'payment_type':'CASH',
+            'time': '11:00',
+            'status': 'CREATED/ACCEPTED',
+            'special': {},
+            'order_items': [{
+              'service': {
+                  'name': 'super service',
+                  'cost': 100,
+                  'category':{
+                  'name': 'super category'
+                }
+              },
+              'master': {
+                  'first_name': 'Vasya',
+                  'avatar': 'url-to-avatar'
+              }]
+          }],
+          'history':[{...'status':'DONE'...}]
         ```
 
         """
-        return super().get(request, *args, **kwargs)
+
+        active, history = order_utils.split_orders(self.get_queryset())
+
+        return Response({
+            'active': self.get_serializer(active, many=True).data,
+            'history': self.get_serializer(history, many=True).data,
+        })
 
 
 class CancelOrderView(generics.DestroyAPIView):

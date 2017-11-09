@@ -11,7 +11,7 @@ from src.apps.clients.models import Address, Client
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot
 from src.apps.masters.receivers import *
-from src.apps.orders.models import Order, OrderItem
+from src.apps.orders.models import Order, OrderItem, OrderStatus
 
 
 def make_category(category_name):
@@ -134,9 +134,9 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, time):
+def make_order(client, service, master, time, status=OrderStatus.CREATED):
     order = Order.objects.create(client=client, date=timezone.now().date(),
-                                 time=time)
+                                 time=time, status=status)
     schedule = master.get_schedule(timezone.now().date())
     slot = schedule.get_slot(time)
 
