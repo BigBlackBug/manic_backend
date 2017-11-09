@@ -68,7 +68,7 @@ def split(masters: Iterable[Master], target_client: Client):
     favorites = []
     for master in masters:
         # TODO cache
-        if master.times_served(target_client) > 0:
+        if target_client and master.times_served(target_client) > 0:
             favorites.append(master)
         else:
             regular.append(master)

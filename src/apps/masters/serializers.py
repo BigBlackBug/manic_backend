@@ -84,5 +84,5 @@ class SimpleMasterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Master
-        fields = ('id', 'first_name', 'avatar', 'services',
+        fields = ('id', 'about', 'first_name', 'avatar', 'services',
                   'location', 'distance', 'available_slots')

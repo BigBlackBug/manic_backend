@@ -20,6 +20,8 @@ class Master(UserProfile):
 
     rating = models.FloatField(default=0.0)
 
+    about = models.TextField(max_length=512, blank=True)
+
     # FK fields
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
@@ -84,7 +86,7 @@ class TimeSlot(models.Model):
         return self.time.value
 
     def __str__(self):
-        taken = 'taken' if self.taken else 'avaiable'
+        taken = 'taken' if self.taken else 'available'
         return f'{self.time} {taken}. Item ID:{self.order_item.id}'
 
 

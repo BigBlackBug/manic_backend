@@ -52,6 +52,7 @@ class MasterListView(generics.ListAPIView):
         {
           'id':100500,
           'first_name':'Maria'
+          'about': 'I am super cool',
           'avatar':'url-to-avatar',
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
@@ -65,7 +66,9 @@ class MasterListView(generics.ListAPIView):
         """
         params = FilteringParams(request)
         masters, slots = master_utils.search(params, FilteringFunctions.search)
-        favorites, others = master_utils.split(masters, request.user.client)
+        favorites, others = master_utils.split(masters,
+                                               request.user.is_client() and
+                                               request.user.client)
 
         return Response(data={
             'favorites': master_utils.sort_and_serialize_masters(
@@ -187,6 +190,7 @@ class MasterDetailView(generics.RetrieveAPIView):
         {
           'id':100500,
           'first_name':'Maria'
+          'about': 'I am super cool',
           'avatar':'url-to-avatar',
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},

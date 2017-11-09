@@ -14,13 +14,14 @@ from src.apps.masters.receivers import *
 
 
 # TODO unify this and data creation for tests
-def make_master(name, lon):
+def make_master(name, lon, about='awesome master!'):
     user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
     master = Master.objects.create(user=user, first_name=name,
                                    avatar=utils.make_in_memory_image(
                                        'supername'),
                                    gender=Gender.MALE,
                                    date_of_birth=timezone.now(),
+                                   about=about,
                                    location=Location.objects.create(lat=10,
                                                                     lon=lon))
     return master
@@ -43,7 +44,7 @@ def make_display_item(*categories, name=None, special=None):
 
 def make_everything():
     # making an auth token
-    vasya = make_master("VASYA", 11.0)
+    vasya = make_master("VASYA", 11.0, about='a terrible master')
     petya = make_master("PETYA", 12.0)
 
     hands = make_category("Маникюр")

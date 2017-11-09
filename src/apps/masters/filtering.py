@@ -147,8 +147,7 @@ class FilteringParams:
     @staticmethod
     def _parse_client(request):
         if not request.user.is_client():
-            # TODO proper exception
-            raise ValueError('not a client')
+            return None
 
         return request.user.client
 
