@@ -35,9 +35,12 @@ class OrderListSerializer(serializers.Serializer):
     time = serializers.TimeField()
     order_items = OrderItemListSerializer(many=True)
     special = serializers.DictField()
+    payment_type = serializers.CharField()
+    status = serializers.CharField()
 
     class Meta:
-        read_only_fields = ('date', 'time', 'order_items', 'special')
+        read_only_fields = ('date', 'time', 'order_items', 'special',
+                            'payment_type', 'status')
 
 
 class OrderItemCreateSerializer(serializers.Serializer):

@@ -1,5 +1,6 @@
 import datetime
 
+from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
@@ -10,7 +11,7 @@ from src.apps.masters.test import make_everything, make_client, make_order
 from src.apps.orders.views import OrderListCreateView
 
 
-class ListOrderTestCse(APITestCase):
+class ListOrderTestCase(APITestCase):
     def setUp(self):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
@@ -32,7 +33,7 @@ class ListOrderTestCse(APITestCase):
                                 time=datetime.time(hour=12, minute=00))
 
         resp = self.client.get(reverse(OrderListCreateView.view_name))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
         # two orders
         # TODO test serializers
         self.assertEqual(len(resp.data), 2)
