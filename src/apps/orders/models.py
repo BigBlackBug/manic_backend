@@ -16,7 +16,8 @@ class OrderStatus:
     CHOICES = (
         (CREATED, 'Создан'),
         (ACCEPTED, 'Принят Мастером'),
-        (DONE, 'Завершён')
+        (STARTED, 'Начат'),
+        (DONE, 'Завершён'),
     )
 
 
