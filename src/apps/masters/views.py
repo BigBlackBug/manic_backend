@@ -1,15 +1,21 @@
-from rest_framework import generics, permissions
-from rest_framework.exceptions import ValidationError, PermissionDenied
+import logging
+
+from rest_framework import generics, permissions, parsers, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.exceptions import NoContentError
-from src.apps.core.permissions import IsClient, IsMaster
+from src.apps.core.permissions import IsClient
+from src.apps.core.serializers import DescriptionImageSerializer
+from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
-from .models import Master
+from .models import Master, PortfolioImage
 from .serializers import MasterSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class MasterListView(generics.ListAPIView):
@@ -216,3 +222,42 @@ class MasterDetailView(generics.RetrieveAPIView):
         ```
         """
         return super().get(request, *args, **kwargs)
+
+
+class AddPortfolioItemsView(generics.GenericAPIView):
+    view_name = 'add-portfolio-item'
+
+    parser_classes = (parsers.MultiPartParser,)
+    permission_classes = (IsAuthenticated, IsMasterIDCorrect)
+
+    def patch(self, request, **kwargs):
+        """
+        Adds a portfolio item to a master
+
+        Input:
+
+        multi-part form data where `image` field contains the image
+        and `description` contains description
+
+        Response:
+        201 Created
+
+        400 Bad Request
+        """
+        master = request.user.master
+        logger.info(f'Updating an avatar for'
+                    f'client {master.first_name}, '
+                    f'id={master.id}')
+
+        serializer = DescriptionImageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        image = serializer.validated_data['image']
+        description = serializer.validated_data['description']
+
+        PortfolioImage.objects.create(master=master,
+                                      image=image,
+                                      description=description)
+        master.save()
+
+        return Response(status=status.HTTP_201_CREATED)

@@ -55,8 +55,25 @@ class Master(UserProfile):
                        self.order_items.all()))
 
 
+class PortfolioOrderStatus:
+    ON_MODERATION = 'ON_MODERATION'
+    ACCEPTED = 'ACCEPTED'
+    CHOICES = (
+        (ON_MODERATION, 'На модерации'),
+        (ACCEPTED, 'Принято'),
+    )
+
+
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
+    description = models.CharField(max_length=1024)
+
+    # status should be manually set by the administrator
+    status = models.CharField(
+        max_length=13,
+        choices=PortfolioOrderStatus.CHOICES,
+        default=PortfolioOrderStatus.ON_MODERATION,
+    )
     master = models.ForeignKey(Master, related_name='portfolio',
                                on_delete=models.CASCADE)
 
