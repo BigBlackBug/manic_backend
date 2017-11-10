@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token
 from src.apps.core import utils
-from src.apps.masters.models import Master
+from src.apps.masters.models import Master, PortfolioOrderStatus
 from src.apps.masters.test import make_master, make_client
 from src.apps.masters.views import AddPortfolioItemsView
 
@@ -22,14 +22,16 @@ class UploadTestCase(APITestCase):
         resp = self.client.patch(reverse(AddPortfolioItemsView.view_name,
                                          args=[self.master_object.id]),
                                  data={
-                                        'image': utils.make_in_memory_image(
+                                     'image': utils.make_in_memory_image(
                                          'avatar'),
-                                        'description': '1'
+                                     'description': '1'
                                  })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         updated_master = Master.objects.get(pk=self.master_object.id)
         self.assertIsNotNone(updated_master.portfolio)
         self.assertEqual(len(updated_master.portfolio.all()), 1)
+        self.assertEqual(updated_master.portfolio.first().status,
+                         PortfolioOrderStatus.ON_MODERATION)
 
     def test_upload_wrong_master(self):
         resp = self.client.patch(reverse(AddPortfolioItemsView.view_name,
@@ -53,5 +55,5 @@ class UploadTestCase(APITestCase):
         resp = self.client.patch(reverse(AddPortfolioItemsView.view_name,
                                          args=[self.master_object.id]),
                                  data={'image': utils.make_in_memory_image(
-                                     'avatar'), 'description':'12'})
+                                     'avatar'), 'description': '12'})
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
