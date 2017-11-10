@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -172,4 +173,29 @@ class CompleteOrderView(generics.GenericAPIView):
         if order.payment_type == PaymentType.CARD:
             cloudpayments.confirm(order)
         order.status = OrderStatus.DONE
+
+        order.time_taken = timezone.now() - order.time_started
+        order.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class StartOrderView(generics.GenericAPIView):
+    view_name = 'start-order'
+    queryset = Order.objects.all()
+    permission_classes = (IsAuthenticated, IsMaster)
+    # TODO needed by swagger
+    serializer_class = OrderListSerializer
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Marks an order as started.
+
+        Response:
+
+        204 No Content
+        """
+        order = self.get_object()
+        order.status = OrderStatus.STARTED
+        order.time_started = timezone.now()
+        order.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

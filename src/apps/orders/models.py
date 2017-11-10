@@ -11,6 +11,7 @@ from src.apps.masters.models import Master
 class OrderStatus:
     CREATED = 'CREATED'
     ACCEPTED = 'ACCEPTED'
+    STARTED = 'STARTED'
     DONE = 'DONE'
     CHOICES = (
         (CREATED, 'Создан'),
@@ -86,6 +87,9 @@ class Order(models.Model):
         choices=OrderStatus.CHOICES,
         default=OrderStatus.CREATED,
     )
+
+    time_started = models.DateTimeField(null=True)
+    time_taken = models.DurationField(null=True)
 
     # TODO create property on save
     @property
