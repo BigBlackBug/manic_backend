@@ -202,7 +202,12 @@ class MasterDetailView(generics.RetrieveAPIView):
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
           'schedule':[{schedule model}]
-          'portfolio':['url-to-image',...]
+          'portfolio':[{
+            'id': 100,
+            'url': 'image-url',
+            'description': 'did this in 10 minutes, yo',
+            'status': 'ON_MODERATION/ACCEPTED',
+          },...]
           'rating':4.3,
           'gender':'F'
           'date_of_birth':'1980-10-20'

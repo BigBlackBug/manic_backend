@@ -41,8 +41,13 @@ class MasterSerializer(serializers.ModelSerializer):
             url = instance.image.url
             request = self.context.get('request', None)
             if request is not None:
-                return request.build_absolute_uri(url)
-            return url
+                url = request.build_absolute_uri(url)
+            return {
+                'id': instance.id,
+                'url': url,
+                'description': instance.description,
+                'status': instance.status,
+            }
 
     location = LocationSerializer(read_only=True)
     services = ServiceSerializer(many=True, read_only=True)
@@ -121,7 +126,7 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
 
     def validate_date(self, date_value):
         if date_value > (timezone.now() +
-                                    datetime.timedelta(days=14)).date():
+                             datetime.timedelta(days=14)).date():
             raise ValidationError(detail='You may not create schedules '
                                          'that are more than two weeks '
                                          'away from today')
