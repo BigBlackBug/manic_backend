@@ -33,6 +33,22 @@ class UploadTestCase(APITestCase):
         self.assertEqual(updated_master.portfolio.first().status,
                          PortfolioOrderStatus.ON_MODERATION)
 
+    def test_upload_no_description(self):
+        self.assertEqual(len(self.master_object.portfolio.all()), 0)
+        resp = self.client.patch(reverse(AddPortfolioItemsView.view_name,
+                                         args=[self.master_object.id]),
+                                 data={
+                                     'image': utils.make_in_memory_image(
+                                         'avatar'),
+                                 })
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        updated_master = Master.objects.get(pk=self.master_object.id)
+        self.assertIsNotNone(updated_master.portfolio)
+        self.assertEqual(len(updated_master.portfolio.all()), 1)
+        self.assertEqual(updated_master.portfolio.first().status,
+                         PortfolioOrderStatus.ON_MODERATION)
+        self.assertEqual(updated_master.portfolio.first().description, '')
+
     def test_upload_wrong_master(self):
         resp = self.client.patch(reverse(AddPortfolioItemsView.view_name,
                                          args=[100]),

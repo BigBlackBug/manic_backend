@@ -72,7 +72,8 @@ class CreateScheduleTestCase(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
         schedules = master.schedule.all()
-        self.assertEqual(len(schedules), 1)
+
+        self.assertEqual(len(schedules), 2)
         schedule = schedules[0]
         self.assertEqual(schedule.date,
                          datetime.strptime('2017-11-20', '%Y-%m-%d').date())

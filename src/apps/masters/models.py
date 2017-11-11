@@ -66,7 +66,7 @@ class PortfolioOrderStatus:
 
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
-    description = models.CharField(max_length=1024)
+    description = models.CharField(max_length=1024, blank=True)
 
     # status should be manually set by the administrator
     status = models.CharField(

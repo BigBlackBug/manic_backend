@@ -226,7 +226,7 @@ class MasterDetailView(generics.RetrieveAPIView):
 
 class AddPortfolioItemsView(generics.GenericAPIView):
     view_name = 'add-portfolio-item'
-
+    serializer_class = DescriptionImageSerializer
     parser_classes = (parsers.MultiPartParser,)
     permission_classes = (IsAuthenticated, IsMasterIDCorrect)
 
@@ -237,7 +237,7 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         Input:
 
         multi-part form data where `image` field contains the image
-        and `description` contains description
+        and `description` contains description. Description is optional
 
         Response:
         201 Created
@@ -253,7 +253,7 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         image = serializer.validated_data['image']
-        description = serializer.validated_data['description']
+        description = serializer.validated_data.get('description', '')
 
         PortfolioImage.objects.create(master=master,
                                       image=image,
