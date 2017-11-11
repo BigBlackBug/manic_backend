@@ -62,21 +62,20 @@ class CreateScheduleTestCase(APITestCase):
                                 taken=False,
                                 schedule=schedule),
 
+        target_date = get_default_date_range(3)[1]
+
         resp = self.client.post(
             reverse(CreateScheduleView.view_name, args=[self.master_object.id]),
             data={
-                'date': get_default_date_range(3)[1].strftime(
-                    '%Y-%m-%d'),
+                'date': target_date.strftime('%Y-%m-%d'),
                 'time_slots': '10:30,11:00,11:30'
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
-        schedules = master.schedule.all()
 
-        self.assertEqual(len(schedules), 2)
-        schedule = schedules[0]
-        self.assertEqual(schedule.date,
-                         datetime.strptime('2017-11-20', '%Y-%m-%d').date())
+        self.assertEqual(len(master.schedule.all()), 2)
+
+        schedule = master.schedule.get(date=target_date)
 
         result_times = ['10:30', '11:00', '11:30']
         self.assertEqual(len(schedule.time_slots.all()), len(result_times))
