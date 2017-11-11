@@ -1,7 +1,8 @@
+import datetime
 import logging
 
-from rest_framework import generics, permissions, parsers, status
-from rest_framework.exceptions import ValidationError
+from rest_framework import generics, permissions, parsers, status, mixins
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,10 +10,11 @@ from rest_framework.response import Response
 from src.apps.core.exceptions import NoContentError
 from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.core.serializers import DescriptionImageSerializer
+from src.apps.masters import time_slot_utils
 from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
-from .models import Master, PortfolioImage
+from .models import Master, PortfolioImage, Schedule
 from .serializers import MasterSerializer, CreateScheduleSerializer
 
 logger = logging.getLogger(__name__)
@@ -288,8 +290,10 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-class CreateScheduleView(generics.CreateAPIView):
-    view_name = 'create-schedule'
+class CreateDeleteScheduleView(mixins.DestroyModelMixin,
+                               mixins.CreateModelMixin,
+                               generics.GenericAPIView):
+    view_name = 'create-delete-schedule'
     serializer_class = CreateScheduleSerializer
     queryset = Master.objects.all()
     permission_classes = (IsAuthenticated, IsMasterIDCorrect)
@@ -310,4 +314,39 @@ class CreateScheduleView(generics.CreateAPIView):
         Response:
         200 OK
         """
-        return super().post(request, *args, **kwargs)
+        return super().create(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Deletes time slots of schedule at `date`
+
+        ```
+        [{
+          'date': '2017-10-10',
+          'time_slots': '10:00-13:30,15:00,17:00-19:00'
+        }]
+        ```
+        Response:
+        200 OK
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        date = serializer.validated_data['date']
+        slot_string = serializer.validated_data['time_slots']
+
+        time_tuples = time_slot_utils.parse_time_slots(slot_string,
+                                                       include_last=True)
+
+        try:
+            schedule = request.user.master.schedule.get(date=date)
+        except Schedule.DoesNotExist:
+            raise NotFound(detail=f'Schedule at {date} was not found')
+        else:
+            for time_tuple in time_tuples:
+                schedule.delete_slot(datetime.
+                                     time(hour=time_tuple.hour,
+                                          minute=time_tuple.minute))
+            if len(schedule.time_slots.all()) == 0:
+                schedule.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

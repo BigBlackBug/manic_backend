@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
+import time
 
 from django.db import models
 
 from src.apps.authentication.models import UserProfile
 from src.apps.categories.models import Service
 from src.apps.clients.models import Client
+from src.apps.core.exceptions import ApplicationError
 from src.apps.core.models import Location
 from src.apps.core.utils import Folders
 
@@ -126,11 +128,32 @@ class Schedule(models.Model):
     def __str__(self):
         return f'schedule for date {self.date}'
 
-    def get_slot(self, time: datetime.time):
+    def get_slot(self, _time):
+        if isinstance(_time, str):
+            _time = time.strptime(_time, '%H:%M')
+            _time = datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
+
         try:
-            return self.time_slots.get(time__value=time)
+            return self.time_slots.get(time__value=_time)
         except TimeSlot.DoesNotExist:
             return None
+
+    def delete_slot(self, time):
+        """
+        Deletes the time slot at specified `time` or raises ApplicationError
+        if the slot is taken. Does nothing if the slot does not exist.
+
+        :param time: str or time instance
+        :return:
+        """
+        slot = self.get_slot(time)
+        if slot:
+            if not slot.taken:
+                slot.delete()
+            else:
+                raise ApplicationError(
+                    f'Slot at time {slot.time} can not be deleted '
+                    f'because there is an order at that time')
 
     def assign_time(self, time: datetime.time, number_of_slots: int,
                     order_item=None):

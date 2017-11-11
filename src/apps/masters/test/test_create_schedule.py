@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.utils import timezone
 from rest_framework import status
@@ -9,7 +9,7 @@ from src.apps.authentication.models import Token
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
 from src.apps.masters.test import make_master
 from src.apps.masters.utils import get_default_date_range
-from src.apps.masters.views import CreateScheduleView
+from src.apps.masters.views import CreateDeleteScheduleView
 
 
 class CreateScheduleTestCase(APITestCase):
@@ -24,7 +24,8 @@ class CreateScheduleTestCase(APITestCase):
     def test_create_new_schedule(self):
         master = Master.objects.get(first_name='VASYA')
         resp = self.client.post(
-            reverse(CreateScheduleView.view_name, args=[master.id]), data={
+            reverse(CreateDeleteScheduleView.view_name, args=[master.id]),
+            data={
                 'date': '2017-11-20',
                 'time_slots': '13:00, 13:00-15:00'
             }, format='json')
@@ -45,7 +46,8 @@ class CreateScheduleTestCase(APITestCase):
     def test_fail_create_future_date(self):
         master = Master.objects.get(first_name='VASYA')
         resp = self.client.post(
-            reverse(CreateScheduleView.view_name, args=[master.id]), data={
+            reverse(CreateDeleteScheduleView.view_name, args=[master.id]),
+            data={
                 'date': get_default_date_range(15)[1].strftime(
                     '%Y-%m-%d'),
                 'time_slots': '13:00, 13:00-15:00'
@@ -65,7 +67,8 @@ class CreateScheduleTestCase(APITestCase):
         target_date = get_default_date_range(3)[1]
 
         resp = self.client.post(
-            reverse(CreateScheduleView.view_name, args=[self.master_object.id]),
+            reverse(CreateDeleteScheduleView.view_name,
+                    args=[self.master_object.id]),
             data={
                 'date': target_date.strftime('%Y-%m-%d'),
                 'time_slots': '10:30,11:00,11:30'

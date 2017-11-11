@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from .views import MasterListView, MasterDetailView, \
     MasterSearchView, MasterBestMatchView, AddPortfolioItemsView, \
-    CreateScheduleView, MeMasterView
+    CreateDeleteScheduleView, MeMasterView
 
 urlpatterns = [
     url(r'^$', MasterListView.as_view(), name=MasterListView.view_name),
@@ -15,6 +15,6 @@ urlpatterns = [
         name=MasterDetailView.view_name),
     url(r'^(?P<pk>[0-9]+)/portfolio', AddPortfolioItemsView.as_view(),
         name=AddPortfolioItemsView.view_name),
-    url(r'^(?P<pk>[0-9]+)/schedule', CreateScheduleView.as_view(),
-        name=CreateScheduleView.view_name),
+    url(r'^(?P<pk>[0-9]+)/schedule', CreateDeleteScheduleView.as_view(),
+        name=CreateDeleteScheduleView.view_name),
 ]
