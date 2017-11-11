@@ -7,7 +7,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.exceptions import NoContentError
-from src.apps.core.permissions import IsClient
+from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.core.serializers import DescriptionImageSerializer
 from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
@@ -225,6 +225,26 @@ class MasterDetailView(generics.RetrieveAPIView):
           }]
         }
         ```
+        """
+        return super().get(request, *args, **kwargs)
+
+
+class MeMasterView(generics.RetrieveAPIView):
+    view_name = 'me-master'
+    permission_classes = (IsAuthenticated, IsMaster)
+    serializer_class = MasterSerializer
+
+    def get_object(self):
+        return self.request.user.master
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a representation of current logged-in master.
+
+        Response:
+        200 OK
+
+        See **/masters/<id>** endpoint for output json format
         """
         return super().get(request, *args, **kwargs)
 
