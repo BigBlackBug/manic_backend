@@ -86,12 +86,16 @@ class Time(models.Model):
     value = models.TimeField(blank=True, null=True, editable=False)
 
     def __str__(self):
-        return '{}:{}'.format(self.hour, self.minute)
+        minute = self.minute
+
+        if minute == 0:
+            minute = '00'
+        return f'{self.hour}:{minute}'
 
 
 class TimeSlot(models.Model):
     DURATION = 30
-
+    # TODO unique schedule+time
     time = models.ForeignKey(Time, on_delete=models.CASCADE, related_name='+')
     taken = models.BooleanField(default=False)
     schedule = models.ForeignKey('Schedule', related_name='time_slots')

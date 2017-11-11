@@ -13,7 +13,7 @@ from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master, PortfolioImage
-from .serializers import MasterSerializer
+from .serializers import MasterSerializer, CreateScheduleSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -261,3 +261,28 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         master.save()
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+class CreateScheduleView(generics.CreateAPIView):
+    view_name = 'create-schedule'
+    serializer_class = CreateScheduleSerializer
+    queryset = Master.objects.all()
+    permission_classes = (IsAuthenticated, IsMasterIDCorrect)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Creates or updates a schedule at the specified date.
+
+        Parses the `time_slots` string and creates all new empty
+        TimeSlots for the schedule at `date`
+
+        ```
+        [{
+          'date': '2017-10-10',
+          'time_slots': '10:00-13:30,15:00,17:00-19:00'
+        }]
+        ```
+        Response:
+        200 OK
+        """
+        return super().post(request, *args, **kwargs)
