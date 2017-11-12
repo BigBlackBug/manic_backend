@@ -8,9 +8,14 @@ class ImageSerializer(serializers.Serializer):
 
 
 class DescriptionImageSerializer(serializers.Serializer):
-    image = serializers.ImageField(required=True, write_only=True)
+    image_id = serializers.IntegerField(required=True, write_only=True)
     description = serializers.CharField(max_length=1024, required=False,
                                         write_only=True)
+
+
+class ImageListSerializer(serializers.Serializer):
+    images = serializers.ListField(child=serializers.ImageField(
+        required=True, allow_empty_file=False), required=True)
 
 
 class LocationSerializer(serializers.ModelSerializer):

@@ -9,7 +9,8 @@ from rest_framework.response import Response
 
 from src.apps.core.exceptions import NoContentError
 from src.apps.core.permissions import IsClient, IsMaster
-from src.apps.core.serializers import DescriptionImageSerializer
+from src.apps.core.serializers import ImageListSerializer, \
+    DescriptionImageSerializer
 from src.apps.masters import time_slot_utils
 from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
@@ -252,42 +253,79 @@ class MeMasterView(generics.RetrieveAPIView):
 
 
 class AddPortfolioItemsView(generics.GenericAPIView):
-    view_name = 'add-portfolio-item'
-    serializer_class = DescriptionImageSerializer
+    view_name = 'add-portfolio-items'
+    serializer_class = ImageListSerializer
     parser_classes = (parsers.MultiPartParser,)
     permission_classes = (IsAuthenticated, IsMasterIDCorrect)
 
-    def patch(self, request, **kwargs):
+    def post(self, request, **kwargs):
         """
         Adds a portfolio item to a master
 
         Input:
 
-        multi-part form data where `image` field contains the image
-        and `description` contains description. Description is optional
+        multi-part form data where `images` field contains a list of images
 
         Response:
         201 Created
+        ```
+        {'image-file-name':'portfolio-id',...}
+        ```
 
         400 Bad Request
         """
         master = request.user.master
-        logger.info(f'Updating an avatar for'
-                    f'client {master.first_name}, '
+        logger.info(f'Adding portfolio images for'
+                    f'master {master.first_name}, '
                     f'id={master.id}')
 
-        serializer = DescriptionImageSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        image = serializer.validated_data['image']
-        description = serializer.validated_data.get('description', '')
-
-        PortfolioImage.objects.create(master=master,
-                                      image=image,
-                                      description=description)
+        images = serializer.validated_data['images']
+        ids = {}
+        for image in images:
+            portfolio_image = PortfolioImage.objects.create(master=master,
+                                                            image=image)
+            ids[image.name] = portfolio_image.id
         master.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data=ids)
+
+
+class AddPortfolioItemDescriptionView(generics.GenericAPIView):
+    view_name = 'add-portfolio-item-description'
+    serializer_class = DescriptionImageSerializer
+    permission_classes = (IsAuthenticated, IsMasterIDCorrect)
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Sets a description for a portfolio image
+
+        Input:
+
+        ```
+        [{
+          'image_id': 100500,
+          'description': 'hey, look!'
+        }]
+        ```
+
+        Response:
+        200 OK
+
+        400 Bad Request
+        """
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+        for item in data:
+            image = PortfolioImage.objects.get(pk=item['image_id'])
+            image.description = item['description']
+            image.save()
+
+        return Response(status=status.HTTP_200_OK)
 
 
 class CreateDeleteScheduleView(mixins.DestroyModelMixin,
