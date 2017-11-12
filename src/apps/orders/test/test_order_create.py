@@ -105,14 +105,6 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(order.date, timezone.now().date())
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 2)
-        order_item = order.order_items.all()[0]
-        order_item_1 = order.order_items.all()[1]
-
-        # assert order_items are created
-        self.assertEqual(order_item.master, master)
-        self.assertEqual(order_item.service, services[0])
-        self.assertEqual(order_item_1.master, master)
-        self.assertEqual(order_item_1.service, services[1])
 
     def test_create_order__composite_4hands(self):
         vasya = Master.objects.get(first_name='VASYA')
