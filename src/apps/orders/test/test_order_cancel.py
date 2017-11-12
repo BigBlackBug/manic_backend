@@ -1,5 +1,7 @@
 import datetime
 
+from django.utils import timezone
+from freezegun import freeze_time
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
@@ -7,12 +9,93 @@ from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_everything, make_client, make_order
+from src.apps.masters.test import make_everything, make_client, \
+    make_order_services, make_order
 from src.apps.orders.models import Order
 from src.apps.orders.views import CancelOrderView
 
 
-class CancelOrderTestCase(APITestCase):
+class MasterCancelOrderTestCase(APITestCase):
+    def setUp(self):
+        make_everything()
+        self.user = PhoneAuthUser.objects.create(phone='777')
+        self.client_object = make_client(self.user)
+        self.master_object = Master.objects.get(first_name='VASYA')
+
+        token, _ = Token.objects.get_or_create(user=self.master_object.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+    def test_cancel_order_many_services_one_master(self):
+        services = self.master_object.services.all()
+        # manually creating an order
+
+        order_1 = make_order_services(client=self.client_object,
+                                      master=self.master_object,
+                                      services=services,
+                                      order_date=timezone.now(),
+                                      order_time=datetime.time(hour=11,
+                                                               minute=00))
+
+        frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
+        frozen.start()
+        resp = self.client.delete(
+            reverse(CancelOrderView.view_name, args=[order_1.id]))
+        frozen.stop()
+
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # two orders canceled -> order is deleted
+        with self.assertRaises(Order.DoesNotExist):
+            Order.objects.get(pk=order_1.id)
+
+    def test_cancel_order_many_services_two_masters(self):
+        # TODO test
+        pass
+
+    def test_cancel_order_too_late(self):
+        services = self.master_object.services.all()
+        # manually creating an order
+
+        order_1 = make_order_services(client=self.client_object,
+                                      master=self.master_object,
+                                      services=services,
+                                      order_date=timezone.now(),
+                                      order_time=datetime.time(hour=11,
+                                                               minute=00))
+
+        frozen = freeze_time(timezone.now().replace(hour=9, minute=0))
+        frozen.start()
+        resp = self.client.delete(
+            reverse(CancelOrderView.view_name, args=[order_1.id]))
+        frozen.stop()
+
+        # too late
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_cancel_order_locked(self):
+        services = self.master_object.services.all()
+        # manually creating an order
+
+        order_1 = make_order_services(client=self.client_object,
+                                      master=self.master_object,
+                                      services=services,
+                                      order_date=timezone.now(),
+                                      order_time=datetime.time(hour=11,
+                                                               minute=00),
+                                      locked=True)
+
+        frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
+        frozen.start()
+        resp = self.client.delete(
+            reverse(CancelOrderView.view_name, args=[order_1.id]))
+        frozen.stop()
+
+        # too late
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ClientCancelOrderTestCase(APITestCase):
     def setUp(self):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
@@ -35,3 +118,22 @@ class CancelOrderTestCase(APITestCase):
         # two orders
         with self.assertRaises(Order.DoesNotExist):
             Order.objects.get(pk=order_1.id)
+
+    def test_cancel_someone_elses_order(self):
+        master = Master.objects.get(first_name='VASYA')
+
+        service = master.services.all()[0]
+        # manually creating an order
+        order_1, _ = make_order(client=self.client_object, master=master,
+                                service=service,
+                                time=datetime.time(hour=11, minute=00))
+
+        new_client = make_client()
+        token, _ = Token.objects.get_or_create(user=new_client.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+        resp = self.client.delete(
+            reverse(CancelOrderView.view_name, args=[order_1.id]))
+
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)

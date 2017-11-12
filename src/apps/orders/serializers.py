@@ -6,6 +6,7 @@ from src.apps.masters.models import Master, TimeSlot
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
 
 
+# out
 class OrderItemListSerializer(serializers.BaseSerializer):
     def to_representation(self, obj: OrderItem):
         request = self.context.get('request', None)
@@ -25,8 +26,18 @@ class OrderItemListSerializer(serializers.BaseSerializer):
             'master': {
                 'first_name': obj.master.first_name,
                 'avatar': avatar_url
-            }
+            },
+            'locked': obj.locked
         }
+
+
+# in
+class OrderItemCreateSerializer(serializers.Serializer):
+    master_id = serializers.IntegerField(min_value=0)
+    service_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=0)
+    )
+    locked = serializers.BooleanField(required=True)
 
 
 # out
@@ -37,13 +48,6 @@ class OrderListSerializer(serializers.Serializer):
     special = serializers.DictField(read_only=True)
     payment_type = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
-
-
-class OrderItemCreateSerializer(serializers.Serializer):
-    master_id = serializers.IntegerField(min_value=0)
-    service_ids = serializers.ListField(
-        child=serializers.IntegerField(min_value=0)
-    )
 
 
 # in
@@ -74,7 +78,8 @@ class OrderCreateSerializer(serializers.Serializer):
             for service in services:
                 order_item = OrderItem.objects.create(order=order,
                                                       master=master,
-                                                      service=service)
+                                                      service=service,
+                                                      locked=item['locked'])
                 next_time = schedule.assign_time(
                     next_time or validated_data['time'],
                     int(service.max_duration / TimeSlot.DURATION),

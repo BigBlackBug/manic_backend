@@ -9,9 +9,8 @@ from rest_framework.test import APIClient
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.authentication.utils import Gender
 from src.apps.categories.models import ServiceCategory
-from src.apps.clients.models import Client, Address
+from src.apps.clients.models import Client
 from src.apps.core import utils
-from src.apps.core.models import Location
 from src.apps.masters.models import Master, TimeSlot, Time, Schedule
 from src.apps.masters.test import make_everything, make_master
 from src.apps.orders.models import Order
@@ -42,6 +41,7 @@ class OrderCreateTestCase(TestCase):
             'payment_type': 'CASH',
             'time': '11:00',
             'order_items': [{
+                'locked': False,
                 'master_id': master.id,
                 'service_ids': [service.id]
             }, ]
@@ -83,6 +83,7 @@ class OrderCreateTestCase(TestCase):
             'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
+                'locked': False,
                 'master_id': master.id,
                 'service_ids': [service.id for service in services]
             }, ]
@@ -139,9 +140,11 @@ class OrderCreateTestCase(TestCase):
             'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
+                'locked': False,
                 'master_id': vasya.id,
                 'service_ids': [vasya.services.first().id]
             }, {
+                'locked': False,
                 'master_id': sanya.id,
                 'service_ids': [sanya.services.first().id]
             }],

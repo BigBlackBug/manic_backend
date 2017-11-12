@@ -45,7 +45,8 @@ class GmapsTestCase(APITestCase):
         slot.order_item = OrderItem.objects.create(
             service=self.vasya.services.first(),
             master=self.vasya,
-            order=order)
+            order=order,
+            locked=False)
         slot.save()
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                                 taken=False, schedule=self.schedule)
@@ -70,7 +71,8 @@ class GmapsTestCase(APITestCase):
         slot.order_item = OrderItem.objects.create(
             service=self.vasya.services.first(),
             master=self.vasya,
-            order=order)
+            order=order,
+            locked=False)
         slot.save()
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                                 taken=False, schedule=self.schedule)
@@ -95,7 +97,8 @@ class GmapsTestCase(APITestCase):
         slot.order_item = OrderItem.objects.create(
             service=self.vasya.services.first(),
             master=self.vasya,
-            order=order)
+            order=order,
+            locked=False)
         slot.save()
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                                 taken=False, schedule=self.schedule)

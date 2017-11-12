@@ -1,5 +1,5 @@
-import datetime
 import random
+from datetime import datetime
 from datetime import timedelta as delta
 
 from django.utils import timezone
@@ -134,20 +134,41 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, time, status=OrderStatus.CREATED):
-    order = Order.objects.create(client=client, date=timezone.now().date(),
+def make_order(client, service, master, time, status=OrderStatus.CREATED,
+               order_date=timezone.now().date()):
+    order = Order.objects.create(client=client, date=order_date,
                                  time=time, status=status)
-    schedule = master.get_schedule(timezone.now().date())
+    schedule = master.get_schedule(order_date)
     slot = schedule.get_slot(time)
 
     order_item = OrderItem.objects.create(service=service,
                                           master=master,
-                                          order=order)
+                                          order=order,
+                                          locked=False)
     slot.order_item = order_item
     slot.save()
     return order, order_item
 
 
+def make_order_services(client, services, master, order_time,
+                        status=OrderStatus.CREATED, order_date=timezone.now()
+                        .date(), locked=False):
+    order = Order.objects.create(client=client, date=order_date,
+                                 time=order_time, status=status)
+    schedule = master.get_schedule(order_date)
+    order_time = datetime.combine(timezone.now(), order_time)
+    for service in services:
+        slot = schedule.get_slot(order_time.time())
+        order_item = OrderItem.objects.create(service=service,
+                                              master=master,
+                                              order=order,
+                                              locked=locked)
+        slot.order_item = order_item
+        slot.save()
+        order_time += delta(minutes=TimeSlot.DURATION)
+    return order
+
+
 def _make_time(hour: int, minute: int) -> Time:
     return Time(hour=hour, minute=minute,
-                value=datetime.time(hour=hour, minute=minute))
+                value=time(hour=hour, minute=minute))

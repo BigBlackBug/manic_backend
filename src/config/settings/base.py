@@ -50,6 +50,9 @@ SMS_API_KEY = 'A6B3E402-4C0E-D9DF-2482-CFAF3D641DD2'
 CLOUDPAYMENTS_PUBLIC_ID = 'pk_60c4e78f074563b799b61b0d36019'
 CLOUDPAYMENTS_API_SECRET = '5e9fb61716880f83b91a6ed928718baf'
 
+# Application settings
+ORDER_CANCELLATION_WINDOW_HOURS = 3
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -186,7 +189,7 @@ LOGGING = {
         },
         'warning_email': {
             'level': 'WARNING',
-            #TODO email handler
+            # TODO email handler
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },

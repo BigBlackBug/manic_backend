@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.exceptions import PermissionDenied
@@ -30,11 +33,13 @@ class OrderListCreateView(generics.ListCreateAPIView):
           'payment_type': 'CARD',
           'time': '11:00',
           'order_items': [{
+            'locked': false,
             'master_id': 10,
             'service_ids': [25]
           }, {
-             'master_id': 11,
-             'service_ids': [16]
+            'locked': false,
+            'master_id': 11,
+            'service_ids': [16]
           }],
           'special': {
             'type': 'composite'
@@ -51,6 +56,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
           'payment_type': 'CARD',
           'time': '11:00',
           'order_items': [{
+            'locked': true,
             'master_id': 10,
             'service_ids': [25, 26]
           }]
@@ -135,19 +141,65 @@ class OrderListCreateView(generics.ListCreateAPIView):
 class CancelOrderView(generics.DestroyAPIView):
     view_name = 'cancel-order'
     queryset = Order.objects.all()
-    permission_classes = (IsAuthenticated, IsClient)
+    permission_classes = (IsAuthenticated, HasAccount)
     # TODO needed by swagger
     serializer_class = OrderListSerializer
 
     def delete(self, request, *args, **kwargs):
         """
-        Cancels an order
+        Cancels an order.
+
+        If called by a master, only the respective OrderItem
+        is deleted and a new master is assigned to the order
+        for the same service, unless the OrderItem is locked.
+
+        An order may be canceled by a master not more than
+        3 hours before the deadline.
+
+        If called by a client, the order itself is deleted.
 
         Response:
 
         204 No Content
+
+        403 Forbidden - If you are trying to delete someone
+        else's order, or you're too late, or the order is locked
         """
-        return super().delete(request, *args, **kwargs)
+        order = self.get_object()
+
+        if request.user.is_client():
+            # check is the order belongs to the client
+            if order.client == request.user.client:
+                order.delete()
+            else:
+                raise PermissionDenied(detail="You are not allowed to cancel"
+                                              "someone else's order")
+        else:
+            order_items = order.order_items.filter(master=request.user.master) \
+                .all()
+            if len(order_items) == 0:
+                raise PermissionDenied(detail='You are not responsible '
+                                              'for this order')
+            order_date = timezone.make_aware(
+                datetime.combine(order.date, order.time))
+            if order_date - timezone.now() < \
+                    timedelta(hours=settings.ORDER_CANCELLATION_WINDOW_HOURS):
+                raise PermissionDenied(detail='You may not delete orders '
+                                              'less than 3 hours before '
+                                              'the deadline')
+
+            for order_item in order_items:
+                if order_item.locked:
+                    raise PermissionDenied(detail='You are not allowed '
+                                                  'to cancel a locked order')
+                order_item.delete()
+                # TODO start looking for a new master
+                # TODO add push notification to client
+                if len(order.order_items.all()) == 0:
+                    # it makes sense to delete the order if there was
+                    # only one order item
+                    order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CompleteOrderView(generics.GenericAPIView):
