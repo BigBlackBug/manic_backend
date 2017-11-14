@@ -36,8 +36,10 @@ def make_category(category_name):
 
 
 def make_master(name, lon):
-    user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
+    randstring = str(random.randint(1000, 2000))
+    user = PhoneAuthUser.objects.create(phone=randstring)
     master = Master.objects.create(user=user, first_name=name,
+                                   email=randstring +'bigblackbugg@gmail.com',
                                    avatar=utils.make_in_memory_image(
                                        'supername'),
                                    gender=Gender.MALE,

@@ -17,13 +17,14 @@ from src.apps.orders.models import OrderStatus, Order, OrderItem
 
 
 def make_master(name, lon, about='awesome master!'):
-    user = PhoneAuthUser.objects.create(phone=str(random.randint(1000, 2000)))
+    randstring = str(random.randint(1000, 2000))
+    user = PhoneAuthUser.objects.create(phone=randstring)
     master = Master.objects.create(user=user, first_name=name,
+                                   email=randstring + 'bigblackbugg@gmail.com',
                                    avatar=utils.make_in_memory_image(
                                        'supername'),
                                    gender=Gender.MALE,
                                    date_of_birth=timezone.now(),
-                                   about=about,
                                    location=Location.objects.create(lat=10,
                                                                     lon=lon))
     return master

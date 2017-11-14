@@ -12,6 +12,18 @@ from src.apps.core.models import Location
 from src.apps.core.utils import Folders
 
 
+class MasterStatus:
+    DUMMY = 'DUMMY'
+    ON_REVIEW = 'ON_REVIEW'
+    VERIFIED = 'VEFIRIED'
+
+    CHOICES = (
+        (DUMMY, 'Свежий мастер'),
+        (ON_REVIEW, 'На модерации'),
+        (VERIFIED, 'Подтверждён'),
+    )
+
+
 class Master(UserProfile):
     MAX_RATING = 5.0
 
@@ -23,6 +35,12 @@ class Master(UserProfile):
     rating = models.FloatField(default=0.0)
 
     about = models.TextField(max_length=512, blank=True)
+
+    email = models.EmailField()
+
+    status = models.CharField(max_length=9,
+                              choices=MasterStatus.CHOICES,
+                              default=MasterStatus.DUMMY)
 
     # FK fields
     # schedule - list of 'created schedules'

@@ -200,6 +200,9 @@ class MasterDetailView(generics.RetrieveAPIView):
         {
           'id':100500,
           'first_name':'Maria'
+          'phone':'88005553535',
+          'email':'supercool@master.com',
+          'status': 'ON_REVIEW/VERIFIED',
           'about': 'I am super cool',
           'avatar':'url-to-avatar',
           'services':[{service model}],

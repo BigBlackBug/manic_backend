@@ -52,6 +52,7 @@ class MasterSerializer(serializers.ModelSerializer):
     services = ServiceSerializer(many=True, read_only=True)
     schedule = ScheduleSerializer(many=True, read_only=True)
     portfolio = PortfolioImageField(many=True, read_only=True)
+    phone = serializers.CharField(source='user.phone', read_only=True)
 
     class Meta:
         model = Master
