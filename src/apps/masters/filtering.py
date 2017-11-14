@@ -84,7 +84,7 @@ class FilteringParams:
     @staticmethod
     def _parse_date(query_params):
         # TODO validate that it's a list
-        date_range = query_params.get('date_between')
+        date_range = query_params.get('date_range')
         if date_range:
             dates = date_range.split(',')
             if len(dates) != 2:
@@ -101,7 +101,7 @@ class FilteringParams:
 
     @staticmethod
     def _parse_time(query_params):
-        time_range = query_params.get('time_between')
+        time_range = query_params.get('time_range')
         if time_range:
             times = time_range.split(',')
             if len(times) != 2:
