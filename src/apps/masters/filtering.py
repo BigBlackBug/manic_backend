@@ -15,7 +15,7 @@ from .models import Master
 
 MAX_DISTANCE_KM = 2000.0
 
-available_params = ['date_between', 'time_between', 'services',
+available_params = ['date_range', 'time_range', 'services',
                     'service', 'coordinates', 'distance', 'date',
                     'time']
 

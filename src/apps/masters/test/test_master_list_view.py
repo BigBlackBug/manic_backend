@@ -58,7 +58,7 @@ class MastersTestCase(APITestCase):
 
     def test_filtering_time(self):
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"time_between=10:30,11:30&" \
+              f"time_range=10:30,11:30&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -73,7 +73,7 @@ class MastersTestCase(APITestCase):
 
     def test_filtering_date(self):
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"date_between={utils.get_date(0)},{utils.get_date(7)}&" \
+              f"date_range={utils.get_date(0)},{utils.get_date(7)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -92,7 +92,7 @@ class MastersTestCase(APITestCase):
                    time=datetime.time(hour=10, minute=30))
 
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"date_between={utils.get_date(0)},{utils.get_date(7)}&" \
+              f"date_range={utils.get_date(0)},{utils.get_date(7)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -109,7 +109,7 @@ class MastersTestCase(APITestCase):
 
     def test_filtering_date_one_day(self):
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"date_between={utils.get_date(0)},{utils.get_date(0)}&" \
+              f"date_range={utils.get_date(0)},{utils.get_date(0)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
