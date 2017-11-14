@@ -30,7 +30,6 @@ class CreateMasterTestCase(APITestCase):
             'gender': Gender.MALE,
             'date_of_birth': utils.get_date(-100),
             'email': 'a@a.com',
-            # 'about':'about',
             'services': [service.id for service in Service.objects.all()]
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
@@ -41,9 +40,9 @@ class CreateMasterTestCase(APITestCase):
             'gender': Gender.MALE,
             'date_of_birth': utils.get_date(-100),
             'email': 'a@a.com',
-            # 'about':'about',
-            'services': [service.id for service in Service.objects.all()]
-        }, format='json')
+            'services': [service.id for service in Service.objects.all()],
+            'avatar': utils.make_in_memory_image('azz')
+        }, format='multipart')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         new_master = Master.objects.get(first_name='SUPER_MASTER')

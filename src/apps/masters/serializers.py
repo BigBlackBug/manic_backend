@@ -150,11 +150,15 @@ class MasterCreateSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(min_value=0),
         required=True, write_only=True)
 
+    avatar = serializers.ImageField(write_only=True, required=True)
+
     def create(self, validated_data):
         services = validated_data.pop('services', [])
+
         master = Master.objects.create(user=self.context['request'].user,
                                        status=MasterStatus.ON_REVIEW,
                                        **validated_data)
+
         for service in services:
             master.services.add(Service.objects.get(pk=service))
         master.save()
@@ -162,5 +166,5 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Master
-        fields = ('first_name', 'gender', 'date_of_birth',
+        fields = ('first_name', 'gender', 'avatar', 'date_of_birth',
                   'email', 'about', 'services')

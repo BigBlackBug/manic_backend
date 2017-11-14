@@ -27,6 +27,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
     view_name = 'master-list-create'
 
     permission_classes = (permissions.IsAuthenticated,)
+    parser_classes = (parsers.MultiPartParser, parsers.JSONParser)
 
     def get(self, request, **kwargs):
         """
