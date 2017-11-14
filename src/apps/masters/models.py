@@ -28,7 +28,7 @@ class Master(UserProfile):
     MAX_RATING = 5.0
 
     location = models.OneToOneField(Location, on_delete=models.CASCADE,
-                                    related_name='+')
+                                    related_name='+', null=True)
 
     services = models.ManyToManyField(Service, related_name='masters')
 

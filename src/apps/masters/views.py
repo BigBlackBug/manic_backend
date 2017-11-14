@@ -2,7 +2,8 @@ import datetime
 import logging
 
 from rest_framework import generics, permissions, parsers, status, mixins
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import ValidationError, NotFound, \
+    PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -16,13 +17,14 @@ from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master, PortfolioImage, Schedule
-from .serializers import MasterSerializer, CreateScheduleSerializer
+from .serializers import MasterSerializer, CreateScheduleSerializer, \
+    MasterCreateSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class MasterListView(generics.ListAPIView):
-    view_name = 'master-list'
+class MasterListCreateView(generics.ListCreateAPIView):
+    view_name = 'master-list-create'
 
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -86,6 +88,19 @@ class MasterListView(generics.ListAPIView):
             'others': master_utils.sort_and_serialize_masters(
                 others, params, slots)
         })
+
+    def post(self, request, *args, **kwargs):
+        if request.user.has_account():
+            raise PermissionDenied(
+                detail='This phone already has an associated account')
+        serializer = MasterCreateSerializer(data=request.data,
+                                            context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
 
 class MasterSearchView(generics.ListAPIView):

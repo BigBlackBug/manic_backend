@@ -9,7 +9,7 @@ from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import SimpleMasterSerializer
 from src.apps.masters.test import make_everything, make_client, make_order
-from src.apps.masters.views import MasterListView
+from src.apps.masters.views import MasterListCreateView
 
 
 class MastersTestCase(APITestCase):
@@ -35,7 +35,7 @@ class MastersTestCase(APITestCase):
         self.assertEqual(data['distance'], serializer.DISTANCE_NOT_AVAILABLE)
 
     def test_filtering_distance(self):
-        url = f'{reverse(MasterListView.view_name)}?' \
+        url = f'{reverse(MasterListCreateView.view_name)}?' \
               f'distance=200&' \
               f'coordinates=10.03,12.43'
         resp = self.client.get(url)
@@ -51,13 +51,13 @@ class MastersTestCase(APITestCase):
         self.assertLess(others[0]['distance'], others[1]['distance'])
 
     def test_fail_no_coords(self):
-        url = f'{reverse(MasterListView.view_name)}?' \
+        url = f'{reverse(MasterListCreateView.view_name)}?' \
               f'distance=200'
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_filtering_time(self):
-        url = f"{reverse(MasterListView.view_name)}?" \
+        url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"time_between=10:30,11:30&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
@@ -72,7 +72,7 @@ class MastersTestCase(APITestCase):
         self.assertEqual(others[0]['first_name'], 'PETYA')
 
     def test_filtering_date(self):
-        url = f"{reverse(MasterListView.view_name)}?" \
+        url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"date_between={utils.get_date(0)},{utils.get_date(7)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
@@ -91,7 +91,7 @@ class MastersTestCase(APITestCase):
                    service=vasya.services.all()[0],
                    time=datetime.time(hour=10, minute=30))
 
-        url = f"{reverse(MasterListView.view_name)}?" \
+        url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"date_between={utils.get_date(0)},{utils.get_date(7)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
@@ -108,7 +108,7 @@ class MastersTestCase(APITestCase):
         self.assertEqual(others[0]['first_name'], 'PETYA')
 
     def test_filtering_date_one_day(self):
-        url = f"{reverse(MasterListView.view_name)}?" \
+        url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"date_between={utils.get_date(0)},{utils.get_date(0)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
@@ -124,7 +124,7 @@ class MastersTestCase(APITestCase):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.all()[0]
 
-        url = f"{reverse(MasterListView.view_name)}?" \
+        url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"services={service.id}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)

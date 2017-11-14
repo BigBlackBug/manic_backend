@@ -4,10 +4,11 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from src.apps.categories.models import Service
 from src.apps.categories.serializers import ServiceSerializer
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
-from .models import Master, Schedule, TimeSlot, Time
+from .models import Master, Schedule, TimeSlot, Time, MasterStatus
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -137,3 +138,24 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ('time_slots', 'date')
+
+
+class MasterCreateSerializer(serializers.ModelSerializer):
+    services = serializers.ListField(
+        child=serializers.IntegerField(min_value=0),
+        required=True, write_only=True)
+
+    def create(self, validated_data):
+        services = validated_data.pop('services', [])
+        master = Master.objects.create(user=self.context['request'].user,
+                                       status=MasterStatus.ON_REVIEW,
+                                       **validated_data)
+        for service in services:
+            master.services.add(Service.objects.get(pk=service))
+        master.save()
+        return master
+
+    class Meta:
+        model = Master
+        fields = ('first_name', 'gender', 'date_of_birth',
+                  'email', 'about', 'services')

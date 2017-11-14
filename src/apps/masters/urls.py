@@ -1,11 +1,12 @@
 from django.conf.urls import url
 
-from .views import MasterListView, MasterDetailView, \
+from .views import MasterListCreateView, MasterDetailView, \
     MasterSearchView, MasterBestMatchView, AddPortfolioItemsView, \
     CreateDeleteScheduleView, MeMasterView, AddPortfolioItemDescriptionView
 
 urlpatterns = [
-    url(r'^$', MasterListView.as_view(), name=MasterListView.view_name),
+    url(r'^$', MasterListCreateView.as_view(),
+        name=MasterListCreateView.view_name),
     url(r'^me$', MeMasterView.as_view(), name=MeMasterView.view_name),
     url(r'^search$', MasterSearchView.as_view(),
         name=MasterSearchView.view_name),
