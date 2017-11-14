@@ -1,4 +1,5 @@
 import datetime
+import time
 import logging
 from collections import defaultdict
 from enum import Enum
@@ -59,7 +60,7 @@ class FilteringParams:
 
         if unrecognized_params:
             raise ValidationError(
-                f'unrecognized parameters {unrecognized_params}')
+                f'Unrecognized parameters {unrecognized_params}')
 
     @staticmethod
     def _parse_services(query_params):
@@ -77,7 +78,7 @@ class FilteringParams:
                 try:
                     int(service_id)
                 except ValueError:
-                    raise ValidationError('invalid service string')
+                    raise ValidationError('Invalid service string')
             return services
 
     @staticmethod
@@ -87,13 +88,13 @@ class FilteringParams:
         if date_range:
             dates = date_range.split(',')
             if len(dates) != 2:
-                raise ValidationError('invalid date range')
+                raise ValidationError('Invalid date range')
             try:
                 dates = (
                     datetime.datetime.strptime(dates[0], '%Y-%m-%d'),
                     datetime.datetime.strptime(dates[1], '%Y-%m-%d'))
             except ValueError:
-                raise ValidationError('invalid date format')
+                raise ValidationError('Invalid date format')
         else:
             dates = utils.get_default_date_range()
         return dates
@@ -104,7 +105,7 @@ class FilteringParams:
         if time_range:
             times = time_range.split(',')
             if len(times) != 2:
-                raise ValidationError('invalid time range')
+                raise ValidationError('Invalid time range')
 
             try:
                 time_0 = strptime(times[0], '%H:%M')
@@ -113,7 +114,7 @@ class FilteringParams:
                     datetime.time(hour=time_0.tm_hour, minute=time_0.tm_min),
                     datetime.time(hour=time_1.tm_hour, minute=time_1.tm_min))
             except ValueError:
-                raise ValidationError('invalid time format')
+                raise ValidationError('Invalid time format')
         else:
             times = (datetime.time(hour=8, minute=0),
                      datetime.time(hour=22, minute=30))
@@ -125,15 +126,15 @@ class FilteringParams:
         # or address coords (don't pay attention, it's an app's job)
         coordinates = query_params.get('coordinates')
         if not coordinates:
-            raise ValidationError("please send coordinates")
+            raise ValidationError("Please send coordinates")
 
         coordinates = coordinates.split(',')
         if len(coordinates) != 2:
-            raise ValidationError('invalid coordinates range')
+            raise ValidationError('Invalid coordinates range')
         try:
             return float(coordinates[0]), float(coordinates[1])
         except ValueError:
-            raise ValidationError('invalid coordinates format')
+            raise ValidationError('Invalid coordinates format')
 
     @staticmethod
     def _parse_distance(query_params):
@@ -156,26 +157,26 @@ class FilteringParams:
         date = query_params.get('date')
         if date:
             try:
-                date = datetime.datetime.strptime(date, '%Y-%m-%d')
+                date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
                 date_range = utils.get_default_date_range()
                 if date < date_range[0] or date > date_range[1]:
                     raise ValidationError(
-                        'date must be withing two weeks range')
+                        'Date must be withing two weeks range')
                 return date
             except ValueError:
-                raise ValidationError('invalid date format')
+                raise ValidationError('Invalid date format')
         else:
             return None
 
     @staticmethod
     def _parse_single_time(query_params):
-        time = query_params.get('time')
-        if time:
+        _time = query_params.get('time')
+        if _time:
             try:
-                time = time.strptime(time, '%H:%M')
-                return datetime.time(hour=time.tm_hour, minute=time.tm_min)
+                _time = time.strptime(_time, '%H:%M')
+                return datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
             except ValueError:
-                raise ValidationError('invalid time format')
+                raise ValidationError('Invalid time format')
         else:
             return None
 
