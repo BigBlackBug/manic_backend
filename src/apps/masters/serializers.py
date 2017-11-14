@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
 from src.apps.categories.serializers import ServiceSerializer
+from src.apps.core.mixins import FilterEmptyFieldsMixin
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
 from .models import Master, Schedule, TimeSlot, Time, MasterStatus
@@ -70,10 +71,13 @@ class MasterScheduleSerializer(serializers.BaseSerializer):
                                   read_only=True).data
 
 
-class SimpleMasterSerializer(serializers.ModelSerializer):
+class SimpleMasterSerializer(FilterEmptyFieldsMixin,
+                             serializers.ModelSerializer):
     """
     Provides a short representation of a master, to be used in the
-    main list of masters
+    main list of masters.
+
+    Ignores `available_slots` field if it's empty
     """
     DISTANCE_NOT_AVAILABLE = -1
 
@@ -81,6 +85,7 @@ class SimpleMasterSerializer(serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     distance = serializers.SerializerMethodField('_distance', read_only=True)
 
+    # may be omitted
     available_slots = serializers.SerializerMethodField('_available_slots',
                                                         read_only=True)
 

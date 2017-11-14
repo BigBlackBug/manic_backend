@@ -32,8 +32,9 @@ class MasterListCreateView(generics.ListCreateAPIView):
         """
         Returns a list of masters filtered by the following params
 
-        `coordinates` **required** - comma separated list of latitude and longitude values.
-        stands for 'current' coordinates of the caller
+        `coordinates` **required** - comma separated list of
+        latitude and longitude values. stands for 'current'
+        coordinates of the caller
 
         `date_range` - comma separated list of dates '2017-10-25,2017-10-26'.
         default range is two weeks from the current day
@@ -68,8 +69,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
           'avatar':'url-to-avatar',
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
-          'distance':10.5,
-          'available_slots':[{'date':'2018-10-20', 'time_slots':['10:30', '15:00']}]
+          'distance':10.5
         }
 
         ```
@@ -93,8 +93,8 @@ class MasterListCreateView(generics.ListCreateAPIView):
         if request.user.has_account():
             raise PermissionDenied(
                 detail='This phone already has an associated account')
-        serializer = MasterCreateSerializer(data=request.data,
-                                            context=self.get_serializer_context())
+        serializer = MasterCreateSerializer(
+            data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -126,8 +126,30 @@ class MasterSearchView(generics.ListAPIView):
 
         Response:
         200 OK
+        ```
+        {
+          //each element of the array is an instance of **Master**
+          'favorites:':[]
+          'others':[]
+        }
+        ```
+        **Master** model
 
-        Identical to the `/masters` endpoint
+        ```
+        {
+          'id':100500,
+          'first_name':'Maria'
+          'about': 'I am super cool',
+          'avatar':'url-to-avatar',
+          'services':[{service model}],
+          'location': {'lat':10, 'lon':12},
+          'distance':10.5,
+          'available_slots':[{
+            'date':'2018-10-20',
+            'time_slots':['10:30', '15:00']
+          }]
+        }
+        ```
         """
         params = FilteringParams(request)
         if params.date and params.time:
