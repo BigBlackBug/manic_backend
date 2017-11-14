@@ -7,10 +7,9 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.authentication.utils import Gender
-from src.apps.clients.models import Client, Address
-from src.apps.clients.views import ClientUpdateView, Me
+from src.apps.clients.models import Client
+from src.apps.clients.views import ClientUpdateView
 from src.apps.core import utils
-from src.apps.core.models import Location
 
 
 class UpdateClientTestCase(APITestCase):

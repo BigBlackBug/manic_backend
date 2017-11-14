@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client
-from src.apps.clients.views import ClientCreateView, Me
+from src.apps.clients.views import ClientCreateView
 from src.apps.core import utils
 
 
@@ -71,7 +71,6 @@ class CreateClientTestCase(APITestCase):
         self.assertEqual(len(new_client_object.addresses.all()), 1)
         self.assertEqual(new_client_object.home_address.city, 'kazan')
         # ... etc
-        pass
 
     def test_create_client_partial(self):
         user = PhoneAuthUser.objects.create(phone='77777')

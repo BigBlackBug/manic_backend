@@ -132,8 +132,8 @@ class ClientAvatarUpdateView(APIView):
         })
 
 
-class Me(generics.RetrieveAPIView):
-    view_name = 'me'
+class MeClient(generics.RetrieveAPIView):
+    view_name = 'me-client'
     permission_classes = (IsAuthenticated, IsClient)
     serializer_class = ClientSerializer
 

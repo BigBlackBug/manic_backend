@@ -1,12 +1,12 @@
 from django.conf.urls import url
 
 from .views import ClientAvatarUpdateView, ClientCreateView, ClientUpdateView, \
-    Me, AddPaymentCardView, DeletePaymentCardView, AddAddressView, \
+    MeClient, AddPaymentCardView, DeletePaymentCardView, AddAddressView, \
     AddressUpdateView
 
 urlpatterns = [
     url(r'^$', ClientCreateView.as_view(), name=ClientCreateView.view_name),
-    url(r'^me$', Me.as_view(), name=Me.view_name),
+    url(r'^me$', MeClient.as_view(), name=MeClient.view_name),
     url(r'^(?P<pk>[0-9]+)$', ClientUpdateView.as_view(),
         name=ClientUpdateView.view_name),
     url(r'^(?P<pk>[0-9]+)/avatar$', ClientAvatarUpdateView.as_view(),

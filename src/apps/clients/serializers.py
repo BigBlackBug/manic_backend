@@ -72,7 +72,6 @@ class ClientSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=32)
     phone = serializers.CharField(source='user.phone', required=False)
     payment_cards = PaymentCardSerializer(many=True, read_only=True)
-
     addresses = AddressSerializer(read_only=True, many=True)
 
     def create(self, validated_data):
@@ -121,5 +120,5 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('id', 'first_name', 'gender', 'date_of_birth', 'tip',
+        fields = ('id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
                   'address', 'phone', 'payment_cards', 'addresses')
