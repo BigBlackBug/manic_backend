@@ -110,7 +110,7 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
             master=master, date=validated_data['date'],
         )
         time_tuples = time_slot_utils.parse_time_slots(
-            validated_data['time_slots'])
+            validated_data['time_slots'], include_last=True)
         # TODO that's not fool proof
         # timeslots may not be overwritten
 

@@ -37,7 +37,7 @@ class CreateScheduleTestCase(APITestCase):
         self.assertEqual(schedule.date,
                          datetime.strptime('2017-11-20', '%Y-%m-%d').date())
 
-        result_times = ['13:00', '13:30', '14:00', '14:30']
+        result_times = ['13:00', '13:30', '14:00', '14:30', '15:00']
         self.assertEqual(len(schedule.time_slots.all()), len(result_times))
 
         for time_slot in schedule.time_slots.all():
