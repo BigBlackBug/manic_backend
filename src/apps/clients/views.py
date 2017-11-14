@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ClientCreateView(generics.CreateAPIView):
-    view_name = 'client-list'
+    view_name = 'client-create'
     queryset = Client.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = ClientSerializer
