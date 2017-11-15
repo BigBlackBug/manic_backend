@@ -25,9 +25,10 @@ logger = logging.getLogger(__name__)
 
 class MasterListCreateView(generics.ListCreateAPIView):
     view_name = 'master-list-create'
-
     permission_classes = (permissions.IsAuthenticated,)
     parser_classes = (parsers.MultiPartParser, parsers.JSONParser)
+    # not used. required by swagger
+    serializer_class = MasterSerializer
 
     def get(self, request, **kwargs):
         """
