@@ -93,7 +93,9 @@ class MasterListCreateView(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Creates a master. Note that it is a multi-part POST request.
+        Creates a master.
+
+        Note that it is a multi-part POST request.
 
         Input:
         ```
