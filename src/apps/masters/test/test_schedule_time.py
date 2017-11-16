@@ -27,8 +27,9 @@ class ScheduleTestCase(TestCase):
                                 taken=False,
                                 schedule=schedule),
 
-        next_time = schedule.assign_time(time=datetime.time(hour=10, minute=30),
-                                         number_of_slots=3)
+        next_time = schedule.assign_time(
+            time_=datetime.time(hour=10, minute=30),
+            number_of_slots=3)
 
         self.assertEqual(datetime.time(hour=12, minute=00), next_time)
         slots = schedule.time_slots.filter(
@@ -55,8 +56,9 @@ class ScheduleTestCase(TestCase):
                                 taken=False,
                                 schedule=schedule),
 
-        next_time = schedule.assign_time(time=datetime.time(hour=12, minute=00),
-                                         number_of_slots=2)
+        next_time = schedule.assign_time(
+            time_=datetime.time(hour=12, minute=00),
+            number_of_slots=2)
 
         self.assertIsNone(next_time)
         slots = schedule.time_slots.filter(time__value__in=['12:00', '12:30'],
@@ -83,5 +85,5 @@ class ScheduleTestCase(TestCase):
                                 schedule=schedule),
 
         with self.assertRaises(ValueError):
-            schedule.assign_time(time=datetime.time(hour=21, minute=10),
+            schedule.assign_time(time_=datetime.time(hour=21, minute=10),
                                  number_of_slots=3)

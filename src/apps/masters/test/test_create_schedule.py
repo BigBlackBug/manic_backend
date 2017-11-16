@@ -9,7 +9,7 @@ from src.apps.authentication.models import Token
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
 from src.apps.masters.test import make_master
 from src.apps.masters.utils import get_default_date_range
-from src.apps.masters.views import CreateDeleteScheduleView
+from src.apps.masters.views import CreateDeleteScheduleView, MeMasterView
 
 
 class CreateScheduleTestCase(APITestCase):
@@ -64,24 +64,26 @@ class CreateScheduleTestCase(APITestCase):
                                 taken=False,
                                 schedule=schedule),
 
-        target_date = get_default_date_range(3)[1]
+        target_date = timezone.now()
 
         resp = self.client.post(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]),
             data={
                 'date': target_date.strftime('%Y-%m-%d'),
-                'time_slots': '10:30,11:00,11:30'
+                'time_slots': '11:30-12:30'
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
 
-        self.assertEqual(len(master.schedule.all()), 2)
+        self.assertEqual(len(master.schedule.all()), 1)
 
         schedule = master.schedule.get(date=target_date)
 
-        result_times = ['10:30', '11:00', '11:30']
+        result_times = ['10:30', '11:00', '11:30', '12:00', '12:30']
         self.assertEqual(len(schedule.time_slots.all()), len(result_times))
 
         for time_slot in schedule.time_slots.all():
             self.assertIn(str(time_slot.time), result_times)
+        resp = self.client.get(reverse(MeMasterView.view_name))
+        print(resp.data)

@@ -64,3 +64,6 @@ class DisplayItem(models.Model):
         if not self.name:
             return 'Unnamed parent item'
         return f'{self.name}'
+
+# DON'T DELETE
+from .receivers import *

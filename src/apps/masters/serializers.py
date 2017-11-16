@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
 from src.apps.categories.serializers import ServiceSerializer
+from src.apps.core.exceptions import ApplicationError
 from src.apps.core.mixins import FilterEmptyFieldsMixin
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
@@ -121,11 +122,20 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
         # timeslots may not be overwritten
 
         for time_tuple in time_tuples:
-            TimeSlot.objects.create(
-                time=Time.objects.create(hour=time_tuple.hour,
-                                         minute=time_tuple.minute),
-                schedule=schedule,
-                taken=False)
+            try:
+                target_time = datetime.time(hour=time_tuple.hour,
+                                            minute=time_tuple.minute)
+                TimeSlot.objects.get(schedule=schedule,
+                                     time__value=target_time)
+            except TimeSlot.DoesNotExist:
+                TimeSlot.objects.create(
+                    time=Time.objects.create(hour=time_tuple.hour,
+                                             minute=time_tuple.minute),
+                    schedule=schedule,
+                    taken=False)
+            else:
+                raise ApplicationError(f'Trying to overwrite time slot'
+                                       f' at {target_time}')
         return schedule
 
     def validate_date(self, date_value):

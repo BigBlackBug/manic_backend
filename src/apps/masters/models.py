@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-import time
+from time import strptime
 
 from django.db import models
 
@@ -146,53 +146,53 @@ class Schedule(models.Model):
     def __str__(self):
         return f'schedule for date {self.date}'
 
-    def get_slot(self, _time):
-        if isinstance(_time, str):
-            _time = time.strptime(_time, '%H:%M')
-            _time = datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
+    def get_slot(self, time_):
+        if isinstance(time_, str):
+            time_ = strptime(time_, '%H:%M')
+            time_ = datetime.time(hour=time_.tm_hour, minute=time_.tm_min)
 
         try:
-            return self.time_slots.get(time__value=_time)
+            return self.time_slots.get(time__value=time_)
         except TimeSlot.DoesNotExist:
             return None
 
-    def delete_slot(self, time):
+    def delete_slot(self, time_):
         """
         Deletes the time slot at specified `time` or raises ApplicationError
         if the slot is taken. Does nothing if the slot does not exist.
 
-        :param time: str or time instance
+        :param time_: str or time instance
         :return:
         """
-        slot = self.get_slot(time)
+        slot = self.get_slot(time_)
         if slot:
             if not slot.taken:
                 slot.delete()
             else:
                 raise ApplicationError(
-                    f'Slot at time {slot.time} can not be deleted '
+                    f'Slot at {slot.time} can not be deleted '
                     f'because there is an order at that time')
 
-    def assign_time(self, time: datetime.time, number_of_slots: int,
+    def assign_time(self, time_: datetime.time, number_of_slots: int,
                     order_item=None):
         """
         Sets the `number_of_slots` number of time slots
         to 'taken' starting at 'time'
 
         :param order_item:
-        :param time:
+        :param time_:
         :param number_of_slots:
         :return: time <datetime> of the next available time slot or None if
         the last processed slot marks the end of the work day
         """
-        if not time:
+        if not time_:
             raise ValueError('time argument should not be None')
 
         time_slots = sorted(self.time_slots.all(), key=lambda slot: slot.value)
 
         # looking for the first timeslot
         for first_slot_index, time_slot in enumerate(time_slots):
-            if time_slot.value == time:
+            if time_slot.value == time_:
                 break
         else:
             raise ValueError('time not found')
@@ -212,5 +212,7 @@ class Schedule(models.Model):
 
         return time_slots[next_index].value
 
+# DON'T DELETE
+from .receivers import *
 # TODO referrals
 # TODO feedbacks
