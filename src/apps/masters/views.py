@@ -169,6 +169,7 @@ class MasterSearchView(generics.ListAPIView):
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
           'distance':10.5,
+          // dates and times when the desired service may be done
           'available_slots':[{
             'date':'2018-10-20',
             'time_slots':['10:30', '15:00']
