@@ -92,6 +92,29 @@ class MasterListCreateView(generics.ListCreateAPIView):
         })
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a master. Note that it is a multi-part POST request.
+
+        Input:
+        ```
+        {
+          'first_name': 'Maria',
+          'gender': 'F/M',
+          'date_of_birth': '1988-10-29',
+          'about': 'I am god',
+          'avatar':'multi-part-image',
+          'email':'super@cool.com',
+          'services':[1,2,3],
+        }
+        ```
+
+        Response:
+        201 Created
+
+        403 Forbidden - If an account is already associated with this phone
+
+        400 Bad Request
+        """
         if request.user.has_account():
             raise PermissionDenied(
                 detail='This phone already has an associated account')
