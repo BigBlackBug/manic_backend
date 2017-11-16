@@ -192,9 +192,10 @@ class MasterBestMatchView(generics.ListAPIView):
         `time` **required** format 11:30
 
         Response:
-        200 OK
+        200 OK - Json with the **Master** model.
+        See `/masters` endpoint for description
 
-        Json with the **Master** model. See `/masters` endpoint for description
+        204 No content
 
         """
         params = FilteringParams(request)
