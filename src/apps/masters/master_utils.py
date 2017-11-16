@@ -17,11 +17,17 @@ class MasterComparable:
         return other.value < self.value
 
 
+def _evaluate_master(distance, max_distance, rating,
+                     max_rating=Master.MAX_RATING):
+    return (1 - (distance / max_distance)) * 3 + (rating / max_rating) * 7
+
+
 def sort_masters(masters: Iterable[Master], coordinates: tuple,
                  max_distance: float):
     """
     Sorts `masters` according to rating and distance to `coordinates`
-    Rating is responsible for 70% of the total value, and distance is for the other 30%
+    Rating is responsible for 70% of the total value,
+    and distance is for the other 30%
     :param max_distance:
     :param masters:
     :param coordinates:
@@ -30,8 +36,9 @@ def sort_masters(masters: Iterable[Master], coordinates: tuple,
     result = []
     for master in masters:
         distance = master.distance(*coordinates) if coordinates else 0
-        value = (1 - (distance / max_distance)) * 3 + \
-                (master.rating / Master.MAX_RATING) * 7
+        value = _evaluate_master(distance=distance,
+                                 max_distance=max_distance,
+                                 rating=master.rating)
         heapq.heappush(result, MasterComparable(master, value))
     return [comp.master for comp in result]
 
@@ -52,8 +59,8 @@ def search(params: FilteringParams, filter_function):
     # search filter
     masters, slots = filter_function(queryset, params)
     # distance filter
-    return filter(lambda m: m.distance(*coordinates) < max_distance,
-                  masters), slots
+    return list(filter(lambda m: m.distance(*coordinates) < max_distance,
+                       masters)), slots
 
 
 def split(masters: Iterable[Master], target_client: Client):
