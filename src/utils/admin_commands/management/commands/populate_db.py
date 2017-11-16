@@ -81,7 +81,7 @@ def make_everything():
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
-                            taken=True, schedule=schedule)
+                            taken=False, schedule=schedule)
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                             taken=False, schedule=schedule)
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
@@ -112,7 +112,7 @@ def make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
                             taken=False, schedule=schedule)
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
-                            taken=True, schedule=schedule)
+                            taken=False, schedule=schedule)
 
     schedule = Schedule.objects.create(master=petya,
                                        date=timezone.now() + delta(days=3))
@@ -123,9 +123,10 @@ def make_everything():
                                            key='client_token')
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
-                          master=vasya, order_time='11:00')
+                          master=vasya, order_time='10:30')
     order, _ = make_order(client=client, service=hands.services.all()[1],
-                          master=vasya, order_time='12:00')
+                          master=vasya, order_time='11:00')
+    # still got 2 slots on the first day
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
                           master=vasya, order_time='11:00',
@@ -145,6 +146,7 @@ def make_order(client, service, master, order_time, status=OrderStatus.CREATED,
                                           order=order,
                                           locked=False)
     slot.order_item = order_item
+    slot.taken = True
     slot.save()
     return order, order_item
 
