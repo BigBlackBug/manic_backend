@@ -1,8 +1,9 @@
 import datetime
 import time
 from collections import namedtuple
-from typing import Iterator
+from typing import Iterator, List
 
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from src.apps.categories.models import Service
@@ -44,24 +45,54 @@ def find_available_starting_slots(service: Service,
     return [time_slots[index] for index in indices]
 
 
-def service_fits_into_slots(service: Service, time_slots: Iterator[TimeSlot],
-                            time_from: datetime.time, time_to: datetime.time):
+def add_time(source_time, **kwargs):
+    """
+    Adds timedelta **kwargs to the source_time and returns the
+    resulting `datetime.time` value
+    """
+    if isinstance(source_time, datetime.datetime):
+        source_time = source_time.time()
+    source_time = datetime.datetime.combine(timezone.now().date(), source_time)
+    return (source_time + datetime.timedelta(**kwargs)).time()
+
+
+def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
+                            time_from: datetime.time = None,
+                            time_to: datetime.time = None):
     """
     Returns true if `service` can be done in the given list of slots
     i.e. `time_slots` contains at least one sequence of available slots which is
     `service.max_duration + TimeSlot.DURATION` minutes long within the given time frame
 
-    *NOTE* slot at `time_to` is excluded
+    *NOTE* slot at `time_to` is excluded because of common sense
 
     :param service:
     :param time_slots:
     :param time_from:
-    :param time_to:
+    :param time_to: if None, equals to the time of the last time_slot
     :return:
     """
-    time_slots = list(
-        filter(lambda slot: time_from <= slot.value < time_to, time_slots))
-    return len(find_available_starting_slots(service, time_slots)) != 0
+    # just in case somebody passes the queryset
+    if isinstance(time_slots, QuerySet):
+        time_slots = list(time_slots)
+    if len(time_slots) == 0:
+        raise ValueError('time_slots list can not be empty')
+    time_slots = sorted(time_slots, key=lambda slot: slot.value)
+
+    if time_from is None:
+        time_from = time_slots[0].value
+    if time_to is None:
+        # because we're using the exclusive comparison '<'
+        time_to = add_time(time_slots[-1].value, minutes=TimeSlot.DURATION)
+
+    if time_to > time_from:
+        good_slots = list(
+            filter(lambda slot: time_from <= slot.value < time_to, time_slots))
+    else:
+        raise ValueError('time_to argument must be '
+                         'greater or equal than time_from')
+
+    return len(find_available_starting_slots(service, good_slots)) != 0
 
 
 TimeTuple = namedtuple('TimeTuple', ['hour', 'minute'])
@@ -108,7 +139,7 @@ def _get_times(start_time_s: str, end_time_s: str, include_last=False):
     while current_time != end_time:
         result.append(TimeTuple(hour=current_time.hour,
                                 minute=current_time.minute))
-        current_time += datetime.timedelta(minutes=TimeSlot.DURATION)
+        current_time = add_time(current_time, minutes=TimeSlot.DURATION)
 
     if include_last:
         result.append(TimeTuple(hour=current_time.hour,
@@ -117,5 +148,4 @@ def _get_times(start_time_s: str, end_time_s: str, include_last=False):
 
 
 def _get_time(_time):
-    _time = datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
-    return datetime.datetime.combine(timezone.now().date(), _time)
+    return datetime.time(hour=_time.tm_hour, minute=_time.tm_min)

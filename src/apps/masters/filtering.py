@@ -204,7 +204,7 @@ class FilteringFunctions(Enum):
             schedule = master.get_schedule(date)
             can_service = time_slot_utils \
                 .service_fits_into_slots(service, schedule.time_slots.all(),
-                                         time, time)
+                                         time_from=time)
             # checking the closest order that goes before `time`
             if can_service and gmaps_utils.can_reach(
                     schedule, target_client.home_address.location, time):
@@ -281,6 +281,7 @@ class FilteringFunctions(Enum):
                                                    date__lte=date_range[1]):
                 if time_slot_utils.service_fits_into_slots(
                         service, schedule.time_slots.all(),
-                        time_range[0], time_range[1]):
+                        time_from=time_range[0],
+                        time_to=time_range[1]):
                     result.add(master)
         return result, {}

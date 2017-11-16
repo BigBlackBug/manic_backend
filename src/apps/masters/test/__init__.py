@@ -39,7 +39,7 @@ def make_master(name, lon):
     randstring = str(random.randint(1000, 2000))
     user = PhoneAuthUser.objects.create(phone=randstring)
     master = Master.objects.create(user=user, first_name=name,
-                                   email=randstring +'bigblackbugg@gmail.com',
+                                   email=randstring + 'bigblackbugg@gmail.com',
                                    avatar=utils.make_in_memory_image(
                                        'supername'),
                                    gender=Gender.MALE,
@@ -148,6 +148,7 @@ def make_order(client, service, master, time, status=OrderStatus.CREATED,
                                           order=order,
                                           locked=False)
     slot.order_item = order_item
+    slot.taken = True
     slot.save()
     return order, order_item
 

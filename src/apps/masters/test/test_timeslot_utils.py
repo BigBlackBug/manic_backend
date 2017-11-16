@@ -157,3 +157,62 @@ class ScheduleFitTestCase(TestCase):
             datetime.time(hour=10, minute=0),
             datetime.time(hour=11, minute=30))
         self.assertFalse(result)
+
+    def test_fits_same_time(self):
+        time_slots = [
+            TimeSlot(time=_make_time(10, 30), taken=True),
+            TimeSlot(time=_make_time(11, 00), taken=False),
+            TimeSlot(time=_make_time(11, 30), taken=False),
+            TimeSlot(time=_make_time(12, 00), taken=False),
+            TimeSlot(time=_make_time(12, 30), taken=False),
+        ]
+        # max - 60 - 2+1 slots
+        result = time_slot_utils.service_fits_into_slots(
+            self.service, time_slots,
+            datetime.time(hour=11, minute=30))
+        self.assertTrue(result)
+
+
+class TestParseTimeSlots(TestCase):
+    def test_range(self):
+        slots = sorted(time_slot_utils.parse_time_slots('10:00-11:30'))
+        self.assertEqual(len(slots), 3)
+        self.assertEqual(slots[0].hour, 10)
+        self.assertEqual(slots[0].minute, 00)
+
+        self.assertEqual(slots[1].hour, 10)
+        self.assertEqual(slots[1].minute, 30)
+
+        self.assertEqual(slots[2].hour, 11)
+        self.assertEqual(slots[2].minute, 00)
+
+    def test_single(self):
+        slots = sorted(time_slot_utils.parse_time_slots('10:00'))
+        self.assertEqual(len(slots), 1)
+        self.assertEqual(slots[0].hour, 10)
+        self.assertEqual(slots[0].minute, 0)
+
+    def test_enumeration(self):
+        slots = sorted(time_slot_utils.parse_time_slots('10:00, 10:30'))
+        self.assertEqual(len(slots), 2)
+        self.assertEqual(slots[0].hour, 10)
+        self.assertEqual(slots[0].minute, 0)
+
+        self.assertEqual(slots[1].hour, 10)
+        self.assertEqual(slots[1].minute, 30)
+
+    def test_combo(self):
+        slots = sorted(
+            time_slot_utils.parse_time_slots('10:00, 10:30, 12:00-13:00'))
+        self.assertEqual(len(slots), 4)
+        self.assertEqual(slots[0].hour, 10)
+        self.assertEqual(slots[0].minute, 0)
+
+        self.assertEqual(slots[1].hour, 10)
+        self.assertEqual(slots[1].minute, 30)
+
+        self.assertEqual(slots[2].hour, 12)
+        self.assertEqual(slots[2].minute, 0)
+
+        self.assertEqual(slots[3].hour, 12)
+        self.assertEqual(slots[3].minute, 30)
