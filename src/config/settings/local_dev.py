@@ -1,6 +1,9 @@
 from .base import *
 
 DEBUG = True
+
+MAX_DISTANCE_KM = 10**6
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

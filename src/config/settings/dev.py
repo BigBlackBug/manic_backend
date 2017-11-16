@@ -2,6 +2,7 @@ from .base import *
 
 DEBUG = True
 
+MAX_DISTANCE_KM = 10**6
 # TODO temporary stub
 ALLOWED_HOSTS = ['dev.4hands2go.bigblackbug.me', '35.195.99.19']
 

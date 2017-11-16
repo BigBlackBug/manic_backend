@@ -6,14 +6,13 @@ from enum import Enum
 from time import strptime
 from typing import Iterable
 
+from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 
 from src.apps.categories.models import Service
 from . import time_slot_utils, gmaps_utils, utils
 from .models import Master
-
-MAX_DISTANCE_KM = 2000.0
 
 available_params = ['date_range', 'time_range', 'services',
                     'service', 'coordinates', 'distance', 'date',
@@ -141,7 +140,7 @@ class FilteringParams:
         # считаем расстояние до адреса
         distance = query_params.get('distance')
         if not distance:
-            return MAX_DISTANCE_KM
+            return settings.MAX_DISTANCE_KM
         else:
             return float(distance)
 
