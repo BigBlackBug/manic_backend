@@ -16,13 +16,18 @@ from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
 
 
-def get_env_variable(var_name):
+def get_env_variable(var_name, raise_exception=True, default=None, type=str):
     """Get the environment variable or raise exception."""
     try:
-        return os.environ[var_name]
+        return type(os.environ[var_name])
     except KeyError:
-        error_msg = "Set the {} environment variable".format(var_name)
-        raise ImproperlyConfigured(error_msg)
+        if raise_exception:
+            error_msg = "Set the {} environment variable".format(var_name)
+            raise ImproperlyConfigured(error_msg)
+        else:
+            return default
+    except TypeError:
+        raise ImproperlyConfigured('Unexpected Value Type')
 
 
 BASE_DIR = Path(__file__).ancestor(3)
@@ -53,6 +58,7 @@ CLOUDPAYMENTS_API_SECRET = '5e9fb61716880f83b91a6ed928718baf'
 # Application settings
 ORDER_CANCELLATION_WINDOW_HOURS = 3
 MAX_DISTANCE_KM = 20.0
+USE_GMAPS_API = False
 
 # Application definition
 INSTALLED_APPS = [

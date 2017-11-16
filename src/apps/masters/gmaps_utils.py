@@ -50,6 +50,9 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     :return: True if it's possible to reach `location` at `time`
     considering `schedule`
     """
+    if not settings.USE_GMAPS_API:
+        return True
+
     dt = datetime.combine(schedule.date, time) - \
          timedelta(minutes=TimeSlot.DURATION)
     prev_time = dt.time()

@@ -2,6 +2,8 @@ from .base import *
 
 DEBUG = True
 
+USE_GMAPS_API=True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
