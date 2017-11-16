@@ -2,7 +2,8 @@ from .base import *
 
 DEBUG = True
 
-USE_GMAPS_API=True
+USE_GMAPS_API = True
+MAX_DISTANCE_KM = 10 ** 6
 
 DATABASES = {
     'default': {
