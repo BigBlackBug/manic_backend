@@ -114,12 +114,12 @@ def custom_exception_handler(exc, context):
             'detail': message
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     elif isinstance(exc, Http404):
-        msg = _('Not found.')
+        msg = 'Not found.'
         data = {'detail': msg}
 
         return Response(data, status=status.HTTP_404_NOT_FOUND)
     elif isinstance(exc, PermissionDenied):
-        msg = _('Permission denied.')
+        msg = 'Permission denied.'
         data = {'detail': msg}
 
         return Response(data, status=status.HTTP_403_FORBIDDEN)

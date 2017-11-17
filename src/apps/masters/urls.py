@@ -1,8 +1,9 @@
 from django.conf.urls import url
 
-from .views import MasterListCreateView, MasterDetailView, \
+from .views import MasterListCreateView, MasterDetailUpdateView, \
     MasterSearchView, MasterBestMatchView, AddPortfolioItemsView, \
-    CreateDeleteScheduleView, MeMasterView, AddPortfolioItemDescriptionView
+    CreateDeleteScheduleView, MeMasterView, AddPortfolioItemDescriptionView, \
+    MasterAvatarUpdateView
 
 urlpatterns = [
     url(r'^$', MasterListCreateView.as_view(),
@@ -12,8 +13,10 @@ urlpatterns = [
         name=MasterSearchView.view_name),
     url(r'^best_match$', MasterBestMatchView.as_view(),
         name=MasterBestMatchView.view_name),
-    url(r'^(?P<pk>[0-9]+)$', MasterDetailView.as_view(),
-        name=MasterDetailView.view_name),
+    url(r'^(?P<pk>[0-9]+)$', MasterDetailUpdateView.as_view(),
+        name=MasterDetailUpdateView.view_name),
+    url(r'^(?P<pk>[0-9]+)/avatar$', MasterAvatarUpdateView.as_view(),
+        name=MasterAvatarUpdateView.view_name),
     url(r'^(?P<pk>[0-9]+)/portfolio_descriptions$',
         AddPortfolioItemDescriptionView.as_view(),
         name=AddPortfolioItemDescriptionView.view_name),

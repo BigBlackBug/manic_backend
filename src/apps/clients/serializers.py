@@ -98,7 +98,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
         if len(validated_data) != 0:
             raise ValidationError(f'The following fields may not be changed: '
-                                  f'{validated_data.keys()}')
+                                  f'{list(validated_data.keys())}')
 
         if new_name:
             logger.debug(f'Updating name for '

@@ -7,11 +7,12 @@ from rest_framework.exceptions import ValidationError, NotFound, \
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from src.apps.core.exceptions import NoContentError
 from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.core.serializers import ImageListSerializer, \
-    DescriptionImageSerializer
+    DescriptionImageSerializer, ImageSerializer
 from src.apps.masters import time_slot_utils
 from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
@@ -250,11 +251,11 @@ class MasterBestMatchView(generics.ListAPIView):
         return Response(data=output_data[0])
 
 
-class MasterDetailView(generics.RetrieveAPIView):
-    view_name = 'master-detail'
+class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
+    view_name = 'master-detail-update'
     queryset = Master.objects.all()
-    serializer_class = MasterSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    get_permission_classes = (permissions.IsAuthenticated,)
+    patch_permission_classes = (permissions.IsAuthenticated, IsMasterIDCorrect)
 
     def get(self, request: Request, *args, **kwargs):
         """
@@ -299,6 +300,85 @@ class MasterDetailView(generics.RetrieveAPIView):
         ```
         """
         return super().get(request, *args, **kwargs)
+
+    def get_serializer_class(self):
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return MasterSerializer
+
+        if self.request.method == 'PATCH':
+            return MasterCreateSerializer
+        return MasterSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'PATCH':
+            return [permission() for permission in
+                    self.patch_permission_classes]
+        return [permission() for permission in self.get_permission_classes]
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Updates a master
+
+        All fields are optional.
+
+        Input:
+        ```
+        {
+          'first_name':'Maria',
+          'date_of_birth':'1980-10-20',
+          'email':'supercool@master.com',
+          'gender':'F',
+          'about': 'I am super cool',
+          'services':[1,2,3,4],
+          'location': {'lat':10, 'lon':12}
+        }
+
+        ```
+
+        Responses:
+
+        200 OK
+
+        400 Bad Request
+        """
+        return super().patch(request, *args, **kwargs)
+
+
+class MasterAvatarUpdateView(APIView):
+    view_name = 'master-avatar-update'
+
+    parser_classes = (parsers.MultiPartParser,)
+    permission_classes = (IsAuthenticated, IsMasterIDCorrect)
+
+    def patch(self, request, **kwargs):
+        """
+        Adds or replaces the avatar of the master
+
+        Input:
+
+        multi-part form data where `image` field contains the image
+
+        Response:
+        201 Created `{'image':'url-to-the-image'}`
+
+        400 Bad Request
+        """
+        master = request.user.master
+        logger.info(f'Updating an avatar for'
+                    f'master {master.first_name}, '
+                    f'id={master.id}')
+
+        serializer = ImageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        image = serializer.validated_data['image']
+        master.avatar = image
+        master.save()
+
+        return Response(status=status.HTTP_201_CREATED, data={
+            'image': master.avatar.url
+        })
 
 
 class MeMasterView(generics.RetrieveAPIView):

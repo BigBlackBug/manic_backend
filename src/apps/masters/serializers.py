@@ -8,6 +8,7 @@ from src.apps.categories.models import Service
 from src.apps.categories.serializers import ServiceSerializer
 from src.apps.core.exceptions import ApplicationError
 from src.apps.core.mixins import FilterEmptyFieldsMixin
+from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
 from .models import Master, Schedule, TimeSlot, Time, MasterStatus
@@ -162,6 +163,23 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
     avatar = serializers.ImageField(write_only=True, required=True)
 
+    # only used during update
+    location = LocationSerializer(write_only=True, required=False)
+
+    def update(self, instance, validated_data):
+        new_services = validated_data.pop('services', [])
+        new_location = validated_data.pop('location', None)
+        if new_services:
+            instance.services = [Service.objects.get(pk=service) for service in
+                                 new_services]
+        if new_location:
+            serializer = LocationSerializer(data=new_location)
+            serializer.is_valid(raise_exception=True)
+
+            instance.location = Location.objects.create(
+                **serializer.validated_data)
+        return super().update(instance, validated_data)
+
     def create(self, validated_data):
         services = validated_data.pop('services', [])
 
@@ -177,4 +195,4 @@ class MasterCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Master
         fields = ('first_name', 'gender', 'avatar', 'date_of_birth',
-                  'email', 'about', 'services')
+                  'email', 'about', 'services', 'location')
