@@ -46,6 +46,10 @@ class Master(UserProfile):
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
     # order_items - list of 'order items'
+    # feedback - list of 'feedback' items
+
+    def add_rating(self, new_rating):
+        self.rating = (self.rating + new_rating) / self.feedback.count()
 
     def distance(self, lat, lon):
         return self.location.distance(lat, lon)
@@ -75,7 +79,17 @@ class Master(UserProfile):
                        self.order_items.all()))
 
 
-class PortfolioOrderStatus:
+class Feedback(models.Model):
+    rating = models.FloatField(default=0.0)
+    text = models.CharField(max_length=1024)
+    date = models.DateField()
+    client = models.ForeignKey(Client, related_name='+', null=True,
+                               on_delete=models.SET_NULL)
+    master = models.ForeignKey(Master, related_name='feedback',
+                               on_delete=models.CASCADE)
+
+
+class PortfolioImageStatus:
     ON_MODERATION = 'ON_MODERATION'
     ACCEPTED = 'ACCEPTED'
     CHOICES = (
@@ -91,8 +105,8 @@ class PortfolioImage(models.Model):
     # status should be manually set by the administrator
     status = models.CharField(
         max_length=13,
-        choices=PortfolioOrderStatus.CHOICES,
-        default=PortfolioOrderStatus.ON_MODERATION,
+        choices=PortfolioImageStatus.CHOICES,
+        default=PortfolioImageStatus.ON_MODERATION,
     )
     master = models.ForeignKey(Master, related_name='portfolio',
                                on_delete=models.CASCADE)
@@ -213,7 +227,7 @@ class Schedule(models.Model):
 
         return time_slots[next_index].value
 
+
 # DON'T DELETE
 from .receivers import *
 # TODO referrals
-# TODO feedbacks

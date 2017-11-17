@@ -19,7 +19,7 @@ from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master, PortfolioImage, Schedule
 from .serializers import MasterSerializer, CreateScheduleSerializer, \
-    MasterCreateSerializer
+    MasterCreateSerializer, CreateFeedbackSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +274,8 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
           'avatar':'url-to-avatar',
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
-          'schedule':[{schedule model}]
+          'schedule':[{schedule model}],
+          'feedback':[{feedback model}],
           'portfolio':[{
             'id': 100,
             'url': 'image-url',
@@ -296,6 +297,19 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
             'time':'10:30',
             'taken':False
           }]
+        }
+        ```
+        **Feedback**
+        ```
+        {
+          'rating':4.0,
+          'text':'hey',
+          'date':'2017-11-20',
+          'client':{
+            'id':1,
+            'avatar':'link-to-img',
+            'first_name':'John'
+          }
         }
         ```
         """
@@ -514,6 +528,7 @@ class CreateDeleteScheduleView(mixins.DestroyModelMixin,
         }]
         ```
         Response:
+
         200 OK
         """
         serializer = self.get_serializer(data=request.data)
@@ -537,3 +552,44 @@ class CreateDeleteScheduleView(mixins.DestroyModelMixin,
                 schedule.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AddFeedbackView(generics.CreateAPIView):
+    view_name = 'add-feedback'
+    serializer_class = CreateFeedbackSerializer
+    queryset = Master.objects.all()
+    permission_classes = (IsAuthenticated, IsClient,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+            'master': self.get_object()
+        })
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """
+        Leaves a feedback to a master
+
+        ```
+        {
+          'rating': 3.0,
+          'text': 'good enough',
+          'date': '2017-10-10'
+        }
+        ```
+        Response:
+
+        200 OK
+
+        403 Forbidden - If you are trying to leave feedback to a master
+        someone who hasn't served you yet
+        """
+        client = request.user.client
+        master = self.get_object()
+        if master.times_served(client) == 0:
+            raise PermissionDenied(
+                detail='You may not leave feedback '
+                       'to masters who did not serve you')
+
+        return super().post(request, *args, **kwargs)

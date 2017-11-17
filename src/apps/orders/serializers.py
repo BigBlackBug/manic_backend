@@ -43,7 +43,7 @@ class OrderItemCreateSerializer(serializers.Serializer):
 # out
 class OrderListSerializer(serializers.Serializer):
     date = serializers.DateField(read_only=True)
-    time = serializers.TimeField(read_only=True)
+    time = serializers.TimeField(read_only=True, format='%H:%M')
     order_items = OrderItemListSerializer(many=True, read_only=True)
     special = serializers.DictField(read_only=True)
     payment_type = serializers.CharField(read_only=True)

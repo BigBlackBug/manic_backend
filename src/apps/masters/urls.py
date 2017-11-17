@@ -3,7 +3,7 @@ from django.conf.urls import url
 from .views import MasterListCreateView, MasterDetailUpdateView, \
     MasterSearchView, MasterBestMatchView, AddPortfolioItemsView, \
     CreateDeleteScheduleView, MeMasterView, AddPortfolioItemDescriptionView, \
-    MasterAvatarUpdateView
+    MasterAvatarUpdateView, AddFeedbackView
 
 urlpatterns = [
     url(r'^$', MasterListCreateView.as_view(),
@@ -17,6 +17,8 @@ urlpatterns = [
         name=MasterDetailUpdateView.view_name),
     url(r'^(?P<pk>[0-9]+)/avatar$', MasterAvatarUpdateView.as_view(),
         name=MasterAvatarUpdateView.view_name),
+    url(r'^(?P<pk>[0-9]+)/feedback$', AddFeedbackView.as_view(),
+        name=AddFeedbackView.view_name),
     url(r'^(?P<pk>[0-9]+)/portfolio_descriptions$',
         AddPortfolioItemDescriptionView.as_view(),
         name=AddPortfolioItemDescriptionView.view_name),

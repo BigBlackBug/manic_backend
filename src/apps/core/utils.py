@@ -116,12 +116,14 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, Http404):
         msg = 'Not found.'
         data = {'detail': msg}
+        logger.exception(f'Unexpected 404 Error')
 
         return Response(data, status=status.HTTP_404_NOT_FOUND)
     elif isinstance(exc, PermissionDenied):
         msg = 'Permission denied.'
         data = {'detail': msg}
 
+        logger.exception(f'Unexpected 403 Error')
         return Response(data, status=status.HTTP_403_FORBIDDEN)
     else:
         if len(exc.args) == 1:

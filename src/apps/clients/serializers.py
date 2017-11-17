@@ -122,3 +122,9 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = ('id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
                   'address', 'phone', 'payment_cards', 'addresses')
+
+
+class SimpleClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = ('id', 'avatar', 'first_name')

@@ -6,12 +6,13 @@ from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
 from src.apps.categories.serializers import ServiceSerializer
+from src.apps.clients.serializers import SimpleClientSerializer
 from src.apps.core.exceptions import ApplicationError
 from src.apps.core.mixins import FilterEmptyFieldsMixin
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
-from .models import Master, Schedule, TimeSlot, Time, MasterStatus
+from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -32,6 +33,33 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         exclude = ('id', 'master')
+
+
+class CreateFeedbackSerializer(serializers.ModelSerializer):
+    rating = serializers.FloatField(max_value=5, min_value=0)
+    text = serializers.CharField(max_length=1024)
+
+    def create(self, validated_data):
+        client = self.context['request'].user.client
+        master = self.context['master']
+        feedback = Feedback.objects.create(client=client,
+                                           master=master,
+                                           **validated_data)
+        master.add_rating(feedback.rating)
+        master.save()
+        return feedback
+
+    class Meta:
+        model = Feedback
+        fields = ('rating', 'text', 'date')
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    client = SimpleClientSerializer(read_only=True)
+
+    class Meta:
+        model = Feedback
+        fields = ('rating', 'text', 'date', 'client')
 
 
 class MasterSerializer(serializers.ModelSerializer):
@@ -56,6 +84,7 @@ class MasterSerializer(serializers.ModelSerializer):
     services = ServiceSerializer(many=True, read_only=True)
     schedule = ScheduleSerializer(many=True, read_only=True)
     portfolio = PortfolioImageField(many=True, read_only=True)
+    feedback = FeedbackSerializer(many=True, read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
 
     class Meta:
