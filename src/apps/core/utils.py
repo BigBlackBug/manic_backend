@@ -5,14 +5,15 @@ from datetime import timedelta
 
 from PIL import Image
 from cloudpayments import CloudPaymentsError
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.http import Http404
 from django.utils import timezone
 from rest_framework import status, exceptions
 from rest_framework.compat import set_rollback
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.views import exception_handler
 
 from src.apps.core.exceptions import ApplicationError
 
@@ -66,14 +67,13 @@ class Folders:
 
 
 def custom_exception_handler(exc, context):
+    set_rollback()
     if isinstance(exc, exceptions.APIException):
         headers = {}
         if getattr(exc, 'auth_header', None):
             headers['WWW-Authenticate'] = exc.auth_header
         if getattr(exc, 'wait', None):
             headers['Retry-After'] = '%d' % exc.wait
-
-        set_rollback()
 
         # most of the time there will be a single message
         # coming from ValidationError
@@ -85,11 +85,10 @@ def custom_exception_handler(exc, context):
 
         # TODO error_type
         return Response(data={
-            'error_code': ApplicationError.ErrorTypes.UNEXPECTED_ERROR.value,
+            'error_code': ApplicationError.ErrorTypes.APPLICATION_ERROR.value,
             'detail': detail
         }, status=exc.status_code, headers=headers)
     elif isinstance(exc, ApplicationError):
-        set_rollback()
         if len(exc.args) == 1:
             parent_exc = exc.args[0]
             message = str(parent_exc)
@@ -102,7 +101,6 @@ def custom_exception_handler(exc, context):
             'detail': message
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     elif isinstance(exc, CloudPaymentsError):
-        set_rollback()
         if len(exc.args) == 1:
             parent_exc = exc.args[0]
             message = str(parent_exc)
@@ -115,8 +113,28 @@ def custom_exception_handler(exc, context):
             'error_code': ApplicationError.ErrorTypes.PAYMENT_ERROR.value,
             'detail': message
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    elif isinstance(exc, Http404):
+        msg = _('Not found.')
+        data = {'detail': msg}
+
+        return Response(data, status=status.HTTP_404_NOT_FOUND)
+    elif isinstance(exc, PermissionDenied):
+        msg = _('Permission denied.')
+        data = {'detail': msg}
+
+        return Response(data, status=status.HTTP_403_FORBIDDEN)
     else:
-        return exception_handler(exc, context)
+        if len(exc.args) == 1:
+            parent_exc = exc.args[0]
+            message = str(parent_exc)
+        else:
+            message = None
+        logger.exception(f'Unexpected ApplicationError')
+
+        return Response(data={
+            'error_code': ApplicationError.ErrorTypes.UNEXPECTED_ERROR.value,
+            'detail': message
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 def get_date(days: int):
