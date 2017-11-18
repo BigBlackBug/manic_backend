@@ -562,9 +562,11 @@ class AddFeedbackView(generics.CreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({
-            'master': self.get_object()
-        })
+        if self.request:
+            # TODO this is a fucking bug of the schema generation module
+            context.update({
+                'master': self.get_object()
+            })
         return context
 
     def post(self, request, *args, **kwargs):
