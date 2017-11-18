@@ -163,7 +163,7 @@ def make_client(user=None):
         location=Location.objects.create(lat=10,
                                          lon=10),
         city='kazan', street_name='latstr',
-        building='4', floor=2, apt_number=79,
+        building='4', floor=2, apt_number=80,
         entrance=6, has_intercom=True, client=client,
         is_default=True)
     return client
