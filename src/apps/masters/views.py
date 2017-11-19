@@ -17,7 +17,7 @@ from src.apps.masters import time_slot_utils
 from src.apps.masters.permissions import IsMasterIDCorrect
 from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
-from .models import Master, PortfolioImage, Schedule
+from .models import Master, PortfolioImage, Schedule, MasterStatus
 from .serializers import MasterSerializer, CreateScheduleSerializer, \
     MasterCreateSerializer, CreateFeedbackSerializer
 
@@ -82,7 +82,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
         params = FilteringParams(request)
         masters, slots = master_utils.search(params, FilteringFunctions.search)
         favorites, others = master_utils.split(masters,
-                                               request.user.is_client() and
+                                               request.user.is_client(request) and
                                                request.user.client)
 
         return Response(data={
@@ -118,9 +118,14 @@ class MasterListCreateView(generics.ListCreateAPIView):
 
         400 Bad Request
         """
-        if request.user.has_account():
+        if not request.user.is_master(request):
             raise PermissionDenied(
-                detail='This phone already has an associated account')
+                detail='A user must be a Master to access this endpoint')
+
+        if not request.user.master.status == MasterStatus.DUMMY:
+            raise PermissionDenied(
+                detail='This phone already has an associated master account')
+
         serializer = MasterCreateSerializer(
             data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)

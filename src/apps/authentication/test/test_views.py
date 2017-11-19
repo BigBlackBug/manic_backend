@@ -7,7 +7,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from ..models import Registration, PhoneAuthUser, Token
+from src.apps.masters.test import make_client
+from ..models import Registration, Token, RegistrationType
 from ..views import CreateRegistrationView, UpdateRegistrationView, LogoutView
 
 
@@ -20,23 +21,26 @@ def make_json_body(body):
 class LoginTest(APITestCase):
     def test_create_registration(self):
         response = self.client.post(reverse(CreateRegistrationView.view_name),
-                                    **make_json_body({'phone': '111'}))
+                                    **make_json_body({'phone': '111',
+                                                      'type': 'CLIENT', }))
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         registrations = list(Registration.objects.filter(phone='111'))
 
-        # created succesfully
+        # created successfully
         self.assertEqual(1, len(registrations))
         self.assertEqual(response.data['id'], registrations[0].id)
 
     def test_create_two_registration(self):
         # there is registration for this phone
         Registration.objects.create(phone='111', verification_code='0000',
+                                    type=RegistrationType.CLIENT,
                                     expires=timezone.now() + timedelta(
                                         minutes=5)
                                     )
         # creating a new one
         response = self.client.post(reverse(CreateRegistrationView.view_name),
-                                    **make_json_body({'phone': '111'}))
+                                    **make_json_body({'phone': '111',
+                                                      'type': 'CLIENT', }))
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         registrations = list(Registration.objects.filter(phone='111'))
@@ -53,6 +57,7 @@ class LoginTest(APITestCase):
 
     def test_confirm_registration_incorrect_code(self):
         reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          type=RegistrationType.CLIENT,
                                           expires=timezone.now() + timedelta(
                                               minutes=5)
                                           )
@@ -75,6 +80,7 @@ class LoginTest(APITestCase):
 
     def test_confirm_registration_expired(self):
         reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          type=RegistrationType.CLIENT,
                                           expires=timezone.now() - timedelta(
                                               minutes=5))
         response = self.client.patch(
@@ -85,6 +91,7 @@ class LoginTest(APITestCase):
 
     def test_confirm_registration_ok(self):
         reg = Registration.objects.create(phone='111', verification_code='0000',
+                                          type=RegistrationType.CLIENT,
                                           expires=timezone.now() + timedelta(
                                               minutes=5)
                                           )
@@ -94,15 +101,13 @@ class LoginTest(APITestCase):
             **make_json_body({'verification_code': '0000'}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('user_id', response.data)
         self.assertIn('token', response.data)
 
         with self.assertRaises(Registration.DoesNotExist):
             Registration.objects.get(phone='111')
 
     def test_logout_ok(self):
-        user = PhoneAuthUser.objects.create(phone='777')
-        token, _ = Token.objects.get_or_create(user=user)
+        token, _ = Token.objects.get_or_create(client=make_client())
 
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')

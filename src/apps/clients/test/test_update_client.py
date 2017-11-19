@@ -1,28 +1,20 @@
 from datetime import datetime
 
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
-from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client
 from src.apps.clients.views import ClientUpdateView
-from src.apps.core import utils
+from src.apps.masters.test import make_client
 
 
 class UpdateClientTestCase(APITestCase):
     def setUp(self):
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = Client.objects.create(
-            user=self.user,
-            first_name='client',
-            avatar=utils.make_in_memory_image('supername'),
-            gender=Gender.MALE,
-            date_of_birth=timezone.now(),
-        )
-        token, _ = Token.objects.get_or_create(user=self.user)
+        self.client_object = make_client(self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

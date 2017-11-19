@@ -13,8 +13,7 @@ from src.apps.masters.views import AddPortfolioItemsView, \
 class UploadTestCase(APITestCase):
     def setUp(self):
         self.master_object = make_master('VASYA', 10)
-        self.user = self.master_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -67,7 +66,7 @@ class UploadTestCase(APITestCase):
     def test_upload_not_master(self):
         client = make_client()
 
-        token, _ = Token.objects.get_or_create(user=client.user)
+        token, _ = Token.objects.get_or_create(client=client)
 
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -81,8 +80,7 @@ class UploadTestCase(APITestCase):
 class AddDescriptionTestCase(APITestCase):
     def setUp(self):
         self.master_object = make_master('VASYA', 10)
-        self.user = self.master_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from src.apps.core.permissions import IsClient
 from src.apps.core.serializers import ImageSerializer
-from .models import Client, PaymentCard, Address
+from .models import Client, PaymentCard, Address, ClientStatus
 from .permissions import IsClientIDCorrect
 from .serializers import ClientSerializer, PaymentCardSerializer, \
     AddressSerializer
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ClientCreateView(generics.CreateAPIView):
     view_name = 'client-create'
     queryset = Client.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsClient)
     serializer_class = ClientSerializer
 
     def post(self, request, **kwargs):
@@ -59,9 +59,13 @@ class ClientCreateView(generics.CreateAPIView):
 
         400 Bad Request
         """
-        if request.user.has_account():
+        if not request.user.is_client(request):
             raise PermissionDenied(
-                detail='This phone already has an associated account')
+                detail='A user must be a Master to access this endpoint')
+
+        if not request.user.client.status == ClientStatus.DUMMY:
+            raise PermissionDenied(
+                detail='This phone already has an associated master account')
         return super().post(request, **kwargs)
 
 

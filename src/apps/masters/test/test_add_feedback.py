@@ -19,7 +19,7 @@ class AddFeedbackTestCase(APITestCase):
                                 self.master_object.services.all()[0],
                                 self.master_object, '11:30')
         self.user = self.client_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

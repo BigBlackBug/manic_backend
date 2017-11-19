@@ -17,7 +17,7 @@ class CreateScheduleTestCase(APITestCase):
         # make_everything()
         self.master_object = make_master('VASYA', 10)
         self.user = self.master_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

@@ -12,7 +12,7 @@ from src.apps.categories.models import ServiceCategory
 from src.apps.clients.models import Client
 from src.apps.core import utils
 from src.apps.masters.models import Master, TimeSlot, Time, Schedule
-from src.apps.masters.test import make_everything, make_master
+from src.apps.masters.test import make_everything, make_master, make_client
 from src.apps.orders.models import Order
 from src.apps.orders.views import OrderListCreateView
 
@@ -21,14 +21,8 @@ class OrderCreateTestCase(TestCase):
     def setUp(self):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = Client.objects.create(
-            user=self.user,
-            first_name='client',
-            avatar=utils.make_in_memory_image('supername'),
-            gender=Gender.MALE,
-            date_of_birth=timezone.now(),
-        )
-        token, _ = Token.objects.get_or_create(user=self.user)
+        self.client_object = make_client(self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

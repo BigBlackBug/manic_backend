@@ -7,7 +7,7 @@ from src.apps.authentication.utils import Gender
 from src.apps.categories.models import Service
 from src.apps.core import utils
 from src.apps.masters.models import Master, MasterStatus
-from src.apps.masters.test import make_category, make_client
+from src.apps.masters.test import make_category, make_client, make_master
 from src.apps.masters.views import MasterListCreateView
 
 
@@ -15,13 +15,14 @@ class CreateMasterTestCase(APITestCase):
     def setUp(self):
         make_category('Сервис')
         self.user = PhoneAuthUser.objects.create(phone='777')
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=make_master('mas',10,
+                                                                  self.user, False))
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def test_create_client_existing_account(self):
-        old_user = make_client().user
-        token, _ = Token.objects.get_or_create(user=old_user)
+    def  test_create_master_existing_account(self):
+        old_client = make_client()
+        token, _ = Token.objects.get_or_create(client=old_client)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

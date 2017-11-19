@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.apps.core.permissions import IsClient, IsMaster, HasAccount
+from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.orders import cloudpayments, order_utils
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer
@@ -17,7 +17,8 @@ from .serializers import OrderCreateSerializer, OrderListSerializer
 class OrderListCreateView(generics.ListCreateAPIView):
     view_name = 'order-list-create'
     queryset = Order.objects.all()
-    permission_classes = (IsAuthenticated, HasAccount)
+    # TODO isactivated
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request, *args, **kwargs):
         """
@@ -70,7 +71,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         400 Bad Request
         """
         # only clients may create orders
-        if not request.user.is_client():
+        if not request.user.is_client(request):
             raise PermissionDenied(detail=IsClient.message)
         return super().post(request, *args, **kwargs)
 
@@ -84,7 +85,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return OrderListSerializer
 
     def get_queryset(self):
-        if self.request.user.is_master():
+        if self.request.user.is_master(self.request):
             order_items = OrderItem.objects.filter(
                 master=self.request.user.master).select_related(
                 'order').order_by('-order__date').all()
@@ -141,7 +142,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
 class CancelOrderView(generics.DestroyAPIView):
     view_name = 'cancel-order'
     queryset = Order.objects.all()
-    permission_classes = (IsAuthenticated, HasAccount)
+    # TODO isactivated
+    permission_classes = (IsAuthenticated,)
     # TODO needed by swagger
     serializer_class = OrderListSerializer
 
@@ -167,7 +169,7 @@ class CancelOrderView(generics.DestroyAPIView):
         """
         order = self.get_object()
 
-        if request.user.is_client():
+        if request.user.is_client(request):
             # check is the order belongs to the client
             if order.client == request.user.client:
                 order.delete()

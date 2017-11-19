@@ -15,7 +15,7 @@ from src.apps.core.utils import Folders
 class MasterStatus:
     DUMMY = 'DUMMY'
     ON_REVIEW = 'ON_REVIEW'
-    VERIFIED = 'VEFIRIED'
+    VERIFIED = 'VERIFIED'
 
     CHOICES = (
         (DUMMY, 'Свежий мастер'),
@@ -36,7 +36,7 @@ class Master(UserProfile):
 
     about = models.TextField(max_length=512, blank=True)
 
-    email = models.EmailField()
+    email = models.EmailField(null=True)
 
     status = models.CharField(max_length=9,
                               choices=MasterStatus.CHOICES,
@@ -47,6 +47,9 @@ class Master(UserProfile):
     # portfolio - list of 'portfolio images'
     # order_items - list of 'order items'
     # feedback - list of 'feedback' items
+
+    def activated(self):
+        return self.status == MasterStatus.VERIFIED
 
     def add_rating(self, new_rating):
         self.rating = (self.rating + new_rating) / self.feedback.count()

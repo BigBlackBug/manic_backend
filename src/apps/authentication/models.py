@@ -8,13 +8,24 @@ from src.apps.core.utils import Folders
 from .utils import Gender
 
 
+class RegistrationType:
+    MASTER = 'MASTER'
+    CLIENT = 'CLIENT'
+
+    CHOICES = (
+        (MASTER, 'Master'),
+        (CLIENT, 'Client'),
+    )
+
+
 class Registration(models.Model):
     """
     A temporary class that represents application login/registration process
     """
     phone = models.CharField(max_length=40, unique=True)
     verification_code = models.CharField(max_length=4)
-
+    # TODO choices
+    type = models.CharField(max_length=6, choices=RegistrationType.CHOICES)
     # TODO create a cron which cleans up expired registrations
     expires = models.DateTimeField()
 
@@ -27,29 +38,30 @@ class PhoneAuthUser(models.Model):
     """
     A base class for a User who's authenticated through a phone number
     """
-    # FK fields
-    # auth_token
-
     phone = models.CharField(max_length=40, unique=True)
 
-    def is_client(self):
+    # FK master, client
+    def is_client(self, request):
         try:
-            self.client
+            self.client and request.auth == self.client.token
         except AttributeError as e:
             return False
         else:
             return True
 
-    def is_master(self):
+    def delete_token(self, request):
+        if self.is_client(request):
+            self.client.token.delete()
+        elif self.is_master(request):
+            self.master.token.delete()
+
+    def is_master(self, request):
         try:
-            self.master
+            self.master and request.auth == self.master.token
         except AttributeError as e:
             return False
         else:
             return True
-
-    def has_account(self):
-        return self.is_client() or self.is_master()
 
     @property
     def is_active(self):
@@ -83,10 +95,11 @@ class Token(models.Model):
     The default authorization token model.
     """
     key = models.CharField(_("Key"), max_length=40, primary_key=True)
-    user = models.OneToOneField(
-        PhoneAuthUser, related_name='auth_token',
-        on_delete=models.CASCADE, verbose_name=_("User")
-    )
+    master = models.OneToOneField('masters.Master',
+                                  related_name="token", null=True)
+    client = models.OneToOneField('clients.Client',
+                                  related_name="token", null=True)
+
     created = models.DateTimeField(_("Created"), auto_now_add=True)
 
     class Meta:
@@ -110,7 +123,7 @@ class UserProfile(models.Model):
                                 related_name="%(class)s",
                                 related_query_name="%(class)s", )
 
-    first_name = models.CharField(max_length=32)
+    first_name = models.CharField(max_length=32, null=True)
     avatar = models.ImageField(upload_to=Folders.avatars, blank=True, null=True)
 
     gender = models.CharField(
@@ -119,7 +132,10 @@ class UserProfile(models.Model):
         default=Gender.FEMALE,
     )
 
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True)
+
+    def activated(self):
+        raise NotImplementedError()
 
     def __str__(self):
         return f'{self.first_name}'

@@ -11,6 +11,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(label=_("Phone"))
     verification_code = serializers.CharField(max_length=4, required=False)
     expires = serializers.DateTimeField(read_only=True)
+    type = serializers.CharField(max_length=6)
 
     REGISTRATION_LIFETIME = timedelta(minutes=5)
 

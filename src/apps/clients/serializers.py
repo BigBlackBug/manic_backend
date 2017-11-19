@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
-from .models import Client, Address, PaymentCard
+from .models import Client, Address, PaymentCard, ClientStatus
 
 logger = logging.getLogger(__name__)
 
@@ -76,15 +76,18 @@ class ClientSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         address_data = validated_data.pop('address', None)
-        client = Client.objects.create(user=self.context['request'].user,
-                                       **validated_data)
+        client = self.context['request'].user.client
+        client.status = ClientStatus.CREATED
+        for (key, value) in validated_data.items():
+            setattr(client, key, value)
+
         if address_data:
             address_serializer = AddressSerializer(data=address_data, context={
                 'client': client
             })
             address_serializer.is_valid(raise_exception=True)
             address_serializer.save()
-
+        client.save()
         return client
 
     def validate_phone(self, phone):
@@ -120,8 +123,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ('id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
-                  'address', 'phone', 'payment_cards', 'addresses')
+        fields = (
+        'id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
+        'address', 'phone', 'payment_cards', 'addresses')
 
 
 class SimpleClientSerializer(serializers.ModelSerializer):

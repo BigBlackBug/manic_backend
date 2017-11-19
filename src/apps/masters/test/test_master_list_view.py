@@ -12,12 +12,12 @@ from src.apps.masters.test import make_everything, make_client, make_order
 from src.apps.masters.views import MasterListCreateView
 
 
-class MastersTestCase(APITestCase):
+class MasterListTestCase(APITestCase):
     def setUp(self):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = make_client(self.user)
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

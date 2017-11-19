@@ -17,7 +17,7 @@ class ListOrderTestCase(APITestCase):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = make_client(self.user)
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -49,7 +49,7 @@ class ListOrderTestCase(APITestCase):
     def test_list_master_orders(self):
         master = Master.objects.get(first_name='VASYA')
         # logging in as a master
-        token, _ = Token.objects.get_or_create(user=master.user)
+        token, _ = Token.objects.get_or_create(master=master)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

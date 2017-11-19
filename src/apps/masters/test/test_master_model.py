@@ -13,7 +13,7 @@ class MasterTestCase(APITestCase):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = make_client(self.user)
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

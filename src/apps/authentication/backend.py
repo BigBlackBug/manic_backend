@@ -56,15 +56,17 @@ class TokenAuthentication(BaseAuthentication):
     def authenticate_credentials(self, key):
         model = self.get_model()
         try:
-            token = model.objects.select_related('user').get(key=key)
+            token = model.objects.select_related('master', 'client').get(key=key)
         except model.DoesNotExist:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
-        if not token.user.is_active:
+        if token.master:
+            return token.master.user, token
+        elif token.client:
+            return token.client.user, token
+        else:
             raise exceptions.AuthenticationFailed(
                 _('User inactive or deleted.'))
-
-        return token.user, token
 
     def authenticate_header(self, request):
         return self.keyword

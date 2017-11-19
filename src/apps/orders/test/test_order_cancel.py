@@ -22,7 +22,7 @@ class MasterCancelOrderTestCase(APITestCase):
         self.client_object = make_client(self.user)
         self.master_object = Master.objects.get(first_name='VASYA')
 
-        token, _ = Token.objects.get_or_create(user=self.master_object.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -100,7 +100,7 @@ class ClientCancelOrderTestCase(APITestCase):
         make_everything()
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = make_client(self.user)
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -128,8 +128,7 @@ class ClientCancelOrderTestCase(APITestCase):
                                 service=service,
                                 time=datetime.time(hour=11, minute=00))
 
-        new_client = make_client()
-        token, _ = Token.objects.get_or_create(user=new_client.user)
+        token, _ = Token.objects.get_or_create(client=make_client())
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

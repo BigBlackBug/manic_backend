@@ -6,13 +6,28 @@ from django.utils import timezone
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.authentication.utils import Gender
-from src.apps.categories.models import ServiceCategory, Service
+from src.apps.categories.models import ServiceCategory, Service, DisplayItem
 from src.apps.clients.models import Address, Client, ClientStatus
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot, \
     MasterStatus
 from src.apps.masters.receivers import *
 from src.apps.orders.models import Order, OrderItem, OrderStatus
+
+
+def make_display_item(*categories, name=None, special=None):
+    if len(categories) == 1:
+        di = DisplayItem.objects.create()
+        di.categories.add(categories[0])
+    else:
+        di = DisplayItem.objects.create(name=name,
+                                        image=utils.make_in_memory_image(
+                                            'supername'),
+                                        special=special and {
+                                            'type': 'composite'})
+        for category in categories:
+            di.categories.add(category)
+    return di
 
 
 def make_category(category_name):
@@ -36,19 +51,20 @@ def make_category(category_name):
     return category
 
 
-def make_master(name, lon, user=None, activated=True):
+def make_master(name, lon, about='awesome master!', user=None, activated=True):
     randstring = str(random.randint(1000, 2000))
     if not user:
         user = PhoneAuthUser.objects.create(phone=randstring)
     if activated:
         master = Master.objects.create(
             user=user, first_name=name,
+            about=about,
             email=randstring + 'bigblackbugg@gmail.com',
             avatar=utils.make_in_memory_image('supername'),
             status=MasterStatus.VERIFIED,
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
-            location=Location.objects.create(lat=10,lon=lon))
+            location=Location.objects.create(lat=10, lon=lon))
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
@@ -63,7 +79,7 @@ def make_token(client=None, master=None):
         token, _ = Token.objects.get_or_create(
             master=master)
     else:
-        pass
+        raise ValueError('provide either client or master')
     return token
 
 
@@ -93,7 +109,7 @@ def make_client(user=None, activated=True):
 
 def make_everything():
     # making an auth token
-    vasya = make_master("VASYA", 11.0)
+    vasya = make_master("VASYA", 11.0, about='a terrible master')
     petya = make_master("PETYA", 12.0)
 
     hands = make_category("Маникюр")
@@ -153,10 +169,10 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, time, status=OrderStatus.CREATED,
+def make_order(client, service, master, order_time, status=OrderStatus.CREATED,
                order_date=timezone.now().date()):
     order = Order.objects.create(client=client, date=order_date,
-                                 time=time, status=status)
+                                 time=order_time, status=status)
     schedule = master.get_schedule(order_date)
     slot = schedule.get_slot(time)
 

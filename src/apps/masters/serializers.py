@@ -211,10 +211,10 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         services = validated_data.pop('services', [])
-
-        master = Master.objects.create(user=self.context['request'].user,
-                                       status=MasterStatus.ON_REVIEW,
-                                       **validated_data)
+        master = self.context['request'].user.master
+        master.status = MasterStatus.ON_REVIEW
+        for (key, value) in validated_data.items():
+            setattr(master, key, value)
 
         for service in services:
             master.services.add(Service.objects.get(pk=service))

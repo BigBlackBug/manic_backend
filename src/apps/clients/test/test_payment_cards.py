@@ -9,19 +9,14 @@ from src.apps.clients.models import Client, Address, PaymentCard
 from src.apps.clients.views import AddPaymentCardView, DeletePaymentCardView
 from src.apps.core import utils
 from src.apps.core.models import Location
+from src.apps.masters.test import make_client
 
 
 class PaymentCardsTestCase(APITestCase):
     def setUp(self):
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = Client.objects.create(
-            user=self.user,
-            first_name='client',
-            avatar=utils.make_in_memory_image('supername'),
-            gender=Gender.MALE,
-            date_of_birth=timezone.now(),
-        )
-        token, _ = Token.objects.get_or_create(user=self.user)
+        self.client_object = make_client(self.user)
+        token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

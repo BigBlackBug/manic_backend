@@ -14,8 +14,7 @@ from src.apps.masters.views import MasterDetailUpdateView
 class UpdateMasterTestCase(APITestCase):
     def setUp(self):
         self.master_object = make_master('NAME', 10)
-        self.user = self.master_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

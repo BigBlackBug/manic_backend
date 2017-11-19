@@ -146,7 +146,7 @@ class FilteringParams:
 
     @staticmethod
     def _parse_client(request):
-        if not request.user.is_client():
+        if not request.user.is_client(request):
             return None
 
         return request.user.client

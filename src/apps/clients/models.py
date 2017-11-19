@@ -6,6 +6,16 @@ from src.apps.authentication.models import UserProfile
 from src.apps.core.models import Location
 
 
+class ClientStatus:
+    DUMMY = 'DUMMY'
+    CREATED = 'CREATED'
+
+    CHOICES = (
+        (DUMMY, 'Свежий аккаунт'),
+        (CREATED, 'Подтверждён'),
+    )
+
+
 class Client(UserProfile):
     # FK fields
     # orders
@@ -13,6 +23,12 @@ class Client(UserProfile):
     # addresses
 
     tip = models.IntegerField(default=5)
+    status = models.CharField(max_length=9,
+                              choices=ClientStatus.CHOICES,
+                              default=ClientStatus.DUMMY)
+
+    def activated(self):
+        return self.status == ClientStatus.CREATED
 
     @property
     def home_address(self):

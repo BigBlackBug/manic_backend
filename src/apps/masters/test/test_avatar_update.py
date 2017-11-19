@@ -13,7 +13,7 @@ class AvatarUpdateTestCase(APITestCase):
     def setUp(self):
         self.master_object = make_master('NAME', 10)
         self.user = self.master_object.user
-        token, _ = Token.objects.get_or_create(user=self.user)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -43,7 +43,7 @@ class AvatarUpdateTestCase(APITestCase):
     def test_upload_not_master(self):
         client_object = make_client()
 
-        token, _ = Token.objects.get_or_create(user=client_object.user)
+        token, _ = Token.objects.get_or_create(client=client_object)
 
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 

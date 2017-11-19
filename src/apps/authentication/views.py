@@ -8,8 +8,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.authentication import sms_verification
+from src.apps.clients.models import Client
 from src.apps.core.views import NamedAPIView
-from .models import Registration, PhoneAuthUser, Token
+from src.apps.masters.models import Master
+from .models import Registration, PhoneAuthUser, Token, RegistrationType
 from .serializers import RegistrationSerializer, UpdateRegistrationSerializer
 
 logger = logging.getLogger(__name__)
@@ -27,7 +29,7 @@ class LogoutView(NamedAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request):
-        request.user.auth_token.delete()
+        request.user.delete_token(request)
         logger.info(f'User {request.user.phone} has logged out')
         return Response(status=status.HTTP_200_OK)
 
@@ -40,7 +42,7 @@ class CreateRegistrationView(NamedAPIView):
         Creates or replaces a registration for the provided number
 
         Input:
-        ```{ 'phone':'88005553535' }```
+        ```{ 'phone':'88005553535', 'type':'MASTER/CLIENT' }```
 
         Response:
         201 Created
@@ -94,6 +96,8 @@ class UpdateRegistrationView(NamedAPIView):
 
         Response:
         200 OK
+
+        `user_id` is a newly created masters id or
         ``` { 'user_id':100500, 'token':'TOKEN' } ```
 
         404 Not Found
@@ -121,13 +125,22 @@ class UpdateRegistrationView(NamedAPIView):
             logger.debug(f'Creating a new token for phone {registration.phone}')
             user, created = PhoneAuthUser.objects.get_or_create(
                 phone=registration.phone)
-            token, _ = Token.objects.get_or_create(user=user)
+            if registration.type == RegistrationType.MASTER:
+                master = Master.objects.create(user=user)
+                user_id = master.id
+                token, _ = Token.objects.get_or_create(master=master)
+            elif registration.type == RegistrationType.CLIENT:
+                client = Client.objects.create(user=user)
+                user_id = client.id
+                token, _ = Token.objects.get_or_create(client=client)
+            else:
+                raise ValueError('Invalid registration type')
 
             logger.debug(f'Deleting the registration {registration.phone}')
             # we don't need the registration anymore
             registration.delete()
 
-            return Response(data={'user_id': user.id, 'token': token.key})
+            return Response(data={'id': user_id, 'token': token.key})
 
     def delete(self, request: Request, reg_id: str):
         """
