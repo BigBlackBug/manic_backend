@@ -174,7 +174,7 @@ def make_order(client, service, master, order_time, status=OrderStatus.CREATED,
     order = Order.objects.create(client=client, date=order_date,
                                  time=order_time, status=status)
     schedule = master.get_schedule(order_date)
-    slot = schedule.get_slot(time)
+    slot = schedule.get_slot(order_time)
 
     order_item = OrderItem.objects.create(service=service,
                                           master=master,
