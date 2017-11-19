@@ -97,7 +97,7 @@ class UpdateRegistrationView(NamedAPIView):
         Response:
         200 OK
 
-        `user_id` is a newly created masters id or
+        `user_id` is a newly created master's or client's ID
         ``` { 'user_id':100500, 'token':'TOKEN' } ```
 
         404 Not Found
