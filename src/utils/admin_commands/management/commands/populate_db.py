@@ -29,7 +29,7 @@ def _make_everything():
         vasya.services.add(service)
     vasya.save()
 
-    token, _ = Token.objects.get_or_create(user=vasya.user,
+    token, _ = Token.objects.get_or_create(master=vasya,
                                            key='master_token')
 
     for service in feet.services.all():
@@ -87,7 +87,7 @@ def _make_everything():
     schedule.save()
 
     client = make_client()
-    token, _ = Token.objects.get_or_create(user=client.user,
+    token, _ = Token.objects.get_or_create(client=client,
                                            key='client_token')
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
