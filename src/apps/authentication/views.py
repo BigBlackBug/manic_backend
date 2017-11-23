@@ -126,11 +126,11 @@ class UpdateRegistrationView(NamedAPIView):
             user, created = PhoneAuthUser.objects.get_or_create(
                 phone=registration.phone)
             if registration.type == RegistrationType.MASTER:
-                master = Master.objects.create(user=user)
+                master, created = Master.objects.get_or_create(user=user)
                 user_id = master.id
                 token, _ = Token.objects.get_or_create(master=master)
             elif registration.type == RegistrationType.CLIENT:
-                client = Client.objects.create(user=user)
+                client, created = Client.objects.get_or_create(user=user)
                 user_id = client.id
                 token, _ = Token.objects.get_or_create(client=client)
             else:
