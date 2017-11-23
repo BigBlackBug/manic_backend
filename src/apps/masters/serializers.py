@@ -185,11 +185,16 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
         fields = ('time_slots', 'date')
 
 
-class MasterCreateSerializer(serializers.ModelSerializer):
-    services = serializers.ListField(
-        child=serializers.IntegerField(min_value=0),
-        required=True, write_only=True)
+class IdListField(serializers.Field):
+    def to_internal_value(self, data):
+        if isinstance(data, str):
+            return [service.strip() for service in data.split(',')]
+        else:
+            raise ValidationError('Wrong field type')
 
+
+class MasterCreateSerializer(serializers.ModelSerializer):
+    services = IdListField(write_only=True, required=True)
     avatar = serializers.ImageField(write_only=True, required=True)
 
     # only used during update

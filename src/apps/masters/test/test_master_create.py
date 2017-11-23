@@ -41,7 +41,7 @@ class CreateMasterTestCase(APITestCase):
             'gender': Gender.MALE,
             'date_of_birth': utils.get_date(-100),
             'email': 'a@a.com',
-            'services': [service.id for service in Service.objects.all()],
+            'services': ','.join([str(service.id) for service in Service.objects.all()]),
             'avatar': utils.make_in_memory_image('azz')
         }, format='multipart')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)

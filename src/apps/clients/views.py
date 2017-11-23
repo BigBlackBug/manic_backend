@@ -65,7 +65,8 @@ class ClientCreateView(generics.CreateAPIView):
 
         if not request.user.client.status == ClientStatus.DUMMY:
             raise PermissionDenied(
-                detail='This phone already has an associated master account')
+                detail=f'Unable to initialize client '
+                       f'with id {request.user.client.id}')
         return super().post(request, **kwargs)
 
 

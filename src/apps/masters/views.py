@@ -107,7 +107,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
           'about': 'I am god',
           'avatar':'multi-part-image',
           'email':'super@cool.com',
-          'services':[1,2,3],
+          'services':'1,2,3',
         }
         ```
 
@@ -123,8 +123,8 @@ class MasterListCreateView(generics.ListCreateAPIView):
                 detail='A user must be a Master to access this endpoint')
 
         if not request.user.master.status == MasterStatus.DUMMY:
-            raise PermissionDenied(
-                detail='This phone already has an associated master account')
+            raise PermissionDenied(detail=f'Unable to initialize master '
+                                          f'with id {request.user.master.id}')
 
         serializer = MasterCreateSerializer(
             data=request.data, context=self.get_serializer_context())
