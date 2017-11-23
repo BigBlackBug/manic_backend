@@ -10,7 +10,12 @@ RUN apt-get update && \
     apt-get install -y postgresql postgresql-client && \
     pip3 install uwsgi
 
-RUN mkdir /code/
+RUN \
+    groupadd code_executor_group && \
+    useradd code_executor_user -g code_executor_group -u 1000
+
+RUN mkdir /code/ && chown -R code_executor_user:code_executor_group /code
+
 WORKDIR /code/
 
 ADD ./requirements.txt /code/requirements.txt

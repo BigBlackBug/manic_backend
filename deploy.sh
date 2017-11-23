@@ -26,7 +26,6 @@ COMPOSE_OPTS="-f ./docker-compose.yml -p 4hands_${FORHANDS_PROFILE}"
 # TODO a super shitty fix with chown
 
 ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
-    chown -R ubuntu:ubuntu /var/lib/4hands2go/${FORHANDS_PROFILE}-media/
     docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
     cd ~/${FORHANDS_PROFILE}
     docker-compose ${COMPOSE_OPTS} pull
