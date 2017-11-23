@@ -4,6 +4,9 @@
 
 FROM bigblackbug/4hands2go-base:latest
 
+RUN mkdir -p /var/lib/4hands2go/
+RUN chown -R ubuntu /var/lib/4hands2go/
+
 ADD . /code/
 
 # uWSGI will listen on this port
