@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True,
                                         serialize=False, verbose_name='ID')),
-                ('cryptogram', models.CharField(max_length=64)),
+                ('cryptogram', models.CharField(max_length=512)),
                 ('client_name_on_card', models.CharField(max_length=64)),
                 ('card_number', models.CharField(max_length=19)),
                 ('client',

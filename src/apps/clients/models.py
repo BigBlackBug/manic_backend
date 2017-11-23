@@ -70,7 +70,7 @@ class Address(models.Model):
 
 class PaymentCard(models.Model):
     # TODO is it 64?? check back
-    cryptogram = models.CharField(max_length=64)
+    cryptogram = models.CharField(max_length=512)
     client_name_on_card = models.CharField(max_length=64)
     card_number = models.CharField(max_length=19)
     client = models.ForeignKey(Client, on_delete=models.CASCADE,
