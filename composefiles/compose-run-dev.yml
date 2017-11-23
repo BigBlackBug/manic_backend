@@ -31,7 +31,6 @@ services:
         - DJANGO_RUN_COLLECTSTATIC=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
-        - OWNER_USER_GROUP=${OWNER_USER_GROUP}
         # temporarily disabling 'time of commute' calculations
         - USE_GMAPS_API=False
     links:
