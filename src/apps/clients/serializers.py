@@ -70,7 +70,8 @@ class ClientSerializer(serializers.ModelSerializer):
     date_of_birth = serializers.DateField()
     gender = serializers.CharField(max_length=1)
     first_name = serializers.CharField(max_length=32)
-    phone = serializers.CharField(source='user.phone', required=False)
+    phone = serializers.CharField(source='user.phone', required=False,
+                                  read_only=True)
     payment_cards = PaymentCardSerializer(many=True, read_only=True)
     addresses = AddressSerializer(read_only=True, many=True)
 
