@@ -49,8 +49,5 @@ if [ "X$DJANGO_RUN_CREATESUPERUSER" = 'Xyes' ]; then
       User.objects.filter(email='$ADMIN_EMAIL').delete();\
       User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')"
 fi
-# a shitty temporary(?) fix
-mkdir -p /var/lib/4hands2go/
-chown -R ubuntu /var/lib/4hands2go/
 
 exec "$@"
