@@ -8,11 +8,11 @@ from src.apps.core.models import Location
 
 class ClientStatus:
     DUMMY = 'DUMMY'
-    CREATED = 'CREATED'
+    VERIFIED = 'VERIFIED'
 
     CHOICES = (
         (DUMMY, 'Свежий аккаунт'),
-        (CREATED, 'Подтверждён'),
+        (VERIFIED, 'Подтверждён'),
     )
 
 
@@ -28,7 +28,7 @@ class Client(UserProfile):
                               default=ClientStatus.DUMMY)
 
     def activated(self):
-        return self.status == ClientStatus.CREATED
+        return self.status == ClientStatus.VERIFIED
 
     @property
     def home_address(self):

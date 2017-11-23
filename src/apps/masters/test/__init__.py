@@ -73,7 +73,7 @@ def make_client(user=None, activated=True):
             phone=str(random.randint(1000, 2000)))
     if activated:
         client = Client.objects.create(user=user, first_name='client',
-                                       status=ClientStatus.CREATED,
+                                       status=ClientStatus.VERIFIED,
                                        avatar=utils.make_in_memory_image(
                                            'supername'),
                                        gender=Gender.MALE,

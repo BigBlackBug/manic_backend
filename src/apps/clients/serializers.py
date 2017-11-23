@@ -77,7 +77,7 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         address_data = validated_data.pop('address', None)
         client = self.context['request'].user.client
-        client.status = ClientStatus.CREATED
+        client.status = ClientStatus.VERIFIED
         for (key, value) in validated_data.items():
             setattr(client, key, value)
 
