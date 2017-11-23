@@ -70,13 +70,16 @@ class ClientSerializer(serializers.ModelSerializer):
     date_of_birth = serializers.DateField()
     gender = serializers.CharField(max_length=1)
     first_name = serializers.CharField(max_length=32)
-    phone = serializers.CharField(source='user.phone', required=False,
-                                  read_only=True)
+    phone = serializers.CharField(source='user.phone', required=False)
     payment_cards = PaymentCardSerializer(many=True, read_only=True)
     addresses = AddressSerializer(read_only=True, many=True)
 
     def create(self, validated_data):
         address_data = validated_data.pop('address', None)
+        phone = validated_data.pop('phone', None)
+        if phone:
+            raise ValidationError("You can not reset the client's phone")
+
         client = self.context['request'].user.client
         client.status = ClientStatus.VERIFIED
         for (key, value) in validated_data.items():

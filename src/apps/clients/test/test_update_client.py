@@ -36,7 +36,7 @@ class UpdateClientTestCase(APITestCase):
             data={
                 'phone': '88005553536'
             }, format='json')
-        # changing first_name is forbidden
+        # changing phone is forbidden
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_tip(self):
