@@ -23,8 +23,6 @@ scp -o "StrictHostKeyChecking no" composefiles/compose-run-${FORHANDS_PROFILE}.y
 COMPOSE_OPTS="-f ./docker-compose.yml -p 4hands_${FORHANDS_PROFILE}"
 
 # starting containers on the remote server
-# TODO a super shitty fix with chown
-
 ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
     docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
     cd ~/${FORHANDS_PROFILE}
@@ -32,6 +30,9 @@ ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
     docker-compose ${COMPOSE_OPTS} down
     DEPLOY_PORT=${DEPLOY_PORT} DEPLOY_HTTPS_PORT=${DEPLOY_HTTPS_PORT} \
     docker-compose ${COMPOSE_OPTS} up -d
+    echo "trying a shitty fix"
+    sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-media/
+    sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-static/
 EOF
 
 echo "Done!"

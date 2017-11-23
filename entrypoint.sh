@@ -49,7 +49,4 @@ if [ "X$DJANGO_RUN_CREATESUPERUSER" = 'Xyes' ]; then
       User.objects.filter(email='$ADMIN_EMAIL').delete();\
       User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')"
 fi
-#TODO TEMPORARY STUB
-sudo chown -R ubuntu:ubuntu /var/lib/4hands2go/dev-media/
-sudo chown -R ubuntu:ubuntu /var/lib/4hands2go/dev-static/
 exec "$@"
