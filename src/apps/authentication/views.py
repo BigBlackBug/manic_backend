@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class LogoutView(NamedAPIView):
     """
-    Logs a client out
+    Logs a client out by deleting his token.
 
     Response:
     200 OK
