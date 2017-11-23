@@ -10,7 +10,7 @@ from src.apps.categories.models import ServiceCategory, Service, DisplayItem
 from src.apps.clients.models import Address, Client, ClientStatus
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot, \
-    MasterStatus
+    MasterStatus, PortfolioImage, PortfolioImageStatus
 from src.apps.masters.receivers import *
 from src.apps.orders.models import Order, OrderItem, OrderStatus
 
@@ -65,6 +65,10 @@ def make_master(name, lon, about='awesome master!', user=None, activated=True):
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
             location=Location.objects.create(lat=10, lon=lon))
+        PortfolioImage.objects.create(image=utils.make_in_memory_image('heyho'),
+                                      description=randstring+'description',
+                                      status=PortfolioImageStatus.ON_MODERATION,
+                                      master=master)
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
