@@ -31,6 +31,7 @@ ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
     DEPLOY_PORT=${DEPLOY_PORT} DEPLOY_HTTPS_PORT=${DEPLOY_HTTPS_PORT} \
     docker-compose ${COMPOSE_OPTS} up -d
     echo "trying a shitty fix"
+    sleep 10
     sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-media/
     sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-static/
 EOF
