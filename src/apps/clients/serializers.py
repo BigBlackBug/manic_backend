@@ -124,11 +124,20 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = (
-        'id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
-        'address', 'phone', 'payment_cards', 'addresses')
+            'id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
+            'address', 'phone', 'payment_cards', 'addresses')
 
 
 class SimpleClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ('id', 'avatar', 'first_name')
+
+
+class OrderClientSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source='user.phone')
+    home_address = AddressSerializer()
+
+    class Meta:
+        model = Client
+        fields = ('id', 'avatar', 'first_name', 'phone', 'home_address')

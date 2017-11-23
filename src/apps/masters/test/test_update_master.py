@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token
 from src.apps.categories.models import Service
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_master
+from src.apps.masters.test import make_master, make_category
 from src.apps.masters.views import MasterDetailUpdateView
 
 
@@ -47,8 +47,10 @@ class UpdateMasterTestCase(APITestCase):
     def test_update_services(self):
         master_id = self.master_object.id
         self.assertEqual(len(self.master_object.services.all()), 0)
+        make_category('usual')
 
-        new_services = [service.id for service in Service.objects.all()]
+        new_services = ','.join([str(service.id) for service
+                                 in Service.objects.all()])
         resp = self.client.patch(
             reverse(MasterDetailUpdateView.view_name, args=[master_id]), data={
                 'services': new_services
@@ -58,7 +60,7 @@ class UpdateMasterTestCase(APITestCase):
         self.master_object = Master.objects.get(pk=master_id)
         # apt number changed
         self.assertEqual(len(self.master_object.services.all()),
-                         len(new_services))
+                         Service.objects.count())
 
     def test_update_multiple(self):
         master_id = self.master_object.id

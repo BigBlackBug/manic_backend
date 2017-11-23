@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
+from src.apps.clients.serializers import OrderClientSerializer
 from src.apps.masters.models import Master, TimeSlot
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
 
@@ -20,6 +21,8 @@ class OrderItemListSerializer(serializers.BaseSerializer):
                 'category': {
                     'name': obj.service.category.name,
                 },
+                'min_duration': obj.service.min_duration,
+                'max_duration': obj.service.max_duration,
                 'name': obj.service.name,
                 'cost': obj.service.cost
             },
@@ -42,6 +45,8 @@ class OrderItemCreateSerializer(serializers.Serializer):
 
 # out
 class OrderListSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    client = OrderClientSerializer(read_only=True)
     date = serializers.DateField(read_only=True)
     time = serializers.TimeField(read_only=True, format='%H:%M')
     order_items = OrderItemListSerializer(many=True, read_only=True)

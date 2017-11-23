@@ -101,6 +101,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
         Input:
         ```
         {
+          'id': 100500,
           'first_name': 'Maria',
           'gender': 'F/M',
           'date_of_birth': '1988-10-29',
@@ -349,7 +350,7 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
           'email':'supercool@master.com',
           'gender':'F',
           'about': 'I am super cool',
-          'services':[1,2,3,4],
+          'services':'1,2,3,4',
           'location': {'lat':10, 'lon':12}
         }
 

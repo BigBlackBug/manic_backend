@@ -188,6 +188,8 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
 class IdListField(serializers.Field):
     def to_internal_value(self, data):
         if isinstance(data, str):
+            if len(data) == 0:
+                raise ValidationError('Empty Id List field')
             return [service.strip() for service in data.split(',')]
         else:
             raise ValidationError('Wrong field type')
@@ -228,5 +230,5 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Master
-        fields = ('first_name', 'gender', 'avatar', 'date_of_birth',
+        fields = ('id', 'first_name', 'gender', 'avatar', 'date_of_birth',
                   'email', 'about', 'services', 'location')

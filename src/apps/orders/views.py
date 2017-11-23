@@ -108,18 +108,28 @@ class OrderListCreateView(generics.ListCreateAPIView):
         ```
         {
           'active': [{
+            'id': 100500,
             'date': '2017-10-18',
             'payment_type':'CASH',
             'time': '11:00',
-            'status': 'CREATED/ACCEPTED',
+            'status': 'CREATED/ACCEPTED/STARTED/DONE',
             'special': {},
             'order_items': [{
               'service': {
                   'name': 'super service',
                   'cost': 100,
+                  'min_duration': 30,
+                  'max_duration': 60,
                   'category':{
-                  'name': 'super category'
-                }
+                    'name': 'super category'
+                  }
+              },
+              'client':{
+                'id':42,
+                'avatar':'link-to-img',
+                'first_name':'Johnny',
+                'phone':'88005553535',
+                'home_address':{**Address** model}
               },
               'master': {
                   'first_name': 'Vasya',

@@ -153,7 +153,9 @@ class MeClient(generics.RetrieveAPIView):
         200 OK
                 ```
         {
+          'id': 1,
           'first_name': 'Maria',
+          'avatar':'link-to-image',
           'phone': '88005553535'
           'gender': 'F/M',
           'date_of_birth': '1988-10-29',
@@ -174,7 +176,7 @@ class MeClient(generics.RetrieveAPIView):
           }],
           'payment_cards': [{
             'id':1,
-            'cryprogram':'cryptogram',
+            'cryptogram':'cryptogram',
             'client_name_on_card':'VASYA VASIN',
             'card_number':'0000000000000000'
           }]
