@@ -10,9 +10,10 @@ RUN apt-get update && \
     apt-get install -y postgresql postgresql-client && \
     pip3 install uwsgi
 
+# replace 1000 with actual UID
 RUN \
     groupadd code_executor_group && \
-    useradd code_executor_user -g code_executor_group -u 1000
+    useradd code_executor_user -g code_executor_group -u 0
 
 RUN mkdir /code/ && chown -R code_executor_user:code_executor_group /code
 
