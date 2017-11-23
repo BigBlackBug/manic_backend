@@ -155,6 +155,7 @@ class MeClient(generics.RetrieveAPIView):
         {
           'id': 1,
           'first_name': 'Maria',
+          'status': 'VERIFIED',
           'avatar':'link-to-image',
           'phone': '88005553535'
           'gender': 'F/M',

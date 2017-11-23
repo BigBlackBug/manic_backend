@@ -125,7 +125,7 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = (
             'id', 'avatar', 'first_name', 'gender', 'date_of_birth', 'tip',
-            'address', 'phone', 'payment_cards', 'addresses')
+            'address', 'phone', 'payment_cards', 'addresses', 'status')
 
 
 class SimpleClientSerializer(serializers.ModelSerializer):
