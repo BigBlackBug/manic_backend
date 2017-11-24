@@ -76,4 +76,5 @@ class PaymentCard(models.Model):
                                related_name='payment_cards')
 
     def __str__(self):
-        return f'Card {self.id} of {self.client.id}'
+        return f'Card #{self.id}, **{self.card_number[-4:]}' \
+               f' of client_id: {self.client.id}'
