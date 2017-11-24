@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'src.apps.orders',
     'src.utils.admin_commands',
 
+    'rest_framework',
     'rest_framework_swagger',
 ]
 
