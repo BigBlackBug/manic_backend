@@ -57,6 +57,8 @@ class OrderListSerializer(serializers.Serializer):
 
 # in
 class OrderCreateSerializer(serializers.Serializer):
+    # because the POST method should return certain fields
+    id = serializers.IntegerField(read_only=True)
     date = serializers.DateField()
     time = serializers.TimeField(format='%H:%M')
     order_items = OrderItemCreateSerializer(many=True, write_only=True)
