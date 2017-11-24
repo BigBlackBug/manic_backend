@@ -34,6 +34,7 @@ class CompleteOrderTestCase(APITestCase):
                                 service=service,
                                 time=datetime.time(hour=11, minute=00))
         order_1.time_started = timezone.now()
+        order_1.status = OrderStatus.STARTED
         order_1.save()
         resp = self.client.patch(
             reverse(CompleteOrderView.view_name, args=[order_1.id]))
