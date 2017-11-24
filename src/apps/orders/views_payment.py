@@ -1,7 +1,8 @@
-from urllib.parse import urlparse
+import logging
 
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -96,6 +97,7 @@ class FinishS3DView(generics.GenericAPIView):
     # TODO swagger needs this
     queryset = Order.objects.all()
     serializer_class = OrderListSerializer
+    parser_classes = (FormParser,)
     # this endpoint is a callback
     # so it should be accessible for everyone
     permission_classes = ()
