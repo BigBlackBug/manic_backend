@@ -9,12 +9,10 @@ from src.apps.masters.models import Master
 
 
 class OrderStatus:
-    CREATED = 'CREATED'
     ACCEPTED = 'ACCEPTED'
     STARTED = 'STARTED'
     DONE = 'DONE'
     CHOICES = (
-        (CREATED, 'Создан'),
         (ACCEPTED, 'Принят Мастером'),
         (STARTED, 'Начат'),
         (DONE, 'Завершён'),
@@ -86,7 +84,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=8,
         choices=OrderStatus.CHOICES,
-        default=OrderStatus.CREATED,
+        default=OrderStatus.ACCEPTED,
     )
 
     time_started = models.DateTimeField(null=True)

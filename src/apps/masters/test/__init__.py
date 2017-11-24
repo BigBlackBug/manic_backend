@@ -153,7 +153,7 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, time, status=OrderStatus.CREATED,
+def make_order(client, service, master, time, status=OrderStatus.ACCEPTED,
                order_date=timezone.now().date()):
     order = Order.objects.create(client=client, date=order_date,
                                  time=time, status=status)
@@ -171,7 +171,7 @@ def make_order(client, service, master, time, status=OrderStatus.CREATED,
 
 
 def make_order_services(client, services, master, order_time,
-                        status=OrderStatus.CREATED, order_date=timezone.now()
+                        status=OrderStatus.ACCEPTED, order_date=timezone.now()
                         .date(), locked=False):
     order = Order.objects.create(client=client, date=order_date,
                                  time=order_time, status=status)

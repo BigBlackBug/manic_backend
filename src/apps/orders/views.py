@@ -112,7 +112,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
             'date': '2017-10-18',
             'payment_type':'CASH',
             'time': '11:00',
-            'status': 'CREATED/ACCEPTED/STARTED/DONE',
+            'status': 'ACCEPTED/STARTED/DONE',
             'special': {},
             'order_items': [{
               'service': {
