@@ -58,7 +58,7 @@ class PayForOrderView(generics.GenericAPIView):
         card = PaymentCard.objects.get(pk=card_id)
         if card not in request.user.client.payment_cards.all():
             raise ValidationError('Trying to use someone else\'s card')
-        s3d_url = f'{reverse(FinishS3DView.view_name)}?order_id={order.id}'
+        s3d_url = reverse(FinishS3DView.view_name)
         return cloudpayments.process_payment(card, order, ip_address,
                                              s3d_url)
 
