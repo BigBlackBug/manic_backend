@@ -14,7 +14,6 @@ services:
       - /var/lib/4hands2go/dev-media:/var/lib/4hands2go/media
       - /var/lib/4hands2go/dev-static:/var/lib/4hands2go/static
 
-# TODO gotta change ownership of the media folder on the host to the current user
 # app is available on port 8000 by default
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -26,7 +25,7 @@ services:
         - DATABASE_PASSWORD=4hands2go_dev
         - DJANGO_RUN_MIGRATIONS=yes
         - DJANGO_RUN_CREATESUPERUSER=yes
-        - DJANGO_RECREATE_TEST_DATA=yes
+        - DJANGO_RECREATE_TEST_DATA=${DJANGO_RECREATE_TEST_DATA-no}
         # needed for admin pages
         - DJANGO_RUN_COLLECTSTATIC=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
