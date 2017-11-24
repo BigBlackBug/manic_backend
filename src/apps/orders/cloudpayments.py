@@ -66,12 +66,14 @@ def finish_s3d(order: Order, transaction_id, pa_res):
     except PaymentError as err:
         order.transaction = CloudPaymentsTransaction.objects.create(
             transaction_id=transaction_id,
-            transaction_info=json.dumps(err.__dict__),
+            transaction_info=err.__dict__,
             status=CPTransactionStatus.S3D_FAILED)
     else:
         order.transaction = CloudPaymentsTransaction.objects.create(
             transaction_id=transaction.id,
-            transaction_info=json.dumps(transaction.__dict__))
+            transaction_info=transaction.__dict__)
+    finally:
+        order.save()
 
 
 def confirm(order: Order):
