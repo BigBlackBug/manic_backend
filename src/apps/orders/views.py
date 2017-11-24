@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -234,6 +234,8 @@ class CompleteOrderView(generics.GenericAPIView):
         204 No Content
         """
         order = self.get_object()
+        if order.status != OrderStatus.STARTED:
+            raise ValidationError("Order must be STARTED by the master")
         if order.payment_type == PaymentType.CARD:
             cloudpayments.confirm(order)
         order.status = OrderStatus.DONE
@@ -259,6 +261,8 @@ class StartOrderView(generics.GenericAPIView):
         204 No Content
         """
         order = self.get_object()
+        if order.status != OrderStatus.ACCEPTED:
+            raise ValidationError("Order must be STARTED by the master")
         order.status = OrderStatus.STARTED
         order.time_started = timezone.now()
         order.save()

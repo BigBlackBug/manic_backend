@@ -38,7 +38,8 @@ def process_payment(card: PaymentCard, order: Order,
         # for confirmation
         order.transaction = CloudPaymentsTransaction.objects.create(
             transaction_id=response.id,
-            transaction_info=json.dumps(response.__dict__))
+            transaction_info=response.__dict__)
+        order.save()
         return Response(status=status.HTTP_201_CREATED)
     elif isinstance(response, Secure3d):
         # a client should send a POST there with specified params
@@ -83,3 +84,4 @@ def confirm(order: Order):
     amount = order.total_cost
     client.confirm_payment(transaction_id, amount)
     order.transaction.confirm()
+    order.transaction.save()
