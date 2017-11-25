@@ -1,8 +1,7 @@
-import json
 from urllib import parse
 
 from cloudpayments import CloudPayments, Currency, Transaction, Secure3d, \
-    CloudPaymentsError, PaymentError
+    PaymentError
 from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
@@ -40,7 +39,9 @@ def process_payment(card: PaymentCard, order: Order,
             transaction_id=response.id,
             transaction_info=response.__dict__)
         order.save()
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED, data={
+            'transaction_id': response.id
+        })
     elif isinstance(response, Secure3d):
         # a client should send a POST there with specified params
         args = parse.urlencode({'order_id': order.id})

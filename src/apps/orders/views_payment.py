@@ -1,5 +1,3 @@
-import logging
-
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser
@@ -37,6 +35,12 @@ class PayForOrderView(generics.GenericAPIView):
         Response:
 
         201 Created - The card has been successfully charged.
+        ```
+        {
+          //cloudpayments transaction id
+          'transaction_id': 100500
+        }
+        ```
 
         202 Accepted - The card requires 3D Secure auth. Check out
         CloudPayments docs for further info

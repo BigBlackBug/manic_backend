@@ -231,7 +231,13 @@ class CompleteOrderView(generics.GenericAPIView):
 
         Response:
 
-        204 No Content
+        200 OK
+        ```
+        {
+          //cloudpayments transaction id
+          'transaction_id: 100500
+        }
+        ```
         """
         order = self.get_object()
         if order.status != OrderStatus.STARTED:
@@ -242,7 +248,9 @@ class CompleteOrderView(generics.GenericAPIView):
 
         order.time_taken = timezone.now() - order.time_started
         order.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK, data={
+            'transaction_id': order.transaction.transaction_id
+        })
 
 
 class StartOrderView(generics.GenericAPIView):
