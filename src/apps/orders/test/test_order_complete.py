@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters.models import Master
 from src.apps.masters.test import make_everything, make_client, make_order
-from src.apps.orders.models import OrderStatus, Order
+from src.apps.orders.models import OrderStatus, Order, CloudPaymentsTransaction
 from src.apps.orders.views import CompleteOrderView
 
 
@@ -35,10 +35,15 @@ class CompleteOrderTestCase(APITestCase):
                                 time=datetime.time(hour=11, minute=00))
         order_1.time_started = timezone.now()
         order_1.status = OrderStatus.STARTED
+        order_1.transaction = CloudPaymentsTransaction.objects.create(
+            transaction_id=1, transaction_info={
+                'info': 'yeah'
+            })
         order_1.save()
         resp = self.client.patch(
             reverse(CompleteOrderView.view_name, args=[order_1.id]))
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['transaction_id'], 1)
         # two orders
         # TODO test serializers
         order = Order.objects.get(pk=order_1.id)
