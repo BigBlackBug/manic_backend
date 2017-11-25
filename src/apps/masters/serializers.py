@@ -199,23 +199,6 @@ class MasterCreateSerializer(serializers.ModelSerializer):
     services = IdListField(write_only=True, required=True)
     avatar = serializers.ImageField(write_only=True, required=True)
 
-    # only used during update
-    location = LocationSerializer(write_only=True, required=False)
-
-    def update(self, instance, validated_data):
-        new_services = validated_data.pop('services', [])
-        new_location = validated_data.pop('location', None)
-        if new_services:
-            instance.services = [Service.objects.get(pk=service) for service in
-                                 new_services]
-        if new_location:
-            serializer = LocationSerializer(data=new_location)
-            serializer.is_valid(raise_exception=True)
-
-            instance.location = Location.objects.create(
-                **serializer.validated_data)
-        return super().update(instance, validated_data)
-
     def create(self, validated_data):
         services = validated_data.pop('services', [])
         master = self.context['request'].user.master
@@ -231,4 +214,34 @@ class MasterCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Master
         fields = ('id', 'first_name', 'gender', 'avatar', 'date_of_birth',
+                  'email', 'about', 'services', 'location')
+
+
+class MasterUpdateSerializer(serializers.ModelSerializer):
+    services = IdListField(write_only=True)
+    location = LocationSerializer(write_only=True)
+
+    def get_fields(self):
+        fields = super().get_fields()
+        for field in fields.values():
+            field.required = False
+        return fields
+
+    def update(self, instance, validated_data):
+        new_services = validated_data.pop('services', [])
+        new_location = validated_data.pop('location', None)
+        if new_services:
+            instance.services = [Service.objects.get(pk=service) for service in
+                                 new_services]
+        if new_location:
+            serializer = LocationSerializer(data=new_location)
+            serializer.is_valid(raise_exception=True)
+
+            instance.location = Location.objects.create(
+                **serializer.validated_data)
+        return super().update(instance, validated_data)
+
+    class Meta:
+        model = Master
+        fields = ('id', 'first_name', 'gender', 'date_of_birth',
                   'email', 'about', 'services', 'location')

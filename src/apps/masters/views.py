@@ -19,7 +19,7 @@ from . import master_utils
 from .filtering import FilteringFunctions, FilteringParams
 from .models import Master, PortfolioImage, Schedule, MasterStatus
 from .serializers import MasterSerializer, CreateScheduleSerializer, \
-    MasterCreateSerializer, CreateFeedbackSerializer
+    MasterCreateSerializer, CreateFeedbackSerializer, MasterUpdateSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -327,7 +327,7 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
             return MasterSerializer
 
         if self.request.method == 'PATCH':
-            return MasterCreateSerializer
+            return MasterUpdateSerializer
         return MasterSerializer
 
     def get_permissions(self):
