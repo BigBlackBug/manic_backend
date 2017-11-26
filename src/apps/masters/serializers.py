@@ -244,4 +244,4 @@ class MasterUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Master
         fields = ('id', 'first_name', 'gender', 'date_of_birth',
-                  'email', 'about', 'services', 'location')
+                  'email', 'about', 'services', 'location', 'status')
