@@ -397,7 +397,7 @@ class MasterAvatarUpdateView(APIView):
         master.save()
 
         return Response(status=status.HTTP_201_CREATED, data={
-            'image': master.avatar.url
+            'image': request.build_absolute_uri(master.avatar.url)
         })
 
 
