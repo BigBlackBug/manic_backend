@@ -82,7 +82,8 @@ class MasterListCreateView(generics.ListCreateAPIView):
         params = FilteringParams(request)
         masters, slots = master_utils.search(params, FilteringFunctions.search)
         favorites, others = master_utils.split(masters,
-                                               request.user.is_client(request) and
+                                               request.user.is_client(
+                                                   request) and
                                                request.user.client)
 
         return Response(data={
@@ -438,7 +439,7 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         Response:
         201 Created
         ```
-        {'image-file-name':'portfolio-id',...}
+        [{'id':10,'image':'url-to-image'},...]
         ```
 
         400 Bad Request
@@ -452,14 +453,17 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         images = serializer.validated_data['images']
-        ids = {}
+        data = []
         for image in images:
             portfolio_image = PortfolioImage.objects.create(master=master,
                                                             image=image)
-            ids[image.name] = portfolio_image.id
+            data.append({
+                'id': portfolio_image.id,
+                'url': request.build_absolute_uri(portfolio_image.image.url)
+            })
         master.save()
 
-        return Response(status=status.HTTP_201_CREATED, data=ids)
+        return Response(status=status.HTTP_201_CREATED, data=data)
 
 
 class AddPortfolioItemDescriptionView(generics.GenericAPIView):

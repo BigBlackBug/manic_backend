@@ -17,7 +17,7 @@ class UploadTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def test_upload(self):
+    def test_upload_multiple(self):
         self.assertEqual(len(self.master_object.portfolio.all()), 0)
         resp = self.client.post(reverse(AddPortfolioItemsView.view_name,
                                         args=[self.master_object.id]),
@@ -29,13 +29,14 @@ class UploadTestCase(APITestCase):
                                 },
                                 format='multipart')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(resp.data), 2)
         updated_master = Master.objects.get(pk=self.master_object.id)
         self.assertIsNotNone(updated_master.portfolio)
         self.assertEqual(len(updated_master.portfolio.all()), 2)
         self.assertEqual(updated_master.portfolio.first().status,
                          PortfolioImageStatus.ON_MODERATION)
 
-    def test_upload_no_description(self):
+    def test_upload_one(self):
         self.assertEqual(len(self.master_object.portfolio.all()), 0)
         resp = self.client.post(reverse(AddPortfolioItemsView.view_name,
                                         args=[self.master_object.id]),
@@ -44,6 +45,7 @@ class UploadTestCase(APITestCase):
                                         'avatar')],
                                 }, format='multipart')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(resp.data), 1)
         updated_master = Master.objects.get(pk=self.master_object.id)
         self.assertIsNotNone(updated_master.portfolio)
         self.assertEqual(len(updated_master.portfolio.all()), 1)
