@@ -480,7 +480,8 @@ class AddPortfolioItemDescriptionView(generics.GenericAPIView):
         ```
         [{
           'image_id': 100500,
-          'description': 'hey, look!'
+          'description': 'hey, look!',
+          'status': 'ON_MODERATION/ACCEPTED'
         }]
         ```
 
@@ -496,6 +497,8 @@ class AddPortfolioItemDescriptionView(generics.GenericAPIView):
         for item in data:
             image = PortfolioImage.objects.get(pk=item['image_id'])
             image.description = item['description']
+            if 'status' in item:
+                image.status = item.get('status')
             image.save()
 
         return Response(status=status.HTTP_200_OK)

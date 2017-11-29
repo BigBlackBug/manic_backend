@@ -11,6 +11,8 @@ class DescriptionImageSerializer(serializers.Serializer):
     image_id = serializers.IntegerField(required=True, write_only=True)
     description = serializers.CharField(max_length=1024, required=False,
                                         write_only=True)
+    status = serializers.CharField(max_length=13, write_only=True,
+                                   required=False)
 
 
 class ImageListSerializer(serializers.Serializer):
