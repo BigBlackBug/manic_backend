@@ -9,7 +9,7 @@ from src.apps.clients.models import Client, Address, PaymentCard
 from src.apps.clients.views import AddPaymentCardView, DeletePaymentCardView
 from src.apps.core import utils
 from src.apps.core.models import Location
-from src.apps.masters.test import make_client
+from src.utils.object_creation import make_client
 
 
 class PaymentCardsTestCase(APITestCase):

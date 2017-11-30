@@ -8,7 +8,7 @@ from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import SimpleMasterSerializer
-from src.apps.masters.test import make_everything, make_client, make_order
+from src.utils.object_creation import make_everything, make_client, make_order
 from src.apps.masters.views import MasterListCreateView
 
 
@@ -89,7 +89,7 @@ class MasterListTestCase(APITestCase):
         vasya = Master.objects.get(first_name='VASYA')
         make_order(client=self.client_object, master=vasya,
                    service=vasya.services.all()[0],
-                   time=datetime.time(hour=10, minute=30))
+                   order_time=datetime.time(hour=10, minute=30))
 
         url = f"{reverse(MasterListCreateView.view_name)}?" \
               f"date_range={utils.get_date(0)},{utils.get_date(7)}&" \

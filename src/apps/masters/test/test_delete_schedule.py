@@ -6,8 +6,8 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
-from src.apps.masters.test import make_master
 from src.apps.masters.views import CreateDeleteScheduleView
+from src.utils.object_creation import make_master
 
 
 class DeleteScheduleTestCase(APITestCase):

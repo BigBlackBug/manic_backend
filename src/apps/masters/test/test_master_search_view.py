@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters import gmaps_utils
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_everything, make_client, make_order
+from src.utils.object_creation import make_everything, make_client, make_order
 from src.apps.masters.views import MasterSearchView
 
 
@@ -28,7 +28,7 @@ class MasterSearchViewTestCase(TestCase):
         service = master.services.all()[0]
         # manually creating an order
         make_order(client=make_client(), master=master, service=service,
-                   time=datetime.time(hour=10, minute=30))
+                   order_time=datetime.time(hour=10, minute=30))
 
         # assume all slots are reachable
         _calculate_eta.return_value = 10

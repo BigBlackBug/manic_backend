@@ -7,8 +7,8 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token
 from src.apps.categories.models import Service
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_master, make_category
 from src.apps.masters.views import MasterDetailUpdateView
+from src.utils.object_creation import make_master, make_category
 
 
 class UpdateMasterTestCase(APITestCase):

@@ -1,18 +1,14 @@
 import random
 
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
-from src.apps.authentication.utils import Gender
-from src.apps.clients.models import Client, Address
-from src.apps.clients.views import ClientAvatarUpdateView, MeClient
+from src.apps.clients.models import Client
+from src.apps.clients.views import ClientAvatarUpdateView
 from src.apps.core import utils
-from src.apps.core.models import Location
-from src.apps.masters.models import Master
-from src.apps.masters.test import make_client, make_master
+from src.utils.object_creation import make_client, make_master
 
 
 class UploadTestCase(APITestCase):
@@ -48,7 +44,7 @@ class UploadTestCase(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_upload_not_client(self):
-        master_user = make_master('123',22)
+        master_user = make_master('123', 22)
         token, _ = Token.objects.get_or_create(master=master_user)
 
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')

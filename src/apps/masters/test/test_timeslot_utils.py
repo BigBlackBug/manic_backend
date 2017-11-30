@@ -6,7 +6,7 @@ from src.apps.categories.models import Service, ServiceCategory
 from src.apps.core import utils
 from src.apps.masters import time_slot_utils
 from src.apps.masters.models import TimeSlot
-from src.apps.masters.test import _make_time
+from src.utils.object_creation import _make_time
 
 
 class TimeUtilsTestCase(TestCase):

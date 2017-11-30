@@ -7,7 +7,7 @@ from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client
 from src.apps.clients.views import ClientCreateView
 from src.apps.core import utils
-from src.apps.masters.test import make_client, make_master
+from src.utils.object_creation import make_client, make_master
 
 
 class CreateClientTestCase(APITestCase):

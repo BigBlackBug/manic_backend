@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from src.apps.masters.models import TimeSlot, Schedule, Time
-from src.apps.masters.test import make_master
+from src.utils.object_creation import make_master
 
 
 class ScheduleTestCase(TestCase):

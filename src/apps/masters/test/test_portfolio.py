@@ -5,14 +5,14 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token
 from src.apps.core import utils
 from src.apps.masters.models import Master, PortfolioImageStatus, PortfolioImage
-from src.apps.masters.test import make_master, make_client
 from src.apps.masters.views import AddPortfolioItemsView, \
     AddPortfolioItemDescriptionView, DeletePortfolioItemView
+from src.utils.object_creation import make_master, make_client
 
 
 class UploadTestCase(APITestCase):
     def setUp(self):
-        self.master_object = make_master('VASYA', 10)
+        self.master_object = make_master('VASYA', 10, make_portfolio=False)
         token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
@@ -81,7 +81,7 @@ class UploadTestCase(APITestCase):
 
 class AddDescriptionTestCase(APITestCase):
     def setUp(self):
-        self.master_object = make_master('VASYA', 10)
+        self.master_object = make_master('VASYA', 10, make_portfolio=False)
         token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
@@ -105,7 +105,7 @@ class AddDescriptionTestCase(APITestCase):
 
 class DeletePortfolioTestCase(APITestCase):
     def setUp(self):
-        self.master_object = make_master('VASYA', 10)
+        self.master_object = make_master('VASYA', 10, make_portfolio=False)
         token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')

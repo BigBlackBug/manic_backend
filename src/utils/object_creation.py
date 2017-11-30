@@ -35,23 +35,24 @@ def make_category(category_name):
                                               image=utils.make_in_memory_image(
                                                   'img'))
 
-    service = Service.objects.create(category=category,
-                                     name=category_name + ' обычный',
-                                     description='d',
-                                     cost=10,
-                                     min_duration=30,
-                                     max_duration=60)
+    Service.objects.create(category=category,
+                           name=category_name + ' обычный',
+                           description='d',
+                           cost=10,
+                           min_duration=30,
+                           max_duration=60)
 
-    service = Service.objects.create(category=category,
-                                     name=category_name + ' топовый',
-                                     description='d',
-                                     cost=100,
-                                     min_duration=60,
-                                     max_duration=90)
+    Service.objects.create(category=category,
+                           name=category_name + ' топовый',
+                           description='d',
+                           cost=100,
+                           min_duration=60,
+                           max_duration=90)
     return category
 
 
-def make_master(name, lon, about='awesome master!', user=None, activated=True):
+def make_master(name, lon, user=None, activated=True,
+                about='awesome master!', make_portfolio=True):
     randstring = str(random.randint(1000, 2000))
     if not user:
         user = PhoneAuthUser.objects.create(phone=randstring)
@@ -65,10 +66,12 @@ def make_master(name, lon, about='awesome master!', user=None, activated=True):
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
             location=Location.objects.create(lat=10, lon=lon))
-        PortfolioImage.objects.create(image=utils.make_in_memory_image('heyho'),
-                                      description=randstring+'description',
-                                      status=PortfolioImageStatus.ON_MODERATION,
-                                      master=master)
+        if make_portfolio:
+            PortfolioImage.objects.create(
+                image=utils.make_in_memory_image('heyho'),
+                description=randstring + 'description',
+                status=PortfolioImageStatus.ON_MODERATION,
+                master=master)
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
@@ -90,7 +93,7 @@ def make_token(client=None, master=None):
 def make_client(user=None, activated=True):
     if not user:
         user = PhoneAuthUser.objects.create(
-            phone=str(random.randint(1000, 2000)))
+            phone=str(random.randint(1, 2000000)))
     if activated:
         client = Client.objects.create(user=user, first_name='client',
                                        status=ClientStatus.VERIFIED,

@@ -7,20 +7,20 @@ from src.apps.authentication.utils import Gender
 from src.apps.categories.models import Service
 from src.apps.core import utils
 from src.apps.masters.models import Master, MasterStatus
-from src.apps.masters.test import make_category, make_client, make_master
 from src.apps.masters.views import MasterListCreateView
+from src.utils.object_creation import make_category, make_client, make_master
 
 
 class CreateMasterTestCase(APITestCase):
     def setUp(self):
         make_category('Сервис')
         self.user = PhoneAuthUser.objects.create(phone='777')
-        token, _ = Token.objects.get_or_create(master=make_master('mas',10,
-                                                                  self.user, False))
+        token, _ = Token.objects.get_or_create(
+            master=make_master('mas', 10, user=self.user, activated=False))
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def  test_create_master_existing_account(self):
+    def test_create_master_existing_account(self):
         old_client = make_client()
         token, _ = Token.objects.get_or_create(client=old_client)
         self.client = APIClient()
@@ -41,7 +41,8 @@ class CreateMasterTestCase(APITestCase):
             'gender': Gender.MALE,
             'date_of_birth': utils.get_date(-100),
             'email': 'a@a.com',
-            'services': ','.join([str(service.id) for service in Service.objects.all()]),
+            'services': ','.join(
+                [str(service.id) for service in Service.objects.all()]),
             'avatar': utils.make_in_memory_image('azz')
         }, format='multipart')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)

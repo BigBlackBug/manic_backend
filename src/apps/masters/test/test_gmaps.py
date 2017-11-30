@@ -8,8 +8,8 @@ from src.apps.core.exceptions import ApplicationError
 from src.apps.core.models import Location
 from src.apps.masters import gmaps_utils
 from src.apps.masters.models import Schedule, TimeSlot, Time
-from src.apps.masters.test import make_master, make_category, make_client
 from src.apps.orders.models import OrderItem, Order
+from src.utils.object_creation import make_master, make_category, make_client
 
 
 class GmapsTestCase(APITestCase):

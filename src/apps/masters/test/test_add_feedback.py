@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token
 from src.apps.core import utils
 from src.apps.masters.models import Master, Feedback
-from src.apps.masters.test import make_client, make_order, \
+from src.utils.object_creation import make_client, make_order, \
     make_everything
 from src.apps.masters.views import AddFeedbackView
 

@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_everything, make_client, make_order
+from src.utils.object_creation import make_everything, make_client, make_order
 from src.apps.orders.models import OrderStatus, Order, CloudPaymentsTransaction
 from src.apps.orders.views import CompleteOrderView
 
@@ -32,7 +32,7 @@ class CompleteOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
-                                time=datetime.time(hour=11, minute=00))
+                                order_time=datetime.time(hour=11, minute=00))
         order_1.time_started = timezone.now()
         order_1.status = OrderStatus.STARTED
         order_1.transaction = CloudPaymentsTransaction.objects.create(

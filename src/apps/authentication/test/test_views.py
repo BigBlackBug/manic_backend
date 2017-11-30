@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from src.apps.masters.test import make_client
+from src.utils.object_creation import make_client
 from ..models import Registration, Token, RegistrationType
 from ..views import CreateRegistrationView, UpdateRegistrationView, LogoutView
 

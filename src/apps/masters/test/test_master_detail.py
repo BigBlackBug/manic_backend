@@ -4,7 +4,7 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.core import utils
 from src.apps.masters.models import Schedule
-from src.apps.masters.test import make_master, make_token
+from src.utils.object_creation import make_master, make_token
 from src.apps.masters.views import MasterDetailUpdateView
 
 

@@ -7,14 +7,11 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from src.apps.authentication.models import PhoneAuthUser, Token
-from src.apps.authentication.utils import Gender
 from src.apps.categories.models import ServiceCategory
-from src.apps.clients.models import Client
-from src.apps.core import utils
 from src.apps.masters.models import Master, TimeSlot, Time, Schedule
-from src.apps.masters.test import make_everything, make_master, make_client
 from src.apps.orders.models import Order
 from src.apps.orders.views import OrderListCreateView
+from src.utils.object_creation import make_everything, make_master, make_client
 
 
 class OrderCreateTestCase(TestCase):

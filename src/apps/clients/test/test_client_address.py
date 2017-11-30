@@ -1,15 +1,12 @@
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
-from src.apps.authentication.utils import Gender
 from src.apps.clients.models import Client, Address
 from src.apps.clients.views import AddAddressView, AddressUpdateView
-from src.apps.core import utils
 from src.apps.core.models import Location
-from src.apps.masters.test import make_client
+from src.utils.object_creation import make_client
 
 
 class ClientAddressTestCase(APITestCase):
@@ -69,7 +66,7 @@ class ClientAddressTestCase(APITestCase):
                                                address.id]),
                                  data={
                                      'is_default': True
-                                 },format='json')
+                                 }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         client_object = Client.objects.first()
@@ -86,10 +83,11 @@ class ClientAddressTestCase(APITestCase):
             is_default=False)
 
         resp = self.client.patch(reverse(AddressUpdateView.view_name,
-                                         args=[self.client_object.id, address.id]),
+                                         args=[self.client_object.id,
+                                               address.id]),
                                  data={
                                      'city': 'MOSCOW'
-                                 },format='json')
+                                 }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         client_object = Client.objects.first()

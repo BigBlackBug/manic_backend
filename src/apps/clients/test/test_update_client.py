@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token, PhoneAuthUser
 from src.apps.clients.models import Client
 from src.apps.clients.views import ClientUpdateView
-from src.apps.masters.test import make_client
+from src.utils.object_creation import make_client
 
 
 class UpdateClientTestCase(APITestCase):

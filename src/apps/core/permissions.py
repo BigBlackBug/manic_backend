@@ -19,3 +19,15 @@ class IsMaster(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_master(request)
+
+
+class IsAccountVerified(BasePermission):
+    message = "Your account should be Verified in order to access this page"
+
+    def has_permission(self, request, view):
+        if request.user.is_client(request) and request.user.client.activated():
+            return True
+        elif request.user.is_master(
+                request) and request.user.master.activated():
+            return True
+        return False

@@ -2,11 +2,11 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
-from src.apps.authentication.models import Token, PhoneAuthUser
+from src.apps.authentication.models import Token
 from src.apps.core import utils
 from src.apps.masters.models import Master
-from src.apps.masters.test import make_master, make_client
 from src.apps.masters.views import MasterAvatarUpdateView
+from src.utils.object_creation import make_master, make_client
 
 
 class AvatarUpdateTestCase(APITestCase):
