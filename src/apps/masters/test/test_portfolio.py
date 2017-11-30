@@ -7,7 +7,7 @@ from src.apps.core import utils
 from src.apps.masters.models import Master, PortfolioImageStatus, PortfolioImage
 from src.apps.masters.test import make_master, make_client
 from src.apps.masters.views import AddPortfolioItemsView, \
-    AddPortfolioItemDescriptionView
+    AddPortfolioItemDescriptionView, DeletePortfolioItemView
 
 
 class UploadTestCase(APITestCase):
@@ -101,3 +101,29 @@ class AddDescriptionTestCase(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         image = PortfolioImage.objects.get(pk=image.id)
         self.assertEqual(image.description, 'superdescription')
+
+
+class DeletePortfolioTestCase(APITestCase):
+    def setUp(self):
+        self.master_object = make_master('VASYA', 10)
+        token, _ = Token.objects.get_or_create(master=self.master_object)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+
+    def test_delete_ok(self):
+        portfolio = PortfolioImage.objects.create(
+            image=utils.make_in_memory_image('kek'),
+            master=self.master_object,
+            description='blabla')
+        resp = self.client.delete(reverse(DeletePortfolioItemView.view_name,
+                                          args=[self.master_object.id,
+                                                portfolio.id]))
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.master_object = Master.objects.get(pk=self.master_object.id)
+        self.assertEqual(len(self.master_object.portfolio.all()), 0)
+        self.assertEqual(PortfolioImage.objects.count(), 0)
+
+    def test_delete_404(self):
+        resp = self.client.delete(reverse(DeletePortfolioItemView.view_name,
+                                          args=[self.master_object.id, 100]))
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

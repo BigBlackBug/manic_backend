@@ -466,6 +466,31 @@ class AddPortfolioItemsView(generics.GenericAPIView):
         return Response(status=status.HTTP_201_CREATED, data=data)
 
 
+class DeletePortfolioItemView(generics.DestroyAPIView):
+    view_name = 'delete-portfolio-item'
+    serializer_class = ImageSerializer
+    permission_classes = (IsAuthenticated, IsMasterIDCorrect)
+
+    def get_object(self):
+        portfolio_id = self.kwargs['portfolio_id']
+        master = self.request.user.master
+        try:
+            return master.portfolio.get(pk=portfolio_id)
+        except PortfolioImage.DoesNotExist as ex:
+            raise NotFound(f'Portfolio with id {portfolio_id} is not found')
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Removes a portfolio item from a master
+
+        Response:
+        204 No Content
+
+        400 Bad Request
+        """
+        return super().delete(request, *args, **kwargs)
+
+
 class AddPortfolioItemDescriptionView(generics.GenericAPIView):
     view_name = 'add-portfolio-item-description'
     serializer_class = DescriptionImageSerializer

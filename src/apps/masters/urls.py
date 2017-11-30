@@ -3,7 +3,7 @@ from django.conf.urls import url
 from .views import MasterListCreateView, MasterDetailUpdateView, \
     MasterSearchView, MasterBestMatchView, AddPortfolioItemsView, \
     CreateDeleteScheduleView, MeMasterView, AddPortfolioItemDescriptionView, \
-    MasterAvatarUpdateView, AddFeedbackView
+    MasterAvatarUpdateView, AddFeedbackView, DeletePortfolioItemView
 
 urlpatterns = [
     url(r'^$', MasterListCreateView.as_view(),
@@ -24,6 +24,9 @@ urlpatterns = [
         name=AddPortfolioItemDescriptionView.view_name),
     url(r'^(?P<pk>[0-9]+)/portfolio$', AddPortfolioItemsView.as_view(),
         name=AddPortfolioItemsView.view_name),
+    url(r'^(?P<pk>[0-9]+)/portfolio/(?P<portfolio_id>[0-9]+)$',
+        DeletePortfolioItemView.as_view(),
+        name=DeletePortfolioItemView.view_name),
     url(r'^(?P<pk>[0-9]+)/schedule$', CreateDeleteScheduleView.as_view(),
         name=CreateDeleteScheduleView.view_name),
 ]
