@@ -66,7 +66,8 @@ class PaymentCardSerializer(serializers.ModelSerializer):
 
 class ClientSerializer(serializers.ModelSerializer):
     address = AddressSerializer(required=False)
-    tip = serializers.IntegerField(min_value=0, max_value=15, required=False)
+    tip = serializers.IntegerField(min_value=0, max_value=15, default=5,
+                                   required=False)
     date_of_birth = serializers.DateField()
     gender = serializers.CharField(max_length=1)
     first_name = serializers.CharField(max_length=32)

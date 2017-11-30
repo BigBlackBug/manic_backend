@@ -95,11 +95,12 @@ class Order(models.Model):
     def total_cost(self):
         """
         Returns a total cost of the order, combined from costs
-        of each individual service
+        of each individual service times client's tips
         """
         # TODO value may be taken from 'special'
+        tip = (1 + self.client.tip / 100.0)
         return sum(map(lambda item: item.service.cost,
-                       self.order_items.all()))
+                       self.order_items.all())) * tip
 
     def __str__(self):
         return f'Order for client_id: {self.client.id} on' \
