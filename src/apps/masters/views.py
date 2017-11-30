@@ -281,6 +281,7 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
           'avatar':'url-to-avatar',
           'services':[{service model}],
           'location': {'lat':10, 'lon':12},
+          //only upcoming schedules are returned
           'schedule':[{schedule model}],
           'feedback':[{feedback model}],
           'portfolio':[{

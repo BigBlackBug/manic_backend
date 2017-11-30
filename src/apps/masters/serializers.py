@@ -82,24 +82,23 @@ class MasterSerializer(serializers.ModelSerializer):
 
     location = LocationSerializer(read_only=True)
     services = ServiceSerializer(many=True, read_only=True)
-    schedule = ScheduleSerializer(many=True, read_only=True)
+    schedule = serializers.SerializerMethodField(read_only=True)
     portfolio = PortfolioImageField(many=True, read_only=True)
     feedback = FeedbackSerializer(many=True, read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
 
+    def get_schedule(self, obj):
+        """
+        Only schedules for upcoming dates are returned
+        """
+        schedules = obj.schedule.filter(date__gte=timezone.now())\
+            .order_by('date').all()
+        serializer = ScheduleSerializer(many=True, instance=schedules)
+        return serializer.data
+
     class Meta:
         model = Master
         exclude = ('user',)
-
-
-class MasterScheduleSerializer(serializers.BaseSerializer):
-    """
-    Given a master instance, serializes only his schedule to a list
-    """
-
-    def to_representation(self, instance: Master):
-        return ScheduleSerializer(instance.schedule, many=True,
-                                  read_only=True).data
 
 
 class SimpleMasterSerializer(FilterEmptyFieldsMixin,
