@@ -12,7 +12,8 @@ from src.apps.core.mixins import FilterEmptyFieldsMixin
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
-from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback
+from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback, \
+    Balance
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -207,7 +208,10 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
         for service in services:
             master.services.add(Service.objects.get(pk=service))
+
         master.save()
+        # initializing balance
+        Balance.objects.create(master=master)
         return master
 
     class Meta:

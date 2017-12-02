@@ -60,6 +60,11 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(order_item.master, master)
         self.assertEqual(order_item.service, service)
 
+        # assert future balance is correct
+        self.assertEqual(master.balance.future,
+                         int(service.cost *
+                             self.client_object.tip_multiplier()))
+
     def test_create_order__one_master_many_services(self):
         master = Master.objects.get(first_name='VASYA')
         schedule = master.get_schedule(timezone.now())
@@ -96,6 +101,12 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(order.date, timezone.now().date())
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 2)
+
+        # assert future balance is correct
+        self.assertEqual(master.balance.future,
+                         sum(map(lambda s: int(
+                             s.cost * self.client_object.tip_multiplier()),
+                                 services)))
 
     def test_create_order__composite_4hands(self):
         vasya = Master.objects.get(first_name='VASYA')
@@ -169,3 +180,11 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(order_item.service, vasya.services.first())
         self.assertEqual(order_item_1.master, sanya)
         self.assertEqual(order_item_1.service, sanya.services.first())
+
+        # assert future balance is correct
+        self.assertEqual(vasya.balance.future,
+                         int(vasya.services.first().cost *
+                             self.client_object.tip_multiplier()))
+        self.assertEqual(sanya.balance.future,
+                         int(sanya.services.first().cost *
+                             self.client_object.tip_multiplier()))

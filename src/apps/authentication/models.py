@@ -140,8 +140,5 @@ class UserProfile(models.Model):
     def __str__(self):
         return f'{self.first_name}'
 
-    # FK fields
-    # debit_cards
-
     class Meta:
         abstract = True

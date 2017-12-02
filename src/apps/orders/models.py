@@ -2,6 +2,7 @@
 
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
+from django.utils import timezone
 
 from src.apps.categories.models import Service
 from src.apps.clients.models import Client
@@ -98,9 +99,23 @@ class Order(models.Model):
         of each individual service times client's tips
         """
         # TODO value may be taken from 'special'
-        tip = (1 + self.client.tip / 100.0)
-        return sum(map(lambda item: item.service.cost,
-                       self.order_items.all())) * tip
+        return sum(map(
+            lambda item: int(item.service.cost * self.client.tip_multiplier()),
+            self.order_items.all()))
+
+    def complete(self):
+        """
+        Sets the `status` and `time_taken` of the order
+        and adjusts balance of each involved master
+        """
+        self.status = OrderStatus.DONE
+        self.time_taken = timezone.now() - self.time_started
+
+        tip_multiplier = self.client.tip_multiplier()
+        for item in self.order_items.all():
+            item.master.complete_order_payment(
+                item.service.cost * tip_multiplier)
+            item.master.save()
 
     def __str__(self):
         return f'Order for client_id: {self.client.id} on' \

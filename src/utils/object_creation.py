@@ -10,7 +10,7 @@ from src.apps.categories.models import ServiceCategory, Service, DisplayItem
 from src.apps.clients.models import Address, Client, ClientStatus
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot, \
-    MasterStatus, PortfolioImage, PortfolioImageStatus
+    MasterStatus, PortfolioImage, PortfolioImageStatus, Balance
 from src.apps.masters.receivers import *
 from src.apps.orders.models import Order, OrderItem, OrderStatus
 
@@ -38,21 +38,22 @@ def make_category(category_name):
     Service.objects.create(category=category,
                            name=category_name + ' обычный',
                            description='d',
-                           cost=10,
+                           cost=random.randint(10,90),
                            min_duration=30,
                            max_duration=60)
 
     Service.objects.create(category=category,
                            name=category_name + ' топовый',
                            description='d',
-                           cost=100,
+                           cost=random.randint(10, 90),
                            min_duration=60,
                            max_duration=90)
     return category
 
 
 def make_master(name, lon, user=None, activated=True,
-                about='awesome master!', make_portfolio=True):
+                about='awesome master!', make_portfolio=True,
+                make_balance=True):
     randstring = str(random.randint(1000, 2000))
     if not user:
         user = PhoneAuthUser.objects.create(phone=randstring)
@@ -72,6 +73,8 @@ def make_master(name, lon, user=None, activated=True,
                 description=randstring + 'description',
                 status=PortfolioImageStatus.ON_MODERATION,
                 master=master)
+        if make_balance:
+            Balance.objects.create(master=master)
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
@@ -187,6 +190,7 @@ def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
                                           master=master,
                                           order=order,
                                           locked=False)
+    master.add_future_balance(service.cost * client.tip_multiplier())
     slot.order_item = order_item
     slot.taken = True
     slot.save()
@@ -206,6 +210,7 @@ def make_order_services(client, services, master, order_time,
                                               master=master,
                                               order=order,
                                               locked=locked)
+        master.add_future_balance(service.cost * client.tip_multiplier())
         slot.order_item = order_item
         slot.save()
         order_time += delta(minutes=TimeSlot.DURATION)

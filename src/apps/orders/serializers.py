@@ -68,8 +68,8 @@ class OrderCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
-        order = Order.objects.create(client=self.context['request'].user.client,
-                                     **validated_data)
+        client = self.context['request'].user.client
+        order = Order.objects.create(client=client, **validated_data)
 
         for item in order_items:
             master = Master.objects.prefetch_related('schedule').get(
@@ -87,6 +87,8 @@ class OrderCreateSerializer(serializers.Serializer):
                                                       master=master,
                                                       service=service,
                                                       locked=item['locked'])
+                master.add_future_balance(
+                    service.cost * client.tip_multiplier())
                 next_time = schedule.assign_time(
                     next_time or validated_data['time'],
                     int(service.max_duration / TimeSlot.DURATION),

@@ -16,7 +16,8 @@ class CreateMasterTestCase(APITestCase):
         make_category('Сервис')
         self.user = PhoneAuthUser.objects.create(phone='777')
         token, _ = Token.objects.get_or_create(
-            master=make_master('mas', 10, user=self.user, activated=False))
+            master=make_master('mas', 10, user=self.user, activated=False,
+                               make_balance=False))
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
@@ -51,5 +52,6 @@ class CreateMasterTestCase(APITestCase):
         self.assertEqual(new_master.status, MasterStatus.ON_REVIEW)
         self.assertEqual(new_master.gender, Gender.MALE)
         self.assertEqual(new_master.email, 'a@a.com')
+        self.assertIsNotNone(new_master.balance)
         self.assertEqual(len(new_master.services.all()),
                          len(Service.objects.all()))

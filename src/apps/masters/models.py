@@ -43,6 +43,7 @@ class Master(UserProfile):
                               default=MasterStatus.DUMMY)
 
     # FK fields
+    # balance
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
     # order_items - list of 'order items'
@@ -56,6 +57,21 @@ class Master(UserProfile):
 
     def distance(self, lat, lon):
         return self.location.distance(lat, lon)
+
+    # TODO money is stored in ints WHAT?
+    def complete_order_payment(self, value):
+        """
+        Deducts `value` from the future balance and
+        adds it to the on_hold balance
+        :param value:
+        """
+        self.balance.on_hold += int(value)
+        self.balance.future -= int(value)
+        self.balance.save()
+
+    def add_future_balance(self, value):
+        self.balance.future += int(value)
+        self.balance.save()
 
     def get_schedule(self, date):
         """
@@ -80,6 +96,17 @@ class Master(UserProfile):
         # a pinch of python functional magic
         return sum(map(lambda item: item.order.client == client,
                        self.order_items.all()))
+
+
+class Balance(models.Model):
+    master = models.OneToOneField(Master, on_delete=models.CASCADE,
+                                  related_name='balance')
+    # sum of upcoming orders
+    future = models.IntegerField(default=0)
+    # sum of completed orders, yet to be transferred
+    on_hold = models.IntegerField(default=0)
+    # sent to master's account
+    sent = models.IntegerField(default=0)
 
 
 class Feedback(models.Model):

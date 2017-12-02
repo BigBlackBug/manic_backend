@@ -77,14 +77,13 @@ def finish_s3d(order: Order, transaction_id, pa_res):
         order.save()
 
 
-def confirm(order: Order):
+def confirm_payment(transaction: CloudPaymentsTransaction, amount:int):
     """
     Confirm payment of the order, after it is completed
 
     :raises CloudPaymentsError
     """
-    transaction_id = order.transaction.transaction_id
-    amount = order.total_cost
+    transaction_id = transaction.transaction_id
     client.confirm_payment(transaction_id, amount)
-    order.transaction.confirm()
-    order.transaction.save()
+    transaction.confirm()
+    transaction.save()
