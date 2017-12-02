@@ -284,6 +284,11 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
           //only upcoming schedules are returned
           'schedule':[{schedule model}],
           'feedback':[{feedback model}],
+          'balance':{
+            'future':10,
+            'on_hold':0,
+            'transferred':1000
+          },
           'portfolio':[{
             'id': 100,
             'url': 'image-url',

@@ -63,6 +63,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
         fields = ('rating', 'text', 'date', 'client')
 
 
+class BalanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Balance
+        exclude = ('id', 'master')
+
+
 class MasterSerializer(serializers.ModelSerializer):
     """
     Provides a complete representation of a master
@@ -87,12 +93,13 @@ class MasterSerializer(serializers.ModelSerializer):
     portfolio = PortfolioImageField(many=True, read_only=True)
     feedback = FeedbackSerializer(many=True, read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
+    balance = BalanceSerializer(read_only=True)
 
     def get_schedule(self, obj):
         """
         Only schedules for upcoming dates are returned
         """
-        schedules = obj.schedule.filter(date__gte=timezone.now())\
+        schedules = obj.schedule.filter(date__gte=timezone.now()) \
             .order_by('date').all()
         serializer = ScheduleSerializer(many=True, instance=schedules)
         return serializer.data

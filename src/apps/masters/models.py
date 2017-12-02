@@ -105,8 +105,8 @@ class Balance(models.Model):
     future = models.IntegerField(default=0)
     # sum of completed orders, yet to be transferred
     on_hold = models.IntegerField(default=0)
-    # sent to master's account
-    sent = models.IntegerField(default=0)
+    # transferred to master's account
+    transferred = models.IntegerField(default=0)
 
 
 class Feedback(models.Model):

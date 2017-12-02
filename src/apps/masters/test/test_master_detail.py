@@ -31,7 +31,7 @@ class MasterDetailTestCase(APITestCase):
         # new schedule
         Schedule.objects.create(master=self.master_object,
                                 date=utils.get_date(1))
-        # todays schedule
+        # today's schedule
         Schedule.objects.create(master=self.master_object,
                                 date=utils.get_date(0))
         resp = self.client.get(
