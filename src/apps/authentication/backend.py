@@ -3,6 +3,9 @@ from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, \
     get_authorization_header
 
+from .mgmt.models import AdminToken
+from .models import Token as AppToken
+
 
 class TokenAuthentication(BaseAuthentication):
     """
@@ -14,26 +17,14 @@ class TokenAuthentication(BaseAuthentication):
         ``Authorization: Token 401f7ac837da42b97f613d789819ff93537bee6a``
     """
 
-    keyword = 'Token'
-    model = None
-
-    def get_model(self):
-        if self.model is not None:
-            return self.model
-        from .models import Token
-        return Token
-
-    """
-    A custom token model may be used, but must have the following properties.
-
-    * key -- The string identifying the token
-    * user -- The user to which the token belongs
-    """
+    keyword = b'Token'
+    admin_keyword = b'AdminToken'
 
     def authenticate(self, request):
         auth = get_authorization_header(request).split()
 
-        if not auth or auth[0].lower() != self.keyword.lower().encode():
+        if not auth or auth[0] not in \
+                (self.keyword, self.admin_keyword):
             return None
 
         if len(auth) == 1:
@@ -43,7 +34,6 @@ class TokenAuthentication(BaseAuthentication):
             msg = _('Invalid token header. '
                     'Token string should not contain spaces.')
             raise exceptions.AuthenticationFailed(msg)
-
         try:
             token = auth[1].decode()
         except UnicodeError:
@@ -51,13 +41,24 @@ class TokenAuthentication(BaseAuthentication):
                     'Token string should not contain invalid characters.')
             raise exceptions.AuthenticationFailed(msg)
 
-        return self.authenticate_credentials(token)
+        if auth[0] == self.keyword:
+            return self.authenticate_application(token)
+        elif auth[0] == self.admin_keyword:
+            return self.authenticate_admin(token)
 
-    def authenticate_credentials(self, key):
-        model = self.get_model()
+    def authenticate_admin(self, key):
         try:
-            token = model.objects.select_related('master', 'client').get(key=key)
-        except model.DoesNotExist:
+            token = AdminToken.objects.get(key=key)
+        except AdminToken.DoesNotExist as ex:
+            raise exceptions.AuthenticationFailed(_('Invalid token.'))
+        else:
+            return token.user, token
+
+    def authenticate_application(self, key):
+        try:
+            token = AppToken.objects \
+                .select_related('master', 'client').get(key=key)
+        except AppToken.DoesNotExist:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
         if token.master:
@@ -69,4 +70,4 @@ class TokenAuthentication(BaseAuthentication):
                 _('User inactive or deleted.'))
 
     def authenticate_header(self, request):
-        return self.keyword
+        return self.keyword.decode()

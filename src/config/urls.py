@@ -29,7 +29,10 @@ urlpatterns = [
     url(r'^orders/', include('src.apps.orders.urls')),
 ]\
 + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
-+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
++ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
++ [
+    url(r'^mgmt/auth/', include('src.apps.authentication.mgmt.urls')),
+]
 
 if settings.DEBUG:
     urlpatterns.append(

@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from src.apps.authentication.utils import get_admin_user_model
+
 
 class IsClient(BasePermission):
     """
@@ -19,6 +21,16 @@ class IsMaster(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.is_master(request)
+
+
+class IsAdmin(BasePermission):
+    """
+    Allows access only to users which are administrators
+    """
+    message = "A user must be an Admin to access this endpoint"
+
+    def has_permission(self, request, view):
+        return isinstance(request.user, get_admin_user_model())
 
 
 class IsAccountVerified(BasePermission):

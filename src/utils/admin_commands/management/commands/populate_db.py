@@ -4,7 +4,9 @@ from datetime import timedelta as delta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from src.apps.authentication.models import Token
+from src.apps.authentication.mgmt.models import AdminToken
+from src.apps.authentication.models import Token as AppToken
+from src.apps.authentication.utils import get_admin_user_model
 from src.apps.core import utils
 from src.apps.masters.models import Schedule, TimeSlot
 from src.apps.masters.receivers import *
@@ -29,8 +31,8 @@ def _make_everything():
         vasya.services.add(service)
     vasya.save()
 
-    token, _ = Token.objects.get_or_create(master=vasya,
-                                           key='master_token')
+    token, _ = AppToken.objects.get_or_create(master=vasya,
+                                              key='master_token')
 
     for service in feet.services.all():
         petya.services.add(service)
@@ -87,8 +89,8 @@ def _make_everything():
     schedule.save()
 
     client = make_client()
-    token, _ = Token.objects.get_or_create(client=client,
-                                           key='client_token')
+    token, _ = AppToken.objects.get_or_create(client=client,
+                                              key='client_token')
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
                           master=vasya, order_time='10:30')
@@ -102,14 +104,19 @@ def _make_everything():
                           status=OrderStatus.DONE)
 
 
-class Command(BaseCommand):
-    args = '<foo bar ...>'
-    help = 'our help string comes here'
+def _make_admin_token():
+    user = get_admin_user_model().objects.create(username='korch')
+    user.set_password('korch')
+    user.save()
+    return AdminToken.objects.create(user=user, key='korchagin_token')
 
+
+class Command(BaseCommand):
     def handle(self, *args, **options):
         settings = os.environ.get('DJANGO_SETTINGS_MODULE', None)
         if settings and ('dev' in settings or 'local' in settings):
             _make_everything()
+            _make_admin_token()
             print("aww yiss")
         else:
             print(f'you are not allowed to run this command: {settings}')
