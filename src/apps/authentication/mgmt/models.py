@@ -1,9 +1,10 @@
 import binascii
 import os
 
-from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
+from src.apps.authentication.utils import get_admin_user_model
 
 
 class AdminToken(models.Model):
@@ -14,7 +15,7 @@ class AdminToken(models.Model):
     created = models.DateTimeField(_("Created"), auto_now_add=True)
 
     user = models.OneToOneField(
-        settings.ADMIN_APP_USER, related_name='auth_token',
+        get_admin_user_model(), related_name='auth_token',
         on_delete=models.CASCADE, verbose_name=_("User")
     )
 

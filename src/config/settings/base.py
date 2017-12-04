@@ -60,7 +60,7 @@ ORDER_CANCELLATION_WINDOW_HOURS = 3
 MAX_DISTANCE_KM = 20.0
 USE_GMAPS_API = False
 
-ADMIN_APP_USER = 'auth.User'
+ADMIN_APP_USER_MODEL = 'auth.User'
 
 # Application definition
 INSTALLED_APPS = [
