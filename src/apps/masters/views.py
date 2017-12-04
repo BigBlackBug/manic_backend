@@ -535,8 +535,8 @@ class AddPortfolioItemDescriptionView(generics.GenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class CreateDeleteScheduleView(mixins.DestroyModelMixin,
-                               mixins.CreateModelMixin,
+class CreateDeleteScheduleView(mixins.CreateModelMixin,
+                               mixins.UpdateModelMixin,
                                generics.GenericAPIView):
     view_name = 'create-delete-schedule'
     serializer_class = CreateScheduleSerializer
@@ -561,7 +561,10 @@ class CreateDeleteScheduleView(mixins.DestroyModelMixin,
         """
         return super().create(request, *args, **kwargs)
 
-    def delete(self, request, *args, **kwargs):
+    # TODO WARNING. TEMPORARY STUB.
+    # All because our lovely Android dev is too lazy
+    # to adapt to a proper endpoint, instead he chose to stick with this
+    def patch(self, request, *args, **kwargs):
         """
         Deletes time slots of schedule at `date`
 

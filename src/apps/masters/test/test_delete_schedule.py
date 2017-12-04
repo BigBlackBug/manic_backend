@@ -31,7 +31,7 @@ class DeleteScheduleTestCase(APITestCase):
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
                                 taken=False,
                                 schedule=schedule),
-        resp = self.client.delete(
+        resp = self.client.patch(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]), data={
                 'date': '2017-11-20',
@@ -59,7 +59,7 @@ class DeleteScheduleTestCase(APITestCase):
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                                 taken=False,
                                 schedule=schedule),
-        resp = self.client.delete(
+        resp = self.client.patch(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]), data={
                 'date': '2017-11-20',
@@ -87,7 +87,7 @@ class DeleteScheduleTestCase(APITestCase):
         TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=0),
                                 taken=False,
                                 schedule=schedule),
-        resp = self.client.delete(
+        resp = self.client.patch(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]), data={
                 'date': '2017-11-20',
@@ -116,7 +116,7 @@ class DeleteScheduleTestCase(APITestCase):
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
                                 taken=False,
                                 schedule=schedule),
-        resp = self.client.delete(
+        resp = self.client.patch(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]), data={
                 'date': '2017-11-21',
@@ -136,7 +136,7 @@ class DeleteScheduleTestCase(APITestCase):
         TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
                                 taken=False,
                                 schedule=schedule),
-        resp = self.client.delete(
+        resp = self.client.patch(
             reverse(CreateDeleteScheduleView.view_name,
                     args=[self.master_object.id]), data={
                 'date': '2017-11-20',
