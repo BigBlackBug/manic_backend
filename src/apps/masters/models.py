@@ -131,7 +131,7 @@ class PortfolioImageStatus:
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
     description = models.CharField(max_length=1024, blank=True)
-
+    added = models.DateTimeField( auto_now_add=True)
     # status should be manually set by the administrator
     status = models.CharField(
         max_length=13,

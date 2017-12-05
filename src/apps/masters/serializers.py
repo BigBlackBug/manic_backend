@@ -75,37 +75,43 @@ class BalanceSerializer(serializers.ModelSerializer):
         exclude = ('id', 'master')
 
 
+class PortfolioSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        url = instance.image.url
+        request = self.context.get('request', None)
+        if request is not None:
+            url = request.build_absolute_uri(url)
+        return {
+            'id': instance.id,
+            'url': url,
+            'description': instance.description,
+            'status': instance.status,
+        }
+
+
 class MasterSerializer(serializers.ModelSerializer):
     """
     Provides a complete representation of a master
     """
 
-    class PortfolioImageField(serializers.RelatedField):
-        def to_representation(self, instance):
-            url = instance.image.url
-            request = self.context.get('request', None)
-            if request is not None:
-                url = request.build_absolute_uri(url)
-            return {
-                'id': instance.id,
-                'url': url,
-                'description': instance.description,
-                'status': instance.status,
-            }
-
     location = LocationSerializer(read_only=True)
     services = ServiceSerializer(many=True, read_only=True)
     schedule = serializers.SerializerMethodField(read_only=True)
-    portfolio = PortfolioImageField(many=True, read_only=True)
+    portfolio = serializers.SerializerMethodField(read_only=True)
     feedback = FeedbackSerializer(many=True, read_only=True)
-    phone = serializers.CharField(source='user.phone', read_only=True)
     balance = BalanceSerializer(read_only=True)
+    phone = serializers.CharField(source='user.phone', read_only=True)
 
-    def get_schedule(self, obj):
+    def get_portfolio(self, master: Master):
+        portfolio = master.portfolio.order_by('-added').all()
+        serializer = PortfolioSerializer(many=True, instance=portfolio)
+        return serializer.data
+
+    def get_schedule(self, master: Master):
         """
         Only schedules for upcoming dates are returned
         """
-        schedules = obj.schedule.filter(date__gte=timezone.now()) \
+        schedules = master.schedule.filter(date__gte=timezone.now()) \
             .order_by('date').all()
         serializer = ScheduleSerializer(many=True, instance=schedules)
         return serializer.data
