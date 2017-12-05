@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -6,10 +6,13 @@ from rest_framework.response import Response
 from src.apps.authentication.mgmt.models import AdminToken
 from src.apps.authentication.utils import get_admin_user_model
 
+AdminUser = get_admin_user_model()
+
 
 class MgmtLoginView(GenericAPIView):
     view_name = 'mgmt_login'
     permission_classes = ()
+    serializer_class = serializers.Serializer
 
     def post(self, request, *args, **kwargs):
         """
@@ -24,8 +27,8 @@ class MgmtLoginView(GenericAPIView):
         username = request.data['username']
         password = request.data['password']
         try:
-            user = get_admin_user_model().objects.get(username=username)
-        except User.DoesNotExist as ex:
+            user = AdminUser.objects.get(username=username)
+        except AdminUser.DoesNotExist as ex:
             raise PermissionDenied("Unknown user")
         else:
             if user.check_password(password):
