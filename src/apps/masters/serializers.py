@@ -17,15 +17,21 @@ from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback, \
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
-    time = serializers.SerializerMethodField('time_value')
+    time = serializers.SerializerMethodField()
+    order_id = serializers.SerializerMethodField()
 
-    def time_value(self, time_slot: TimeSlot):
+    def get_order_id(self, time_slot):
+        return time_slot.order_item and \
+               time_slot.order_item.order and \
+               time_slot.order_item.order.id
+
+    def get_time(self, time_slot: TimeSlot):
         # chopping off seconds
         return str(time_slot.time.value)[:-3]
 
     class Meta:
         model = TimeSlot
-        fields = ('time', 'taken')
+        fields = ('time', 'taken', 'order_id')
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
