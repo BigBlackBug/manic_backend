@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-MAX_DISTANCE_KM = 10**6
+MAX_DISTANCE_KM = 10 ** 6
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -14,5 +14,6 @@ DATABASES = {
         'PASSWORD': get_env_variable('DATABASE_PASSWORD'),
         'HOST': get_env_variable('DATABASE_HOST'),
         'PORT': '5432',
+        'ATOMIC_REQUESTS': True
     }
 }
