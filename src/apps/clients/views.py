@@ -151,7 +151,7 @@ class MeClient(generics.RetrieveAPIView):
 
         Response:
         200 OK
-                ```
+        ```
         {
           'id': 1,
           'first_name': 'Maria',
