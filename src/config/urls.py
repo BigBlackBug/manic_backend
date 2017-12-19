@@ -32,6 +32,7 @@ urlpatterns = [
 + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
 + [
     url(r'^mgmt/auth/', include('src.apps.authentication.mgmt.urls')),
+    url(r'^mgmt/categories/', include('src.apps.categories.mgmt.urls'))
 ]
 
 if settings.DEBUG:

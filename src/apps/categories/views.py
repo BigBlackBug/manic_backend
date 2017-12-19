@@ -2,8 +2,9 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 
-from .models import DisplayItem, ServiceCategory
-from .serializers import DisplayItemSerializer, ServiceCategorySerializer
+from .models import DisplayItem, ServiceCategory, Service
+from .serializers import DisplayItemSerializer, ServiceCategorySerializer, \
+    ServiceSerializer
 
 
 class DisplayItemList(generics.ListAPIView):
@@ -106,6 +107,39 @@ class CategoryListView(generics.ListAPIView):
               'max_duration':60
             }]
           }]
+        }]
+        ```
+
+        """
+        return super().get(request, *args, **kwargs)
+
+
+class ServiceListView(generics.ListAPIView):
+    view_name = 'service-list'
+
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request, *args, **kwargs):
+        """
+        Returns a list of all categories.
+
+        Response:
+        200 OK
+        ```
+        [{
+          'id':100,
+          'name':'Slow and steady'
+          'description':'Yeah!"
+          'cost':100,
+          'min_duration':30
+          'max_duration':60,
+          'category':{
+            'id':300,
+            'name':'super category',
+            'image':'url-to-image'
+          }
         }]
         ```
 
