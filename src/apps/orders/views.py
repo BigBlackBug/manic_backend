@@ -165,10 +165,9 @@ class CancelOrderView(generics.DestroyAPIView):
         is deleted and a new master is assigned to the order
         for the same service, unless the OrderItem is locked.
 
-        An order may be canceled by a master not more than
-        3 hours before the deadline.
-
         If called by a client, the order itself is deleted.
+
+        An order may be canceled not more than 3 hours before the deadline.
 
         Response:
 
@@ -178,6 +177,14 @@ class CancelOrderView(generics.DestroyAPIView):
         else's order, or you're too late, or the order is locked
         """
         order = self.get_object()
+
+        order_date = timezone.make_aware(
+            datetime.combine(order.date, order.time))
+        if order_date - timezone.now() < \
+                timedelta(hours=settings.ORDER_CANCELLATION_WINDOW_HOURS):
+            raise PermissionDenied(detail='You may not delete orders '
+                                          'less than 3 hours before '
+                                          'the deadline')
 
         if request.user.is_client(request):
             # check is the order belongs to the client
@@ -192,14 +199,6 @@ class CancelOrderView(generics.DestroyAPIView):
             if len(order_items) == 0:
                 raise PermissionDenied(detail='You are not responsible '
                                               'for this order')
-            order_date = timezone.make_aware(
-                datetime.combine(order.date, order.time))
-            if order_date - timezone.now() < \
-                    timedelta(hours=settings.ORDER_CANCELLATION_WINDOW_HOURS):
-                raise PermissionDenied(detail='You may not delete orders '
-                                              'less than 3 hours before '
-                                              'the deadline')
-
             for order_item in order_items:
                 if order_item.locked:
                     raise PermissionDenied(detail='You are not allowed '
