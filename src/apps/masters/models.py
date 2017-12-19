@@ -15,11 +15,15 @@ from src.apps.core.utils import Folders
 class MasterStatus:
     DUMMY = 'DUMMY'
     ON_REVIEW = 'ON_REVIEW'
+    DELETED = 'DELETED'
+    BLOCKED = 'BLOCKED'
     VERIFIED = 'VERIFIED'
 
     CHOICES = (
         (DUMMY, 'Свежий мастер'),
         (ON_REVIEW, 'На модерации'),
+        (DELETED, 'Удалён'),
+        (BLOCKED, 'Заблокирован'),
         (VERIFIED, 'Подтверждён'),
     )
 

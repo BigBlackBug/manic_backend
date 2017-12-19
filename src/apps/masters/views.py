@@ -276,7 +276,7 @@ class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
           'first_name':'Maria'
           'phone':'88005553535',
           'email':'supercool@master.com',
-          'status': 'ON_REVIEW/VERIFIED',
+          'status': 'ON_REVIEW/DELETED/BLOCKED/VERIFIED',
           'about': 'I am super cool',
           'avatar':'url-to-avatar',
           'services':[{service model}],
