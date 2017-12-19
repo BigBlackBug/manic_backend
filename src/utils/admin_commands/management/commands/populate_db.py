@@ -88,7 +88,9 @@ def _make_everything():
                                        date=timezone.now() + delta(days=3))
     schedule.save()
 
-    client = make_client()
+    client = make_client(first_name='client')
+    make_client(first_name='client2')
+    make_client(first_name='john doe')
     token, _ = AppToken.objects.get_or_create(client=client,
                                               key='client_token')
 

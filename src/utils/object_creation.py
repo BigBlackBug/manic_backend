@@ -7,7 +7,7 @@ from django.utils import timezone
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.authentication.utils import Gender
 from src.apps.categories.models import ServiceCategory, Service, DisplayItem
-from src.apps.clients.models import Address, Client, ClientStatus
+from src.apps.clients.models import Address, Client, ClientStatus, PaymentCard
 from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot, \
     MasterStatus, PortfolioImage, PortfolioImageStatus, Balance
@@ -93,12 +93,12 @@ def make_token(client=None, master=None):
     return token
 
 
-def make_client(user=None, activated=True):
+def make_client(user=None, first_name='client', activated=True):
     if not user:
         user = PhoneAuthUser.objects.create(
             phone=str(random.randint(1, 2000000)))
     if activated:
-        client = Client.objects.create(user=user, first_name='client',
+        client = Client.objects.create(user=user, first_name=first_name,
                                        status=ClientStatus.VERIFIED,
                                        avatar=utils.make_in_memory_image(
                                            'supername'),
@@ -111,6 +111,9 @@ def make_client(user=None, activated=True):
             building='4', floor=2, apt_number=79,
             entrance=6, has_intercom=True, client=client,
             is_default=True)
+        PaymentCard.objects.create(client=client, cryptogram='BLABL',
+                                   client_name_on_card='JOHN',
+                                   card_number='190')
     else:
         client = Client.objects.create(user=user,
                                        status=ClientStatus.DUMMY)

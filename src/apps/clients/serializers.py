@@ -40,7 +40,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = '__all__'
+        exclude = ('client',)
 
 
 class PaymentCardSerializer(serializers.ModelSerializer):
