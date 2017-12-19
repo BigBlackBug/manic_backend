@@ -8,11 +8,12 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
+from src.apps.core import utils
 from src.apps.masters.models import Master
+from src.apps.orders.models import Order
+from src.apps.orders.views import OrderCancelView
 from src.utils.object_creation import make_everything, make_client, \
     make_order_services, make_order
-from src.apps.orders.models import Order
-from src.apps.orders.views import OrderUpdateCancelView
 
 
 class MasterCancelOrderTestCase(APITestCase):
@@ -40,7 +41,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -67,7 +68,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=9, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         # too late
@@ -88,7 +89,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         # too late
@@ -111,13 +112,36 @@ class ClientCancelOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
-                                order_time=datetime.time(hour=11, minute=00))
+                                order_date=utils.get_date(1),
+                                order_time=datetime.time(hour=12, minute=30))
         resp = self.client.delete(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         # two orders
         with self.assertRaises(Order.DoesNotExist):
             Order.objects.get(pk=order_1.id)
+
+    def test_cancel_order_too_late(self):
+        master = Master.objects.get(first_name='VASYA')
+
+        service = master.services.all()[0]
+        # manually creating an order
+
+        order_1, _ = make_order(client=self.client_object,
+                                master=master,
+                                service=service,
+                                order_date=timezone.now(),
+                                order_time=datetime.time(hour=11,
+                                                         minute=00))
+
+        frozen = freeze_time(timezone.now().replace(hour=9, minute=0))
+        frozen.start()
+        resp = self.client.delete(
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
+        frozen.stop()
+
+        # too late
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_cancel_someone_elses_order(self):
         master = Master.objects.get(first_name='VASYA')
@@ -133,6 +157,6 @@ class ClientCancelOrderTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
         resp = self.client.delete(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
 
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)

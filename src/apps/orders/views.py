@@ -151,18 +151,17 @@ class OrderListCreateView(generics.ListCreateAPIView):
         })
 
 
-class OrderUpdateCancelView(mixins.DestroyModelMixin, mixins.UpdateModelMixin,
-                            generics.GenericAPIView):
-    view_name = 'update-cancel-order'
+class OrderUpdateCommentView(mixins.UpdateModelMixin, generics.GenericAPIView):
+    view_name = 'update-order-comment'
     queryset = Order.objects.all()
-    # TODO isactivated
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsClient,)
     # used by patch
     serializer_class = OrderUpdateSerializer
 
     def patch(self, request, *args, **kwargs):
         """
-        Updates an order. Can only be called by a client.
+        Creates or updates an order's comment.
+        Can only be called by a client on orders that are DONE
 
         Input:
         ```
@@ -175,14 +174,21 @@ class OrderUpdateCancelView(mixins.DestroyModelMixin, mixins.UpdateModelMixin,
 
         200 OK
 
-        403 Forbidden - if endpoint is called by a master
-        or the order is not DONE
+        403 Forbidden - if the order is not DONE
         """
         # only clients can update orders
         # TODO that's is not true, but good enough at the moment
-        if not request.user.is_client(request):
-            raise PermissionDenied(detail=IsClient.message)
         return self.partial_update(request, *args, **kwargs)
+
+
+class OrderCancelView(mixins.DestroyModelMixin,
+                      generics.GenericAPIView):
+    view_name = 'cancel-order'
+    queryset = Order.objects.all()
+    # TODO isactivated
+    permission_classes = (IsAuthenticated,)
+    # used by patch
+    serializer_class = OrderUpdateSerializer
 
     def delete(self, request, *args, **kwargs):
         """

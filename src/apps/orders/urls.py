@@ -1,15 +1,17 @@
 from django.conf.urls import url
 
-from .views import OrderUpdateCancelView, CompleteOrderView, OrderListCreateView, \
-    StartOrderView
+from .views import OrderCancelView, CompleteOrderView, OrderListCreateView, \
+    StartOrderView, OrderUpdateCommentView
 from .views_payment import PayForOrderView, FinishS3DView, \
     CloudPaymentsTransactionView
 
 urlpatterns = [
     url(r'^$', OrderListCreateView.as_view(),
         name=OrderListCreateView.view_name),
-    url(r'^(?P<pk>[0-9]+)$', OrderUpdateCancelView.as_view(),
-        name=OrderUpdateCancelView.view_name),
+    url(r'^(?P<pk>[0-9]+)$', OrderCancelView.as_view(),
+        name=OrderCancelView.view_name),
+    url(r'^(?P<pk>[0-9]+)/comment$', OrderUpdateCommentView.as_view(),
+        name=OrderUpdateCommentView.view_name),
     url(r'^(?P<pk>[0-9]+)/pay$', PayForOrderView.as_view(),
         name=PayForOrderView.view_name),
     url(r'^confirm_3ds$', FinishS3DView.as_view(),

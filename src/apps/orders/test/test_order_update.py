@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters.models import Master
 from src.apps.orders.models import OrderStatus, Order, PaymentType
-from src.apps.orders.views import OrderUpdateCancelView
+from src.apps.orders.views import OrderUpdateCommentView
 from src.utils.object_creation import make_everything, make_client, make_order
 
 
@@ -36,7 +36,7 @@ class UpdateOrderCommentTestCase(APITestCase):
 
         self.assertEqual(order_1.comment, '')
         resp = self.client.patch(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]), data={
+            reverse(OrderUpdateCommentView.view_name, args=[order_1.id]), data={
                 'comment': 'A new comment'
             }, format='json')
 
@@ -60,7 +60,7 @@ class UpdateOrderCommentTestCase(APITestCase):
 
         self.assertEqual(order_1.comment, 'LOL')
         resp = self.client.patch(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]), data={
+            reverse(OrderUpdateCommentView.view_name, args=[order_1.id]), data={
                 'comment': 'A new comment'
             }, format='json')
 
@@ -82,7 +82,7 @@ class UpdateOrderCommentTestCase(APITestCase):
 
         self.assertEqual(order_1.comment, 'old')
         resp = self.client.patch(
-            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]), data={
+            reverse(OrderUpdateCommentView.view_name, args=[order_1.id]), data={
                 'comment': 'new'
             }, format='json')
 

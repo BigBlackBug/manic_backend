@@ -108,7 +108,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             if instance.status != OrderStatus.DONE:
                 raise PermissionDenied(
                     detail="You are not allowed to add a comment "
-                           "to a non-complete order")
+                           "to an order that is not DONE")
         return super().update(instance, validated_data)
 
     class Meta:
