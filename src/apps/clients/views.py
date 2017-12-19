@@ -160,8 +160,8 @@ class MeClient(generics.RetrieveAPIView):
           'phone': '88005553535'
           'gender': 'F/M',
           'date_of_birth': '1988-10-29',
-          'tip': 5, //**optional**
-          'addresses': [{ //**optional**
+          'tip': 5,
+          'addresses': [{
             'location': {
                 'lat': 100,
                 'lon': 100,
