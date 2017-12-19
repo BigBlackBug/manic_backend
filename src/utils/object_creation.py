@@ -180,10 +180,12 @@ def make_everything():
 
 
 def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
-               order_date=timezone.now().date(), payment_type=PaymentType.CARD):
+               order_date=timezone.now().date(), payment_type=PaymentType.CARD,
+               comment=''):
     order = Order.objects.create(client=client, date=order_date,
                                  time=order_time, status=status,
-                                 payment_type=payment_type)
+                                 payment_type=payment_type,
+                                 comment=comment)
     schedule = master.get_schedule(order_date)
     slot = schedule.get_slot(order_time)
 

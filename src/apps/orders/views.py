@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.utils import timezone
-from rest_framework import generics, status
+from rest_framework import generics, status, mixins
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.orders import cloudpayments, order_utils
 from .models import Order, OrderStatus, PaymentType, OrderItem
-from .serializers import OrderCreateSerializer, OrderListSerializer
+from .serializers import OrderCreateSerializer, OrderListSerializer, \
+    OrderUpdateSerializer
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
@@ -114,6 +115,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
             'time': '11:00',
             'status': 'ACCEPTED/STARTED/DONE',
             'special': {},
+            'comment': '',
             'order_items': [{
               'service': {
                   'name': 'super service',
@@ -149,13 +151,38 @@ class OrderListCreateView(generics.ListCreateAPIView):
         })
 
 
-class CancelOrderView(generics.DestroyAPIView):
-    view_name = 'cancel-order'
+class OrderUpdateCancelView(mixins.DestroyModelMixin, mixins.UpdateModelMixin,
+                            generics.GenericAPIView):
+    view_name = 'update-cancel-order'
     queryset = Order.objects.all()
     # TODO isactivated
     permission_classes = (IsAuthenticated,)
-    # TODO needed by swagger
-    serializer_class = OrderListSerializer
+    # used by patch
+    serializer_class = OrderUpdateSerializer
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Updates an order. Can only be called by a client.
+
+        Input:
+        ```
+        {
+          'comment': 'I liked it!'
+        }
+        ```
+
+        Response:
+
+        200 OK
+
+        403 Forbidden - if endpoint is called by a master
+        or the order is not DONE
+        """
+        # only clients can update orders
+        # TODO that's is not true, but good enough at the moment
+        if not request.user.is_client(request):
+            raise PermissionDenied(detail=IsClient.message)
+        return self.partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         """
@@ -249,7 +276,7 @@ class CompleteOrderView(generics.GenericAPIView):
         order.save()
         return Response(status=status.HTTP_200_OK, data={
             'transaction_id': order.transaction and
-                        order.transaction.transaction_id
+                              order.transaction.transaction_id
         })
 
 

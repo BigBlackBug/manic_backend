@@ -12,7 +12,7 @@ from src.apps.masters.models import Master
 from src.utils.object_creation import make_everything, make_client, \
     make_order_services, make_order
 from src.apps.orders.models import Order
-from src.apps.orders.views import CancelOrderView
+from src.apps.orders.views import OrderUpdateCancelView
 
 
 class MasterCancelOrderTestCase(APITestCase):
@@ -40,7 +40,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(CancelOrderView.view_name, args=[order_1.id]))
+            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -67,7 +67,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=9, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(CancelOrderView.view_name, args=[order_1.id]))
+            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         # too late
@@ -88,7 +88,7 @@ class MasterCancelOrderTestCase(APITestCase):
         frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
         frozen.start()
         resp = self.client.delete(
-            reverse(CancelOrderView.view_name, args=[order_1.id]))
+            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
         frozen.stop()
 
         # too late
@@ -113,7 +113,7 @@ class ClientCancelOrderTestCase(APITestCase):
                                 service=service,
                                 order_time=datetime.time(hour=11, minute=00))
         resp = self.client.delete(
-            reverse(CancelOrderView.view_name, args=[order_1.id]))
+            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         # two orders
         with self.assertRaises(Order.DoesNotExist):
@@ -133,6 +133,6 @@ class ClientCancelOrderTestCase(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
         resp = self.client.delete(
-            reverse(CancelOrderView.view_name, args=[order_1.id]))
+            reverse(OrderUpdateCancelView.view_name, args=[order_1.id]))
 
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)

@@ -91,6 +91,8 @@ class Order(models.Model):
     time_started = models.DateTimeField(null=True)
     time_taken = models.DurationField(null=True)
 
+    comment = models.CharField(max_length=1024, blank=True)
+
     # TODO create property on save
     @property
     def total_cost(self):

@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from src.apps.categories.models import Service
 from src.apps.clients.serializers import OrderClientSerializer
 from src.apps.masters.models import Master, TimeSlot
-from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction
+from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction, \
+    OrderStatus
 
 
 # out
@@ -97,6 +98,22 @@ class OrderCreateSerializer(serializers.Serializer):
             if next_time:
                 schedule.assign_time(next_time, 1, order_item)
         return order
+
+
+class OrderUpdateSerializer(serializers.ModelSerializer):
+    comment = serializers.CharField(max_length=1024, write_only=True)
+
+    def update(self, instance, validated_data):
+        if 'comment' in validated_data:
+            if instance.status != OrderStatus.DONE:
+                raise PermissionDenied(
+                    detail="You are not allowed to add a comment "
+                           "to a non-complete order")
+        return super().update(instance, validated_data)
+
+    class Meta:
+        model = Order
+        fields = ('comment',)
 
 
 class CloudPaymentsTransactionSerializer(serializers.ModelSerializer):
