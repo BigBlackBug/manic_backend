@@ -33,7 +33,8 @@ urlpatterns = [
 + [
     url(r'^mgmt/auth/', include('src.apps.authentication.mgmt.urls')),
     url(r'^mgmt/categories/', include('src.apps.categories.mgmt.urls')),
-    url(r'^mgmt/clients/', include('src.apps.clients.mgmt.urls'))
+    url(r'^mgmt/clients/', include('src.apps.clients.mgmt.urls')),
+    url(r'^mgmt/orders/', include('src.apps.orders.mgmt.urls'))
 ]
 
 if settings.DEBUG:
