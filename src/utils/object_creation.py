@@ -12,7 +12,7 @@ from src.apps.core import utils
 from src.apps.masters.models import Master, Location, Schedule, TimeSlot, \
     MasterStatus, PortfolioImage, PortfolioImageStatus, Balance
 from src.apps.masters.receivers import *
-from src.apps.orders.models import Order, OrderItem, OrderStatus
+from src.apps.orders.models import Order, OrderItem, OrderStatus, PaymentType
 
 
 def make_display_item(*categories, name=None, special=None):
@@ -38,7 +38,7 @@ def make_category(category_name):
     Service.objects.create(category=category,
                            name=category_name + ' обычный',
                            description='d',
-                           cost=random.randint(10,90),
+                           cost=random.randint(10, 90),
                            min_duration=30,
                            max_duration=60)
 
@@ -180,9 +180,10 @@ def make_everything():
 
 
 def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
-               order_date=timezone.now().date()):
+               order_date=timezone.now().date(), payment_type=PaymentType.CARD):
     order = Order.objects.create(client=client, date=order_date,
-                                 time=order_time, status=status)
+                                 time=order_time, status=status,
+                                 payment_type=payment_type)
     schedule = master.get_schedule(order_date)
     slot = schedule.get_slot(order_time)
 

@@ -234,7 +234,8 @@ class CompleteOrderView(generics.GenericAPIView):
         200 OK
         ```
         {
-          //cloudpayments transaction id
+          //cloudpayments transaction id. null, in case the order
+          //is paid by cash
           'transaction_id: 100500
         }
         ```
@@ -248,7 +249,8 @@ class CompleteOrderView(generics.GenericAPIView):
         order.complete()
         order.save()
         return Response(status=status.HTTP_200_OK, data={
-            'transaction_id': order.transaction.transaction_id
+            'transaction_id': order.transaction and
+                        order.transaction.transaction_id
         })
 
 

@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
 from src.apps.orders.models import OrderStatus, Order, CloudPaymentsTransaction, \
-    OrderItem
+    OrderItem, PaymentType
 from src.apps.orders.views import CompleteOrderView
 from src.utils.object_creation import make_everything, make_client, make_order, \
     make_master, make_category
@@ -47,6 +47,31 @@ class CompleteOrderTestCase(APITestCase):
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data['transaction_id'], 1)
+        # TODO test serializers
+        order = Order.objects.get(pk=order_1.id)
+        self.assertIsNotNone(order.time_taken)
+        self.assertEqual(order.status, OrderStatus.DONE)
+
+        master = Master.objects.get(first_name='VASYA')
+
+        self.assertEqual(master.balance.on_hold, order_1.total_cost)
+
+    def test_complete_order_cash(self):
+        master = Master.objects.get(first_name='VASYA')
+        service = master.services.all()[0]
+        # manually creating an order
+        order_1, _ = make_order(client=self.client_object, master=master,
+                                service=service,
+                                order_time=datetime.time(hour=11, minute=00),
+                                payment_type=PaymentType.CASH)
+        order_1.time_started = timezone.now()
+        order_1.status = OrderStatus.STARTED
+        order_1.save()
+        resp = self.client.patch(
+            reverse(CompleteOrderView.view_name, args=[order_1.id]))
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['transaction_id'], None)
         # TODO test serializers
         order = Order.objects.get(pk=order_1.id)
         self.assertIsNotNone(order.time_taken)
