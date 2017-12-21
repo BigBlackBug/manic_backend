@@ -7,7 +7,7 @@ from ..serializers import ClientSerializer
 
 
 class ClientListView(generics.ListAPIView):
-    view_name = 'client-list'
+    view_name = 'mgmt-client-list'
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     permission_classes = (IsAdmin,)

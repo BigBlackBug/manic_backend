@@ -10,7 +10,7 @@ AdminUser = get_admin_user_model()
 
 
 class MgmtLoginView(GenericAPIView):
-    view_name = 'mgmt_login'
+    view_name = 'mgmt-login'
     permission_classes = ()
     serializer_class = serializers.Serializer
 

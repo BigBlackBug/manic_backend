@@ -8,7 +8,7 @@ from ..serializers import OrderListSerializer
 
 
 class OrderListView(generics.ListAPIView):
-    view_name = 'client-list'
+    view_name = 'mgmt-client-list'
     queryset = Order.objects.all()
     serializer_class = OrderListSerializer
     permission_classes = (IsAdmin,)
