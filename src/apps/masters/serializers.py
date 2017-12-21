@@ -104,7 +104,9 @@ class MasterSerializer(serializers.ModelSerializer):
 
     def get_portfolio(self, master: Master):
         portfolio = master.portfolio.order_by('-added').all()
-        serializer = PortfolioSerializer(many=True, instance=portfolio)
+        serializer = PortfolioSerializer(many=True,
+                                         instance=portfolio,
+                                         context=self.context)
         return serializer.data
 
     def get_schedule(self, master: Master):
