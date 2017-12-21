@@ -54,27 +54,30 @@ def make_category(category_name):
 def make_master(name, lon, user=None, activated=True,
                 about='awesome master!', make_portfolio=True,
                 make_balance=True):
-    randstring = str(random.randint(1000, 2000))
+    def _rand():
+        return random.randint(1000, 2000)
+
     if not user:
-        user = PhoneAuthUser.objects.create(phone=randstring)
+        user = PhoneAuthUser.objects.create(phone=str(_rand()))
     if activated:
         master = Master.objects.create(
             user=user, first_name=name,
             about=about,
-            email=randstring + 'bigblackbugg@gmail.com',
+            email=str(_rand()) + 'bigblackbugg@gmail.com',
             avatar=utils.make_in_memory_image('supername'),
             status=MasterStatus.VERIFIED,
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
-            location=Location.objects.create(lat=10, lon=lon))
+            location=Location.objects.create(lat=_rand(), lon=lon))
         if make_portfolio:
             PortfolioImage.objects.create(
                 image=utils.make_in_memory_image('heyho'),
-                description=randstring + 'description',
+                description=str(_rand()) + 'description',
                 status=PortfolioImageStatus.ON_MODERATION,
                 master=master)
         if make_balance:
-            Balance.objects.create(master=master)
+            Balance.objects.create(master=master, future=_rand(),
+                                   on_hold=_rand(), transferred=_rand())
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
