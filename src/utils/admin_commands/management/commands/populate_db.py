@@ -89,18 +89,18 @@ def _make_everything():
     schedule.save()
 
     client = make_client(first_name='client')
-    make_client(first_name='client2')
-    make_client(first_name='john doe')
+    client2 = make_client(first_name='client2')
+    client3 = make_client(first_name='john doe')
     token, _ = AppToken.objects.get_or_create(client=client,
                                               key='client_token')
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
                           master=vasya, order_time='10:30')
-    order, _ = make_order(client=client, service=hands.services.all()[1],
+    order, _ = make_order(client=client2, service=hands.services.all()[1],
                           master=vasya, order_time='11:00')
     # still got 2 slots on the first day
 
-    order, _ = make_order(client=client, service=hands.services.all()[0],
+    order, _ = make_order(client=client3, service=hands.services.all()[0],
                           master=vasya, order_time='11:00',
                           order_date=utils.get_date(-2),
                           status=OrderStatus.DONE)
