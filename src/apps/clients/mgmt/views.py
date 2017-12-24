@@ -1,8 +1,9 @@
 from rest_framework import generics
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import OrderingFilter
 
 from src.apps.clients.models import Client
 from src.apps.core.permissions import IsAdmin
+from .filters import ClientSearchFilter
 from ..serializers import ClientSerializer
 
 
@@ -11,13 +12,20 @@ class ClientListView(generics.ListAPIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     permission_classes = (IsAdmin,)
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('^first_name',)
+    filter_backends = (ClientSearchFilter, OrderingFilter)
+    search_fields = ('^first_name', '=id', '^user__phone')
     ordering = ('first_name',)
 
     def get(self, request, *args, **kwargs):
         """
-        Returns a list of clients
+        Returns a list of clients to be displayed
+        in the mgmt search page
+
+        Query Params:
+        ```search``` - searches by first_name, id, phone
+
+        ```service``` - searches for clients who have ordered this service
+
 
         Response:
         200 OK
