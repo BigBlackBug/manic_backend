@@ -7,7 +7,7 @@ from .serializers import DisplayItemSerializer, ServiceCategorySerializer, \
     ServiceSerializer
 
 
-class DisplayItemList(generics.ListAPIView):
+class DisplayItemListView(generics.ListAPIView):
     view_name = 'display-item-list'
 
     queryset = DisplayItem.objects.all()

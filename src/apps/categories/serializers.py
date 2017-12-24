@@ -43,4 +43,4 @@ class DisplayItemSerializer(FilterEmptyFieldsMixin,
 
     class Meta:
         model = DisplayItem
-        fields = ('name', 'categories', 'image', 'special')
+        fields = ('id', 'name', 'categories', 'image', 'special')
