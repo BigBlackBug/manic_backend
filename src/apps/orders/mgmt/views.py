@@ -20,6 +20,8 @@ class OrderListView(generics.ListAPIView):
         """
         Returns a list of orders.
 
+        Query Params: ```status, id```
+
         Response:
 
         200 OK
