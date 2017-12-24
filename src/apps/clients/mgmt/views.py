@@ -22,6 +22,7 @@ class ClientListView(generics.ListAPIView):
         in the mgmt search page
 
         Query Params:
+
         ```search``` - searches by first_name, id, phone
 
         ```service``` - searches for clients who have ordered this service

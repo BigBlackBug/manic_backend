@@ -28,9 +28,11 @@ class MgmtMasterSearchView(generics.ListAPIView):
         Returns a list of masters to be displayed
         in the mgmt search page.
 
-        Query Params: ```search, service```
+        Query Params:
 
-        Search Params: ```first_name, id, phone, email```
+        ```search``` - searches by first_name, id, phone, email
+
+        ```service``` - searches for masters who are doing this service
 
         Response:
         200 OK
