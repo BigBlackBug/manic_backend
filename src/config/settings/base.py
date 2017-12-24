@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'src.apps.masters',
     'src.apps.clients',
     'src.apps.orders',
+    'src.apps.finances',
     'src.utils.admin_commands',
 
     'rest_framework',

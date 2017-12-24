@@ -278,6 +278,7 @@ class CompleteOrderView(generics.GenericAPIView):
         if order.payment_type == PaymentType.CARD:
             cloudpayments.confirm_payment(order.transaction, order.total_cost)
 
+        # only one master of the order can complete the order
         order.complete()
         order.save()
         return Response(status=status.HTTP_200_OK, data={
@@ -303,9 +304,8 @@ class StartOrderView(generics.GenericAPIView):
         """
         order = self.get_object()
         if order.status != OrderStatus.ACCEPTED:
-            raise ValidationError("Order must be STARTED by the master")
+            raise ValidationError("Order must be ACCEPTED by the master")
 
-        order.status = OrderStatus.STARTED
-        order.time_started = timezone.now()
+        order.start()
         order.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

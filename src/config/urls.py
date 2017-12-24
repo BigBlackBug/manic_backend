@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^mgmt/clients/', include('src.apps.clients.mgmt.urls')),
     url(r'^mgmt/orders/', include('src.apps.orders.mgmt.urls')),
     url(r'^mgmt/masters/', include('src.apps.masters.mgmt.urls')),
+    url(r'^mgmt/finances/', include('src.apps.finances.mgmt.urls')),
 ]
 
 if settings.DEBUG:

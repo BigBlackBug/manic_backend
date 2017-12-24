@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from src.apps.categories.models import Service
 from src.apps.clients.models import Client
+from src.apps.finances.models import TransactionEntry, TransactionEntryType
 from src.apps.masters.models import Master
 
 
@@ -105,6 +106,10 @@ class Order(models.Model):
             lambda item: int(item.service.cost * self.client.tip_multiplier()),
             self.order_items.all()))
 
+    def start(self):
+        self.status = OrderStatus.STARTED
+        self.time_started = timezone.now()
+
     def complete(self):
         """
         Sets the `status` and `time_taken` of the order
@@ -115,8 +120,12 @@ class Order(models.Model):
 
         tip_multiplier = self.client.tip_multiplier()
         for item in self.order_items.all():
-            item.master.complete_order_payment(
-                item.service.cost * tip_multiplier)
+            value = int(item.service.cost * tip_multiplier)
+            # needed by analytics
+            TransactionEntry.objects.create(entry_type=TransactionEntryType.IN,
+                                            master=item.master, value=value,
+                                            order=self)
+            item.master.complete_order_payment(value)
             item.master.save()
 
     def __str__(self):
