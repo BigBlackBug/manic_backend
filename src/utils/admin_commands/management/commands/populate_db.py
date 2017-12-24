@@ -98,12 +98,15 @@ def _make_everything():
                           master=vasya, order_time='10:30')
     order, _ = make_order(client=client2, service=hands.services.all()[1],
                           master=vasya, order_time='11:00')
-    # still got 2 slots on the first day
 
+    # still got 2 slots on the first day
     order, _ = make_order(client=client3, service=hands.services.all()[0],
                           master=vasya, order_time='11:00',
                           order_date=utils.get_date(-2),
                           status=OrderStatus.DONE)
+    order.start()
+    order.complete()
+    order.save()
 
 
 def _make_admin_token():
