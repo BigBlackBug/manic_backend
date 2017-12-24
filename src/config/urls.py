@@ -35,6 +35,7 @@ urlpatterns = [
     url(r'^mgmt/categories/', include('src.apps.categories.mgmt.urls')),
     url(r'^mgmt/clients/', include('src.apps.clients.mgmt.urls')),
     url(r'^mgmt/orders/', include('src.apps.orders.mgmt.urls')),
+    url(r'^mgmt/masters/', include('src.apps.masters.mgmt.urls')),
 ]
 
 if settings.DEBUG:
