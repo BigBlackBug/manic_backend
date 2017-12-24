@@ -25,6 +25,10 @@ class MgmtListCreateServiceCategoryView(mixins.CreateModelMixin,
             return [parsers.MultiPartParser()]
 
     def get_serializer_class(self):
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return ServiceCategorySerializer
+
         if self.request.method == 'GET':
             return ServiceCategorySerializer
         elif self.request.method == 'POST':
@@ -64,6 +68,11 @@ class MgmtCreateServiceView(mixins.CreateModelMixin,
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return context
+
         context['category'] = self.get_object()
         return context
 
@@ -108,6 +117,10 @@ class MgmtListCreateDisplayItemView(mixins.CreateModelMixin,
             return [parsers.MultiPartParser()]
 
     def get_serializer_class(self):
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return DisplayItemSerializer
+
         if self.request.method == 'GET':
             return DisplayItemSerializer
         elif self.request.method == 'POST':
