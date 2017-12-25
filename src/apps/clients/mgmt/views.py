@@ -19,7 +19,7 @@ class ClientListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         """
         Returns a list of clients to be displayed
-        in the mgmt search page
+        on the mgmt search page
 
         Query Params:
 
