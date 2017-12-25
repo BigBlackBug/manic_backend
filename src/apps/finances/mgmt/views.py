@@ -26,7 +26,9 @@ class TransactionEntryListView(generics.ListAPIView):
         ```search``` - searches by master's first_name
 
         ```entry_type``` - searches for entries with this type.
+
         Can be IN or OUT.
+
         IN means transaction from a client to the 4hands account.
         OUT means payment from the 4hands account to a master.
 

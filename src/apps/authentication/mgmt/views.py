@@ -16,13 +16,15 @@ class MgmtLoginView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        A temporary(or permanent) endpoint for admin app auth
+        Logs an administrator in
 
         Input:
+
         ``` { 'username':'super', 'password':'boss' } ```
 
         Response:
-        ```  { 'token':'my_token' } ```
+
+        200 OK ```  { 'token':'my_token' } ```
         """
         username = request.data['username']
         password = request.data['password']
