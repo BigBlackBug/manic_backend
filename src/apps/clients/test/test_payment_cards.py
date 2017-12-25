@@ -1,21 +1,17 @@
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import Token, PhoneAuthUser
-from src.apps.authentication.utils import Gender
-from src.apps.clients.models import Client, Address, PaymentCard
+from src.apps.clients.models import Client, PaymentCard
 from src.apps.clients.views import AddPaymentCardView, DeletePaymentCardView
-from src.apps.core import utils
-from src.apps.core.models import Location
 from src.utils.object_creation import make_client
 
 
 class PaymentCardsTestCase(APITestCase):
     def setUp(self):
         self.user = PhoneAuthUser.objects.create(phone='777')
-        self.client_object = make_client(self.user)
+        self.client_object = make_client(self.user, make_card=False)
         token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')

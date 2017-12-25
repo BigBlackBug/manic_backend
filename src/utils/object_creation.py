@@ -53,7 +53,7 @@ def make_category(category_name):
 
 def make_master(name, lon, user=None, activated=True,
                 about='awesome master!', make_portfolio=True,
-                make_balance=True):
+                make_balance=False):
     def _rand():
         return random.randint(1000, 2000)
 
@@ -68,7 +68,7 @@ def make_master(name, lon, user=None, activated=True,
             status=MasterStatus.VERIFIED,
             gender=Gender.MALE,
             date_of_birth=timezone.now(),
-            location=Location.objects.create(lat=_rand(), lon=lon))
+            location=Location.objects.create(lat=10, lon=lon))
         if make_portfolio:
             PortfolioImage.objects.create(
                 image=utils.make_in_memory_image('heyho'),
@@ -78,6 +78,9 @@ def make_master(name, lon, user=None, activated=True,
         if make_balance:
             Balance.objects.create(master=master, future=_rand(),
                                    on_hold=_rand(), transferred=_rand())
+        else:
+            Balance.objects.create(master=master)
+
     else:
         master = Master.objects.create(user=user, status=MasterStatus.DUMMY)
 
@@ -96,7 +99,7 @@ def make_token(client=None, master=None):
     return token
 
 
-def make_client(user=None, first_name='client', activated=True):
+def make_client(user=None, first_name='client', activated=True, make_card=True):
     if not user:
         user = PhoneAuthUser.objects.create(
             phone=str(random.randint(1, 2000000)))
@@ -114,7 +117,8 @@ def make_client(user=None, first_name='client', activated=True):
             building='4', floor=2, apt_number=79,
             entrance=6, has_intercom=True, client=client,
             is_default=True)
-        PaymentCard.objects.create(client=client, cryptogram='BLABL',
+        if make_card:
+            PaymentCard.objects.create(client=client, cryptogram='BLABL',
                                    client_name_on_card='JOHN',
                                    card_number='190')
     else:
