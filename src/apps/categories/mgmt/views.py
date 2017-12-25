@@ -35,6 +35,19 @@ class MgmtListCreateServiceCategoryView(mixins.CreateModelMixin,
             return CreateUpdateServiceCategorySerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a category.
+
+        It's a multipart request.
+
+        Input:
+
+        ``` { 'name':'super', 'image':'multipart-image' } ```
+
+        Response:
+
+        201 Created
+        """
         return super().create(request, *args, **kwargs)
 
 
@@ -53,9 +66,29 @@ class MgmtUpdateDeleteServiceCategoryView(mixins.UpdateModelMixin,
             return [parsers.MultiPartParser()]
 
     def patch(self, request, *args, **kwargs):
+        """
+        Updates a category.
+
+        It's a multipart request.
+
+        Input:
+
+        ``` { 'name':'super', 'image':'multipart-image' } ```
+
+        Response:
+
+        200 OK
+        """
         return super().partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        """
+        Deletes a category.
+
+        Response:
+
+        204 No content
+        """
         return super().destroy(request, *args, **kwargs)
 
 
@@ -77,6 +110,25 @@ class MgmtCreateServiceView(mixins.CreateModelMixin,
         return context
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a service.
+
+        Input:
+
+        ```
+        {
+          'name':'hey',
+          'description':'sweetheart',
+          'cost':100,
+          'min_duration':30,
+          'max_duration':60
+        }
+        ```
+
+        Response:
+
+        201 Created
+        """
         return super().create(request, *args, **kwargs)
 
 
@@ -97,9 +149,35 @@ class MgmtUpdateDeleteServiceView(mixins.UpdateModelMixin,
             raise NotFound(f'Service with id {service_id} is not found')
 
     def patch(self, request, *args, **kwargs):
+        """
+        Updates a service.
+
+        Input:
+
+        ```
+        {
+          'name':'hey',
+          'description':'sweetheart',
+          'cost':100,
+          'min_duration':30,
+          'max_duration':60
+        }
+        ```
+
+        Response:
+
+        200 Created
+        """
         return super().partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        """
+        Deletes a service.
+
+        Response:
+
+        204 No content
+        """
         return super().destroy(request, *args, **kwargs)
 
 
@@ -127,6 +205,26 @@ class MgmtListCreateDisplayItemView(mixins.CreateModelMixin,
             return CreateUpdateDisplayItemSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Creates a display item.
+
+        It's a multipart request.
+
+        Input:
+
+        ```
+        {
+          'name':'super',
+          'image':'multipart-image',
+          'categories':'1,2,3',
+          'special':{}
+        }
+        ```
+
+        Response:
+
+        201 Created
+        """
         return super().create(request, *args, **kwargs)
 
 
@@ -145,7 +243,34 @@ class MgmtUpdateDeleteDisplayItemView(mixins.UpdateModelMixin,
             return [parsers.MultiPartParser()]
 
     def patch(self, request, *args, **kwargs):
+        """
+        Updates a display item.
+
+        It's a multipart request.
+
+        Input:
+
+        ```
+        {
+          'name':'super',
+          'image':'multipart-image',
+          'categories':'1,2,3',
+          'special':{}
+        }
+        ```
+
+        Response:
+
+        200 OK
+        """
         return super().partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        """
+        Deletes a display item.
+
+        Response:
+
+        204 No content
+        """
         return super().destroy(request, *args, **kwargs)
