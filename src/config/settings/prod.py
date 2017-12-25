@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = False
-
+ENABLE_SMS_CONFIRMATION = True
 USE_GMAPS_API = True
 # TODO temporary stub
 ALLOWED_HOSTS = ['4hands2go.bigblackbug.me', '35.195.99.19']

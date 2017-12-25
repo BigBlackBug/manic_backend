@@ -56,7 +56,7 @@ class CreateRegistrationView(NamedAPIView):
         serializer.is_valid(raise_exception=True)
 
         phone = serializer.validated_data['phone']
-        if not settings.DEBUG:
+        if settings.ENABLE_SMS_CONFIRMATION:
             code = sms_verification.generate_code(phone)
             logger.info(f'Generated code {code} for the phone {phone}')
             # will raise exception
