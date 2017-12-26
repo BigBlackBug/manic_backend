@@ -48,6 +48,7 @@ class Master(UserProfile):
 
     # FK fields
     # balance
+    # device
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
     # order_items - list of 'order items'

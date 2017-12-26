@@ -21,6 +21,7 @@ class Client(UserProfile):
     # orders
     # payment_cards
     # addresses
+    # device
 
     tip = models.IntegerField(default=5)
     status = models.CharField(max_length=9,
