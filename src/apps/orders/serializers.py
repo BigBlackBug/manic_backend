@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from src.apps.categories.models import Service
 from src.apps.clients.serializers import OrderClientSerializer
 from src.apps.masters.models import Master, TimeSlot
+from src.apps.orders import notifications
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction, \
     OrderStatus
 
@@ -96,7 +97,15 @@ class OrderCreateSerializer(serializers.Serializer):
                     order_item)
             # add +1 if it's not end of the day
             if next_time:
-                schedule.assign_time(next_time, 1, order_item)
+                schedule.assign_time(next_time, number_of_slots=1,
+                                     order_item=order_item)
+            if master.device:
+                # TODO FCM iOS event
+                master.device.send_message(
+                    notifications.NEW_ORDER_TITLE,
+                    notifications.NEW_ORDER_CONTENT(
+                        order_time=order.time.strftime('%H:%M'),
+                        order_date=order.date.strftime('%Y-%m-%d')))
         return order
 
 
