@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^masters/', include('src.apps.masters.urls')),
     url(r'^clients/', include('src.apps.clients.urls')),
     url(r'^orders/', include('src.apps.orders.urls')),
+    url(r'^devices/', include('src.apps.devices.urls')),
 ]\
 + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
 + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \

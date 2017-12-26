@@ -2,13 +2,15 @@ from django.conf.urls import url
 
 from src.apps.masters.mgmt.views import MgmtMasterSearchView, \
     MgmtMasterDetailUpdateView, MgmtMasterAvatarUpdateView, \
-    MgmtUpdatePortfolioStatusView
+    MgmtUpdatePortfolioStatusView, MgmtMasterUpdateStatusView
 
 urlpatterns = [
     url(r'^$', MgmtMasterSearchView.as_view(),
         name=MgmtMasterSearchView.view_name),
     url(r'^(?P<pk>[0-9]+)$', MgmtMasterDetailUpdateView.as_view(),
         name=MgmtMasterSearchView.view_name),
+    url(r'^(?P<pk>[0-9]+)/status$', MgmtMasterUpdateStatusView.as_view(),
+        name=MgmtMasterUpdateStatusView.view_name),
     url(r'^(?P<pk>[0-9]+)/avatar$', MgmtMasterAvatarUpdateView.as_view(),
         name=MgmtMasterAvatarUpdateView.view_name),
     url(r'^(?P<pk>[0-9]+)/portfolio/(?P<portfolio_id>[0-9]+)$',

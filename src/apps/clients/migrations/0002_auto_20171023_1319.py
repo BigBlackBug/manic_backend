@@ -20,4 +20,13 @@ class Migration(migrations.Migration):
                                        related_name='client',
                                        to='clients.Address'),
         ),
+        migrations.AddField(
+            model_name='client',
+            name='device',
+            field=models.OneToOneField(null=True,
+                                       on_delete=django.db.models.deletion.SET_NULL,
+                                       related_name='client',
+                                       related_query_name='client',
+                                       to='devices.FCMDevice'),
+        ),
     ]

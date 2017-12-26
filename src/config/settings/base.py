@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'src.apps.clients',
     'src.apps.orders',
     'src.apps.finances',
+    'src.apps.devices',
     'src.utils.admin_commands',
 
     'rest_framework',
@@ -101,6 +102,13 @@ REST_FRAMEWORK = {
 
 SWAGGER_SETTINGS = {
     'DOC_EXPANSION': 'list'
+}
+
+FCM_DJANGO_SETTINGS = {
+    # TODO FCM API KEY
+    'FCM_SERVER_KEY': '[your api key]',
+    'ONE_DEVICE_PER_USER': False,
+    'DELETE_INACTIVE_DEVICES': False,
 }
 
 MIDDLEWARE = [

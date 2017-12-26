@@ -19,6 +19,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
+            model_name='master',
+            name='device',
+            field=models.OneToOneField(null=True,
+                                       on_delete=django.db.models.deletion.SET_NULL,
+                                       related_name='master',
+                                       related_query_name='master',
+                                       to='devices.FCMDevice'),
+        ),
+        migrations.AddField(
             model_name='timeslot',
             name='order_item',
             field=models.ForeignKey(blank=True, null=True,

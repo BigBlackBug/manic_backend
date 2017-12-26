@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('devices', '0001_initial'),
         ('authentication', '0001_initial'),
         ('core', '0001_initial'),
     ]
@@ -60,4 +61,5 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+
     ]

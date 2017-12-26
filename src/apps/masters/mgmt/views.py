@@ -1,16 +1,16 @@
 from rest_framework import generics, mixins, parsers, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
 from src.apps.core.permissions import IsAdmin
 from src.apps.core.serializers import ImageSerializer
+from src.apps.masters import notifications
 from .filters import MasterListSearchFilter
-from .serializers import MgmtMasterListSerializer, \
-    MgmtMasterUpdateSerializer
-from ..models import Master, PortfolioImage
-from ..serializers import MasterSerializer
+from .serializers import MgmtMasterListSerializer
+from ..models import Master, PortfolioImage, MasterStatus
+from ..serializers import MasterSerializer, MasterUpdateSerializer
 from ..views import MasterDetailUpdateView
 
 
@@ -69,12 +69,12 @@ class MgmtMasterDetailUpdateView(MasterDetailUpdateView):
             return MasterSerializer
 
         if self.request.method == 'PATCH':
-            return MgmtMasterUpdateSerializer
+            return MasterUpdateSerializer
         return MasterSerializer
 
     def patch(self, request, *args, **kwargs):
         """
-        Updates a master's status
+        Updates a master's info
 
         Input:
         ```
@@ -86,7 +86,6 @@ class MgmtMasterDetailUpdateView(MasterDetailUpdateView):
           'about': 'I am super cool',
           'services':'1,2,3,4',
           'location': {'lat':10, 'lon':12}
-          'status': 'ON_REVIEW/DELETED/BLOCKED/VERIFIED'
         }
         ```
 
@@ -97,8 +96,40 @@ class MgmtMasterDetailUpdateView(MasterDetailUpdateView):
         """
         self.partial_update(request, *args, **kwargs)
         return Response(data={})
-        # def get(self, request, *args, **kwargs):
-        #     return super().get(request, *a)
+
+
+class MgmtMasterUpdateStatusView(generics.UpdateAPIView):
+    view_name = 'mgmt-update-status-master'
+    queryset = Master.objects.all()
+    permission_classes = (IsAdmin,)
+    serializer_class = MasterSerializer
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Updates a master's status
+
+        Input:
+        ``` { 'status': 'ON_REVIEW/DELETED/BLOCKED/VERIFIED' }```
+
+        Response:
+
+        200 OK
+
+        """
+        master = self.get_object()
+        master_status = request.data.get('status', None)
+        if not master_status:
+            raise ValidationError('status is required')
+        if master_status not in [choice[0] for choice in MasterStatus.CHOICES]:
+            raise ValidationError('unsupported status')
+        if master.device:
+            # TODO FCM iOS event
+            master.device.send_message(
+                notifications.MASTER_STATUS_CHANGED,
+                notifications.MASTER_STATUS_MAP[master_status])
+        master.status = master_status
+        master.save()
+        return Response()
 
 
 class MgmtMasterAvatarUpdateView(mixins.UpdateModelMixin,

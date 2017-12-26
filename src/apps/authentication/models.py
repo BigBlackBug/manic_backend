@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from src.apps.core.utils import Folders
+from src.apps.devices.models import FCMDevice
 from .utils import Gender
 
 
@@ -131,6 +132,10 @@ class UserProfile(models.Model):
         choices=Gender.CHOICES,
         default=Gender.FEMALE,
     )
+
+    device = models.OneToOneField(FCMDevice, null=True, on_delete=models.SET_NULL,
+                                  related_name="%(class)s",
+                                  related_query_name="%(class)s", )
 
     date_of_birth = models.DateField(null=True)
 
