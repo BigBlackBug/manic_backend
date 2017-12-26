@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.permissions import IsClient, IsMaster
-from src.apps.orders import cloudpayments, order_utils
+from src.apps.orders import cloudpayments, order_utils, notifications
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer, \
     OrderUpdateSerializer
@@ -281,9 +281,16 @@ class CompleteOrderView(generics.GenericAPIView):
         # only one master of the order can complete the order
         order.complete()
         order.save()
+
+        # TODO FCM iOS event
+        if order.client.device:
+            order.client.device.send_message(
+                notifications.ORDER_COMPLETE_TITLE,
+                notifications.ORDER_COMPLETE_CONTENT(
+                    order.time.strftime('%H:%M')))
         return Response(status=status.HTTP_200_OK, data={
             'transaction_id': order.transaction and
-                              order.transaction.transaction_id
+                        order.transaction.transaction_id
         })
 
 
