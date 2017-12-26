@@ -125,7 +125,7 @@ class MgmtMasterUpdateStatusView(generics.UpdateAPIView):
         if master.device:
             # TODO FCM iOS event
             master.device.send_message(
-                notifications.MASTER_STATUS_CHANGED,
+                notifications.MASTER_STATUS_CHANGED_TITLE,
                 notifications.MASTER_STATUS_MAP[master_status])
         master.status = master_status
         master.save()
