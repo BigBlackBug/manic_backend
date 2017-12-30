@@ -10,7 +10,7 @@ services:
       - ${DEPLOY_HTTPS_PORT-4433}:443
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
-#      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - /etc/nginx:/etc/nginx:ro
       - /var/lib/4hands2go/dev-media:/var/lib/4hands2go/media
       - /var/lib/4hands2go/dev-static:/var/lib/4hands2go/static
 
