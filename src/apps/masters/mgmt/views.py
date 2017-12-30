@@ -98,7 +98,8 @@ class MgmtMasterDetailUpdateView(MasterDetailUpdateView):
         return Response(data={})
 
 
-class MgmtMasterUpdateStatusView(generics.UpdateAPIView):
+class MgmtMasterUpdateStatusView(mixins.UpdateModelMixin,
+                                 generics.GenericAPIView):
     view_name = 'mgmt-update-status-master'
     queryset = Master.objects.all()
     permission_classes = (IsAdmin,)

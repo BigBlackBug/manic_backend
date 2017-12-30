@@ -258,7 +258,9 @@ class MasterBestMatchView(generics.ListAPIView):
         return Response(data=output_data[0])
 
 
-class MasterDetailUpdateView(generics.RetrieveUpdateAPIView):
+class MasterDetailUpdateView(mixins.RetrieveModelMixin,
+                             mixins.UpdateModelMixin,
+                             generics.GenericAPIView):
     view_name = 'master-detail-update'
     queryset = Master.objects.all()
     get_permission_classes = (permissions.IsAuthenticated,)
