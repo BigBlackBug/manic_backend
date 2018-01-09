@@ -282,7 +282,6 @@ class CompleteOrderView(generics.GenericAPIView):
         order.complete()
         order.save()
 
-        # TODO FCM iOS event
         if order.client.device:
             order.client.device.send_message(
                 notifications.ORDER_COMPLETE_TITLE,

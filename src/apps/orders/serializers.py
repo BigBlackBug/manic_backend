@@ -100,7 +100,6 @@ class OrderCreateSerializer(serializers.Serializer):
                 schedule.assign_time(next_time, number_of_slots=1,
                                      order_item=order_item)
             if master.device:
-                # TODO FCM iOS event
                 master.device.send_message(
                     notifications.NEW_ORDER_TITLE,
                     notifications.NEW_ORDER_CONTENT(

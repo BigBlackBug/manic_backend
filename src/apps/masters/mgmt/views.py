@@ -124,7 +124,6 @@ class MgmtMasterUpdateStatusView(mixins.UpdateModelMixin,
         if master_status not in [choice[0] for choice in MasterStatus.CHOICES]:
             raise ValidationError('unsupported status')
         if master.device:
-            # TODO FCM iOS event
             master.device.send_message(
                 notifications.MASTER_STATUS_CHANGED_TITLE,
                 notifications.MASTER_STATUS_MAP[master_status])
