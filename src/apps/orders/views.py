@@ -287,7 +287,10 @@ class CompleteOrderView(generics.GenericAPIView):
             order.client.device.send_message(
                 notifications.ORDER_COMPLETE_TITLE,
                 notifications.ORDER_COMPLETE_CONTENT(
-                    order.time.strftime('%H:%M')))
+                    order.time.strftime('%H:%M')),
+                data={
+                    "order_id": order.id
+                })
         return Response(status=status.HTTP_200_OK, data={
             'transaction_id': order.transaction and
                         order.transaction.transaction_id
