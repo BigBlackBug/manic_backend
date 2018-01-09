@@ -7,6 +7,12 @@ USE_GMAPS_API = get_env_variable('USE_GMAPS_API', default=True)
 # TODO temporary stub
 ALLOWED_HOSTS = ['dev.4hands2go.bigblackbug.me', '35.195.99.19']
 
+FCM_DJANGO_SETTINGS = {
+    'FCM_SERVER_KEY': "AAAAn_i-bL4:APA91bHJj5gX88W-dMy-u_3JDUf1oSqmp0VOGP8qkl"
+                      "INUegqX2ZavfVg4clL5zfMOshPkr7AODpX8yhmphhsSACPAUxJeZJ7"
+                      "U3E0Fwua4F-8RPYBx5DuE778lYkPvPH7e4MjQzgVY75p",
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

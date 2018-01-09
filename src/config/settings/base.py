@@ -16,6 +16,10 @@ from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
 
 
+def raiser(ex):
+    raise ex
+
+
 def get_env_variable(var_name, raise_exception=True, default=None, type=str):
     """Get the environment variable or raise exception."""
     try:
@@ -105,10 +109,7 @@ SWAGGER_SETTINGS = {
 }
 
 FCM_DJANGO_SETTINGS = {
-    # TODO FCM API KEY
-    'FCM_SERVER_KEY': '[your api key]',
-    'ONE_DEVICE_PER_USER': False,
-    'DELETE_INACTIVE_DEVICES': False,
+    'FCM_SERVER_KEY': raiser(KeyError("Set FCM_SERVER_KEY")),
 }
 
 MIDDLEWARE = [
