@@ -328,7 +328,7 @@ class MasterDetailUpdateView(mixins.RetrieveModelMixin,
         }
         ```
         """
-        return super().get(request, *args, **kwargs)
+        return super().retrieve(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if not self.request:
@@ -371,7 +371,7 @@ class MasterDetailUpdateView(mixins.RetrieveModelMixin,
 
         400 Bad Request
         """
-        return super().patch(request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
 
 class MasterAvatarUpdateView(APIView):
