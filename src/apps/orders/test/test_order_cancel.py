@@ -50,6 +50,11 @@ class MasterCancelOrderTestCase(APITestCase):
         with self.assertRaises(Order.DoesNotExist):
             Order.objects.get(pk=order_1.id)
 
+        # find new master
+        self.master_object = Master.objects.get(pk=self.master_object.id)
+        self.assertEqual(self.master_object.balance.future, 0)
+
+
     def test_cancel_order_many_services_two_masters(self):
         # TODO test
         pass
@@ -120,6 +125,9 @@ class ClientCancelOrderTestCase(APITestCase):
         # two orders
         with self.assertRaises(Order.DoesNotExist):
             Order.objects.get(pk=order_1.id)
+
+        master = Master.objects.get(pk=master.id)
+        self.assertEqual(master.balance.future, 0)
 
     def test_cancel_order_too_late(self):
         master = Master.objects.get(first_name='VASYA')
