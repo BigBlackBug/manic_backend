@@ -16,10 +16,6 @@ from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
 
 
-def raiser(ex):
-    raise ex
-
-
 def get_env_variable(var_name, raise_exception=True, default=None, type=str):
     """Get the environment variable or raise exception."""
     try:
@@ -64,6 +60,7 @@ ORDER_CANCELLATION_WINDOW_HOURS = 3
 MAX_DISTANCE_KM = 20.0
 USE_GMAPS_API = False
 ENABLE_SMS_CONFIRMATION = False
+MINIMUM_BALANCE = 500
 
 ADMIN_APP_USER_MODEL = 'auth.User'
 
@@ -109,7 +106,7 @@ SWAGGER_SETTINGS = {
 }
 
 FCM_DJANGO_SETTINGS = {
-    'FCM_SERVER_KEY': raiser(KeyError("Set FCM_SERVER_KEY")),
+    'FCM_SERVER_KEY': None,
 }
 
 MIDDLEWARE = [
