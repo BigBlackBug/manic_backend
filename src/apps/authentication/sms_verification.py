@@ -11,6 +11,8 @@ from src.apps.core.exceptions import ApplicationError
 
 SMS_ERROR = ApplicationError.ErrorTypes.SMS_ERROR
 SMS_RU_RESPONSE_OK = 100
+SMS_RU_NO_MONEY = 201
+SMS_RU_SERVICE_UNAVAILABLE = 220
 
 logger = logging.getLogger(__name__)
 
@@ -62,19 +64,23 @@ def send_code(phone: str, code: str):
     if balance < settings.MINIMUM_BALANCE:
         logger.warning(f'Current Balance ({balance}) is low. '
                        f'Consider refilling.')
-        # TODO send a warning
+        # TODO send a notification
         pass
 
-    if status_code != SMS_RU_RESPONSE_OK:
-        # 201 - no money
-        # 220 - service unavailable
+    if status_code == SMS_RU_RESPONSE_OK:
+        sms_response = json['sms'][phone]
+
+        if sms_response['status_code'] != SMS_RU_RESPONSE_OK:
+            # TODO proper error handling
+            raise ApplicationError(sms_response['status_text'],
+                                   error_type=SMS_ERROR)
+    else:
+        if status_code == SMS_RU_NO_MONEY:
+            # TODO send a notification
+            pass
+        elif status_code == SMS_RU_SERVICE_UNAVAILABLE:
+            # TODO send a notification
+            pass
         raise ApplicationError(
             f'Unable to send SMS. Reason: {json["status_text"]}',
             error_type=SMS_ERROR)
-
-    sms_response = json['sms'][phone]
-
-    if sms_response['status_code'] != SMS_RU_RESPONSE_OK:
-        # TODO proper error handling
-        raise ApplicationError(sms_response['status_text'],
-                               error_type=SMS_ERROR)
