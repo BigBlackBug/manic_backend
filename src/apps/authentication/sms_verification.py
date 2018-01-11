@@ -61,7 +61,7 @@ def send_code(phone: str, code: str):
     status_code = json['status_code']
     balance = json['balance']
 
-    if balance < settings.MINIMUM_BALANCE:
+    if balance < settings.SMS_RU_WARNING_BALANCE_RUB:
         logger.warning(f'Current Balance ({balance}) is low. '
                        f'Consider refilling.')
         # TODO send a notification
