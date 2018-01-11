@@ -204,8 +204,7 @@ def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
                                           master=master,
                                           order=order,
                                           locked=False)
-    master.create_order_payment(service, client.tip_multiplier(),
-                                order.payment_type)
+    master.create_order_payment(order, order_item)
     slot.order_item = order_item
     slot.taken = True
     slot.save()
@@ -225,8 +224,7 @@ def make_order_services(client, services, master, order_time,
                                               master=master,
                                               order=order,
                                               locked=locked)
-        master.create_order_payment(service, client.tip_multiplier(),
-                                    order.payment_type)
+        master.create_order_payment(order, order_item)
         slot.order_item = order_item
         slot.save()
         order_time += delta(minutes=TimeSlot.DURATION)

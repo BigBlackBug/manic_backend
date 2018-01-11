@@ -225,10 +225,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 # since order is canceled
                 # the master should not rely on that money
                 for order_item in order.order_items.all():
-                    order_item.master.cancel_order_payment(
-                        order_item.service,
-                        order.client.tip_multiplier(),
-                        order.payment_type)
+                    order_item.master.cancel_order_payment(order, order_item)
                 order.delete()
             else:
                 raise PermissionDenied(detail="You are not allowed to cancel"
@@ -245,10 +242,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
                                                   'to cancel a locked order')
                 # since order is canceled
                 # the master should not rely on that money
-                order_item.master.cancel_order_payment(
-                    order_item.service,
-                    order.client.tip_multiplier(),
-                    order.payment_type)
+                order_item.master.cancel_order_payment(order, order_item)
                 order_item.delete()
                 # TODO start looking for a new master
                 # TODO add push notification to client

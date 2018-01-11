@@ -125,8 +125,7 @@ class Order(models.Model):
                                             master=item.master,
                                             value=item.service.cost,
                                             order=self)
-            item.master.complete_order_payment(item.service,
-                                               self.client.tip_multiplier())
+            item.master.complete_order_payment(self, item)
             item.master.save()
 
     def __str__(self):

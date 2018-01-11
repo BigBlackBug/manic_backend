@@ -90,8 +90,7 @@ class OrderCreateSerializer(serializers.Serializer):
                                                       service=service,
                                                       locked=item['locked'])
 
-                master.create_order_payment(service, client.tip_multiplier(),
-                                            order.payment_type)
+                master.create_order_payment(order, order_item)
                 next_time = schedule.assign_time(
                     next_time or validated_data['time'],
                     int(service.max_duration / TimeSlot.DURATION),

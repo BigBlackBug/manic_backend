@@ -64,44 +64,48 @@ class Master(UserProfile):
         return self.location.distance(lat, lon)
 
     # TODO money is stored in ints WHAT?
-    def complete_order_payment(self, service: Service, tip_multiplier):
+    def complete_order_payment(self, order, order_item):
         """
         Moves the master's share from completing the service
         from the future balance to the on_hold balance
         """
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
         master_share, service_share = \
             service.calculate_shares(tip_multiplier)
         self.balance.on_hold += int(master_share)
         self.balance.future -= int(master_share)
         self.balance.save()
 
-    def cancel_order_payment(self, service: Service, tip_multiplier,
-                             payment_type):
+    def cancel_order_payment(self, order, order_item):
         """
         Deducts the master's share from completing the service
         from the future balance and if the `payment_type` is CASH
         assigns removes the debt portion
         """
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
         masters_share, service_share = service.calculate_shares(tip_multiplier)
         self.balance.future -= masters_share
         # jeez
         from src.apps.orders.models import PaymentType
-        if payment_type == PaymentType.CASH:
+        if order.payment_type == PaymentType.CASH:
             self.balance.debt -= service_share
         self.balance.save()
 
-    def create_order_payment(self, service: Service, tip_multiplier,
-                             payment_type):
+    def create_order_payment(self, order, order_item):
         """
         Assigns the master's share from completing the service
         to the future balance and if the `payment_type` is CASH
         assigns master's debt to the service
         """
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
         masters_share, service_share = service.calculate_shares(tip_multiplier)
         self.balance.future += masters_share
         # jeez
         from src.apps.orders.models import PaymentType
-        if payment_type == PaymentType.CASH:
+        if order.payment_type == PaymentType.CASH:
             self.balance.debt += service_share
         self.balance.save()
 
