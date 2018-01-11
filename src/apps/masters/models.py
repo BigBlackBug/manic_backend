@@ -64,18 +64,49 @@ class Master(UserProfile):
         return self.location.distance(lat, lon)
 
     # TODO money is stored in ints WHAT?
-    def complete_order_payment(self, value):
+    def complete_order_payment(self, order, order_item):
         """
-        Deducts `value` from the future balance and
-        adds it to the on_hold balance
-        :param value:
+        Moves the master's share from completing the service
+        from the future balance to the on_hold balance
         """
-        self.balance.on_hold += int(value)
-        self.balance.future -= int(value)
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
+        master_share, service_share = \
+            service.calculate_shares(tip_multiplier)
+        self.balance.on_hold += int(master_share)
+        self.balance.future -= int(master_share)
         self.balance.save()
 
-    def add_future_balance(self, value):
-        self.balance.future += int(value)
+    def cancel_order_payment(self, order, order_item):
+        """
+        Deducts the master's share from completing the service
+        from the future balance and if the `payment_type` is CASH
+        assigns removes the debt portion
+        """
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
+        masters_share, service_share = service.calculate_shares(tip_multiplier)
+        self.balance.future -= masters_share
+        # jeez
+        from src.apps.orders.models import PaymentType
+        if order.payment_type == PaymentType.CASH:
+            self.balance.debt -= service_share
+        self.balance.save()
+
+    def create_order_payment(self, order, order_item):
+        """
+        Assigns the master's share from completing the service
+        to the future balance and if the `payment_type` is CASH
+        assigns master's debt to the service
+        """
+        service = order_item.service
+        tip_multiplier = order.client.tip_multiplier()
+        masters_share, service_share = service.calculate_shares(tip_multiplier)
+        self.balance.future += masters_share
+        # jeez
+        from src.apps.orders.models import PaymentType
+        if order.payment_type == PaymentType.CASH:
+            self.balance.debt += service_share
         self.balance.save()
 
     def get_schedule(self, date):
@@ -86,21 +117,19 @@ class Master(UserProfile):
         """
         return self.schedule.get(date=date)
 
+    def times_served(self, client: Client):
+        """
+        Returns a number of orders that this master had with the `client`
+        """
+        # a pinch of python functional magic
+        return sum(map(lambda item: item.order.client == client,
+                       self.order_items.all()))
+
     def __str__(self):
         return self.first_name
 
     class Meta(UserProfile.Meta):
         db_table = 'master'
-
-    def times_served(self, client: Client):
-        """
-        Returns a number of orders that this master had with the `client`
-        :param client:
-        :return:
-        """
-        # a pinch of python functional magic
-        return sum(map(lambda item: item.order.client == client,
-                       self.order_items.all()))
 
 
 class Balance(models.Model):
@@ -112,6 +141,8 @@ class Balance(models.Model):
     on_hold = models.IntegerField(default=0)
     # transferred to master's account
     transferred = models.IntegerField(default=0)
+    # cash debt to the service
+    debt = models.IntegerField(default=0)
 
 
 class Feedback(models.Model):
@@ -136,7 +167,7 @@ class PortfolioImageStatus:
 class PortfolioImage(models.Model):
     image = models.ImageField(upload_to=Folders.portfolio)
     description = models.CharField(max_length=1024, blank=True)
-    added = models.DateTimeField( auto_now_add=True)
+    added = models.DateTimeField(auto_now_add=True)
     # status should be manually set by the administrator
     status = models.CharField(
         max_length=13,

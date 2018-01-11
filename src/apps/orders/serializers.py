@@ -89,8 +89,8 @@ class OrderCreateSerializer(serializers.Serializer):
                                                       master=master,
                                                       service=service,
                                                       locked=item['locked'])
-                master.add_future_balance(
-                    service.cost * client.tip_multiplier())
+
+                master.create_order_payment(order, order_item)
                 next_time = schedule.assign_time(
                     next_time or validated_data['time'],
                     int(service.max_duration / TimeSlot.DURATION),

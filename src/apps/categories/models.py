@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
 
@@ -46,6 +47,18 @@ class Service(models.Model):
     min_duration = models.PositiveIntegerField()
     max_duration = models.PositiveIntegerField()
 
+    def calculate_shares(self, tip_multiplier):
+        return self.masters_share(tip_multiplier), self.service_share()
+
+    def masters_share(self, tip_multiplier):
+        # TODO int money
+        return int(self.cost * settings.MASTER_SHARE_PERCENTAGE +
+                   self.cost * tip_multiplier)
+
+    def service_share(self):
+        # TODO int money
+        return int(self.cost * (1 - settings.MASTER_SHARE_PERCENTAGE))
+
     def __str__(self):
         return f'{self.name} from category {self.category.id}'
 
@@ -64,6 +77,7 @@ class DisplayItem(models.Model):
         if not self.name:
             return 'Unnamed parent item'
         return f'{self.name}'
+
 
 # DON'T DELETE
 from .receivers import *

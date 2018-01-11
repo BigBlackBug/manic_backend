@@ -230,9 +230,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 # since order is canceled
                 # the master should not rely on that money
                 for order_item in order.order_items.all():
-                    order_item.master.add_future_balance(
-                        -1 * order_item.service.cost *
-                        order.client.tip_multiplier())
+                    order_item.master.cancel_order_payment(order, order_item)
                 order.delete()
             else:
                 raise PermissionDenied(detail="You are not allowed to cancel"
@@ -294,13 +292,11 @@ class OrderCancelView(mixins.DestroyModelMixin,
             return False
 
         # this money is not yours anymore
-        order_item.master.add_future_balance(
-            -1 * order_item.service.cost * client.tip_multiplier())
+        order_item.master.cancel_order_payment(order, order_item)
 
         # it's for the new guy
         master = masters[0]
-        master.add_future_balance(
-            order_item.service.cost * client.tip_multiplier())
+        master.create_order_payment(order, order_item)
 
         order_item.master = master
         order_item.save()
