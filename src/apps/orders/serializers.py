@@ -104,7 +104,10 @@ class OrderCreateSerializer(serializers.Serializer):
                     notifications.NEW_ORDER_TITLE,
                     notifications.NEW_ORDER_CONTENT(
                         order_time=order.time.strftime('%H:%M'),
-                        order_date=order.date.strftime('%Y-%m-%d')))
+                        order_date=order.date.strftime('%Y-%m-%d')),
+                    data={
+                        'event': notifications.NEW_ORDER_EVENT
+                    })
         return order
 
 

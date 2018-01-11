@@ -126,7 +126,10 @@ class MgmtMasterUpdateStatusView(mixins.UpdateModelMixin,
         if master.device:
             master.device.send_message(
                 notifications.MASTER_STATUS_CHANGED_TITLE,
-                notifications.MASTER_STATUS_MAP[master_status])
+                notifications.MASTER_STATUS_MAP[master_status],
+                data={
+                    'event': notifications.MASTER_STATUS_CHANGED_EVENT
+                })
         master.status = master_status
         master.save()
         return Response()

@@ -1,6 +1,8 @@
 from src.apps.masters.models import MasterStatus
 
+MASTER_STATUS_CHANGED_EVENT = 'MASTER_STATUS_CHANGED'
 MASTER_STATUS_CHANGED_TITLE = "Новый статус профиля"
+
 MASTER_STATUS_MAP = {
     MasterStatus.VERIFIED: "Вы успешно прошли проверку профиля. "
                            "Добавьте расписание для начала работы!",
