@@ -9,19 +9,59 @@ from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.core import utils
-from src.apps.masters.models import Master
+from src.apps.masters.models import Master, Schedule, TimeSlot, Time
 from src.apps.orders.models import Order
 from src.apps.orders.views import OrderCancelView
 from src.utils.object_creation import make_everything, make_client, \
-    make_order_services, make_order
+    make_order_services, make_order, make_master, make_category
 
 
 class MasterCancelOrderTestCase(APITestCase):
     def setUp(self):
-        make_everything()
+        # making an auth token
+        vasya = make_master("VASYA", 11.0, about='a terrible master')
+        petya = make_master("PETYA", 12.0)
+
+        hands = make_category("Маникюр")
+
+        for service in hands.services.all():
+            vasya.services.add(service)
+        vasya.save()
+
+        for service in hands.services.all():
+            petya.services.add(service)
+        petya.save()
+
+        # VASYA works on 0,+1, does manicure, got three slots
+        schedule = Schedule.objects.create(master=vasya, date=timezone.now())
+        schedule.save()
+
+        TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=00),
+                                taken=False, schedule=schedule)
+
+        # PETYA works on 0th
+        schedule = Schedule.objects.create(master=petya,
+                                           date=timezone.now())
+        schedule.save()
+
+        TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
+                                taken=False, schedule=schedule)
+
         self.user = PhoneAuthUser.objects.create(phone='777')
         self.client_object = make_client(self.user)
-        self.master_object = Master.objects.get(first_name='VASYA')
+        self.master_object = vasya
 
         token, _ = Token.objects.get_or_create(master=self.master_object)
         self.client = APIClient()
@@ -29,8 +69,8 @@ class MasterCancelOrderTestCase(APITestCase):
 
     def test_cancel_order_many_services_one_master(self):
         services = self.master_object.services.all()
-        # manually creating an order
 
+        # manually creating an order
         order_1 = make_order_services(client=self.client_object,
                                       master=self.master_object,
                                       services=services,
@@ -46,13 +86,14 @@ class MasterCancelOrderTestCase(APITestCase):
 
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
-        # two orders canceled -> order is deleted
-        with self.assertRaises(Order.DoesNotExist):
-            Order.objects.get(pk=order_1.id)
+        # both order_items now should have PETYA assigned to them
 
-        # find new master
-        self.master_object = Master.objects.get(pk=self.master_object.id)
-        self.assertEqual(self.master_object.balance.future, 0)
+        # TODO FUUUUUCK, gotta write good test cases
+        vasya = Master.objects.get(first_name='VASYA')
+        self.assertEqual(vasya.balance.future, 0)
+
+        petya = Master.objects.get(first_name='PETYA')
+        self.assertNotEqual(petya.balance.future, 0)
 
 
     def test_cancel_order_many_services_two_masters(self):

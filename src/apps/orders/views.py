@@ -9,6 +9,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.permissions import IsClient, IsMaster
+from src.apps.masters import master_utils
+from src.apps.masters.filtering import FilteringParams, FilteringFunctions
 from src.apps.orders import cloudpayments, order_utils, notifications
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer, \
@@ -206,6 +208,8 @@ class OrderCancelView(mixins.DestroyModelMixin,
 
         204 No Content
 
+        ``` {'result':'OK/FAILURE'} ```
+
         403 Forbidden - If you are trying to delete someone
         else's order, or you're too late, or the order is locked
         """
@@ -218,6 +222,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
             raise PermissionDenied(detail='You may not delete orders '
                                           'less than 3 hours before '
                                           'the deadline')
+        response_status = 'OK'
 
         if request.user.is_client(request):
             # check is the order belongs to the client
@@ -227,7 +232,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 for order_item in order.order_items.all():
                     order_item.master.add_future_balance(
                         -1 * order_item.service.cost *
-                            order.client.tip_multiplier())
+                        order.client.tip_multiplier())
                 order.delete()
             else:
                 raise PermissionDenied(detail="You are not allowed to cancel"
@@ -242,18 +247,65 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 if order_item.locked:
                     raise PermissionDenied(detail='You are not allowed '
                                                   'to cancel a locked order')
-                # since order is canceled
-                # the master should not rely on that money
-                order_item.master.add_future_balance(
-                    -1 * order_item.service.cost * order.client.tip_multiplier())
-                order_item.delete()
-                # TODO start looking for a new master
-                # TODO add push notification to client
-                if len(order.order_items.all()) == 0:
-                    # it makes sense to delete the order if there was
-                    # only one order item
-                    order.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+                found = self.find_replacement(order, order_item,
+                                              request.user.master)
+
+                if not found:
+                    response_status = 'FAILURE'
+                    break
+
+        return Response(status=status.HTTP_204_NO_CONTENT, data={
+            'result': response_status
+        })
+
+    def find_replacement(self, order, order_item, old_master):
+        order_service_id = order_item.service.id
+        # since order is canceled
+        # the master should not rely on that money
+        client = order.client
+
+        # looking for a replacement
+        location = client.home_address.location
+        params = FilteringParams({
+            'service': order_service_id,
+            'date': str(order.date),
+            'time': order.time.strftime('%H:%M'),
+            'coordinates': f'{location.lat},{location.lon}'
+        }, client=client)
+
+        masters, slots = master_utils.search(
+            params, FilteringFunctions.datetime)
+
+        if len(masters) == 0:
+            # unable to find replacement, cancel altogether
+            order.delete()
+            # TODO add push notification to client and other masters
+            return False
+
+        masters = master_utils.sort_masters(masters, params.coordinates,
+                                            params.distance)
+        # we can't pick the same master
+        masters = list(
+            filter(lambda m: m.id != old_master.id, masters))
+        if len(masters) == 0:
+            # if the old master is the only one who fits - cancel order
+            # TODO add push notification to client and other masters
+            order.delete()
+            return False
+
+        # this money is not yours anymore
+        order_item.master.add_future_balance(
+            -1 * order_item.service.cost * client.tip_multiplier())
+
+        # it's for the new guy
+        master = masters[0]
+        master.add_future_balance(
+            order_item.service.cost * client.tip_multiplier())
+
+        order_item.master = master
+        order_item.save()
+
+        return True
 
 
 class CompleteOrderView(generics.GenericAPIView):
@@ -298,7 +350,8 @@ class CompleteOrderView(generics.GenericAPIView):
                 notifications.ORDER_COMPLETE_CONTENT(
                     order.time.strftime('%H:%M')),
                 data={
-                    "order_id": order.id
+                    'order_id': order.id,
+                    'event': notifications.ORDER_COMPLETE_EVENT
                 })
         return Response(status=status.HTTP_200_OK, data={
             'transaction_id': order.transaction and

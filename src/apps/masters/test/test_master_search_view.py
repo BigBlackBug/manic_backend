@@ -10,8 +10,8 @@ from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.masters import gmaps_utils
 from src.apps.masters.models import Master
 from src.utils.object_creation import make_everything, make_client, make_order
-from src.apps.masters.views import MasterSearchView
-
+from src.apps.masters.views import MasterSearchView, MasterBestMatchView
+from src.apps.core import utils
 
 class MasterSearchViewTestCase(TestCase):
     def setUp(self):
@@ -48,3 +48,21 @@ class MasterSearchViewTestCase(TestCase):
         day_one_slots = others[0]['available_slots']
         self.assertEqual(len(day_one_slots), 2)
         # TODO MORE TESTS
+
+    @mock.patch.object(gmaps_utils, '_calculate_eta')
+    def test_master_best_match(self, _calculate_eta):
+        master = Master.objects.get(first_name='VASYA')
+        service = master.services.all()[0]
+
+        # assume all slots are reachable
+        _calculate_eta.return_value = 10
+
+        url = reverse(MasterBestMatchView.view_name)
+        resp = self.client.get(f"{url}?service={service.id}"
+                               f"&date={utils.get_date(0)}&time=10:30"
+                               f"&coordinates=10,20")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # no favorites in this test
+        master_data = resp.data
+        self.assertEqual(master_data['first_name'], master.first_name)

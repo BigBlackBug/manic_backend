@@ -1,6 +1,6 @@
 import datetime
-import time
 import logging
+import time
 from collections import defaultdict
 from enum import Enum
 from time import strptime
@@ -8,7 +8,6 @@ from typing import Iterable
 
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
-from rest_framework.request import Request
 
 from src.apps.categories.models import Service
 from . import time_slot_utils, gmaps_utils, utils
@@ -22,8 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class FilteringParams:
-    def __init__(self, request: Request, coords_required=True):
-        query_params = request.query_params
+    def __init__(self, query_params: dict, client=None, request=None,
+                 coords_required=True):
         logger.info(f'Parsing {query_params}')
 
         self._validate(query_params)
@@ -36,7 +35,11 @@ class FilteringParams:
         if coords_required:
             self.coordinates = self._parse_coordinates(query_params)
         self.distance = self._parse_distance(query_params)
-        self.target_client = self._parse_client(request)
+
+        if client:
+            self.target_client = client
+        elif request:
+            self.target_client = self._parse_client(request)
 
     @staticmethod
     def _parse_service(query_params):
@@ -146,10 +149,9 @@ class FilteringParams:
 
     @staticmethod
     def _parse_client(request):
-        if not request.user.is_client(request):
-            return None
-
-        return request.user.client
+        # hail python magic
+        # returns either client or None
+        return request.user.is_client(request) and request.user.client or None
 
     @staticmethod
     def _parse_single_date(query_params):

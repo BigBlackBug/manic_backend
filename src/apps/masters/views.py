@@ -79,7 +79,7 @@ class MasterListCreateView(generics.ListCreateAPIView):
 
         400 Bad Request
         """
-        params = FilteringParams(request)
+        params = FilteringParams(request.query_params, request=request)
         masters, slots = master_utils.search(params, FilteringFunctions.search)
         favorites, others = master_utils.split(masters,
                                                request.user.is_client(
@@ -187,7 +187,7 @@ class MasterSearchView(generics.ListAPIView):
         }
         ```
         """
-        params = FilteringParams(request)
+        params = FilteringParams(request.query_params, request=request)
         if params.date and params.time:
             masters, slots = master_utils.search(
                 params, FilteringFunctions.datetime)
@@ -232,7 +232,7 @@ class MasterBestMatchView(generics.ListAPIView):
         204 No content
 
         """
-        params = FilteringParams(request)
+        params = FilteringParams(request.query_params, request=request)
         if params.date and params.time:
             masters, slots = master_utils.search(
                 params, FilteringFunctions.datetime)
