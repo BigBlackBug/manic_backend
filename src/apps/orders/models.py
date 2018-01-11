@@ -123,7 +123,7 @@ class Order(models.Model):
             # needed by analytics
             TransactionEntry.objects.create(entry_type=TransactionEntryType.IN,
                                             master=item.master,
-                                            value=item.service.cost,
+                                            value=item.service.service_share(),
                                             order=self)
             item.master.complete_order_payment(self, item)
             item.master.save()
