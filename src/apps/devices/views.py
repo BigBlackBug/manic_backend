@@ -1,11 +1,11 @@
-from rest_framework import permissions
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import permissions, generics, mixins
 
 from src.apps.devices.models import FCMDevice
 from src.apps.devices.serializers import FCMDeviceSerializer
 
 
-class FCMDeviceViewSet(ModelViewSet):
+class FCMDeviceViewSet(mixins.CreateModelMixin,
+                       generics.GenericAPIView):
     view_name = 'add-device'
     queryset = FCMDevice.objects.all()
     serializer_class = FCMDeviceSerializer
