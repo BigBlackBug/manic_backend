@@ -5,9 +5,9 @@ from rest_framework.test import APITestCase, APIClient
 from src.apps.authentication.models import Token
 from src.apps.core import utils
 from src.apps.masters.models import Master, Feedback
+from src.apps.masters.views import AddFeedbackView
 from src.utils.object_creation import make_client, make_order, \
     make_everything
-from src.apps.masters.views import AddFeedbackView
 
 
 class AddFeedbackTestCase(APITestCase):
@@ -15,9 +15,9 @@ class AddFeedbackTestCase(APITestCase):
         make_everything()
         self.master_object = Master.objects.get(first_name='VASYA')
         self.client_object = make_client()
-        self.order,_ = make_order(self.client_object,
-                                self.master_object.services.all()[0],
-                                self.master_object, '11:30')
+        self.order, _ = make_order(self.client_object,
+                                   self.master_object.services.all()[0],
+                                   self.master_object, '11:30')
         self.user = self.client_object.user
         token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
