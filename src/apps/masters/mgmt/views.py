@@ -123,15 +123,18 @@ class MgmtMasterUpdateStatusView(mixins.UpdateModelMixin,
             raise ValidationError('status is required')
         if master_status not in [choice[0] for choice in MasterStatus.CHOICES]:
             raise ValidationError('unsupported status')
+
+        master.status = master_status
+        master.save()
+
         if master.device:
             master.device.send_message(
                 notifications.MASTER_STATUS_CHANGED_TITLE,
                 notifications.MASTER_STATUS_MAP[master_status],
                 data={
-                    'event': notifications.MASTER_STATUS_CHANGED_EVENT
+                    'event': notifications.MASTER_STATUS_CHANGED_EVENT,
+                    'status': master_status
                 })
-        master.status = master_status
-        master.save()
         return Response()
 
 
