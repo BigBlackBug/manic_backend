@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.core import utils
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
-from src.apps.orders.models import Order
+from src.apps.orders.models import Order, PaymentType
 from src.apps.orders.views import OrderCancelView
 from src.utils.object_creation import make_everything, make_client, \
     make_order_services, make_order, make_master, make_category
@@ -95,6 +95,34 @@ class MasterCancelOrderTestCase(APITestCase):
         petya = Master.objects.get(first_name='PETYA')
         self.assertNotEqual(petya.balance.future, 0)
 
+    def test_cancel_order_many_services_one_master_cash(self):
+        services = self.master_object.services.all()
+
+        # manually creating an order
+        order_1 = make_order_services(client=self.client_object,
+                                      master=self.master_object,
+                                      services=services,
+                                      order_date=timezone.now(),
+                                      payment_type=PaymentType.CASH,
+                                      order_time=datetime.time(hour=11,
+                                                               minute=00))
+
+        frozen = freeze_time(timezone.now().replace(hour=7, minute=0))
+        frozen.start()
+        resp = self.client.delete(
+            reverse(OrderCancelView.view_name, args=[order_1.id]))
+        frozen.stop()
+
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        # both order_items now should have PETYA assigned to them
+
+        # TODO FUUUUUCK, gotta write good test cases
+        vasya = Master.objects.get(first_name='VASYA')
+        self.assertEqual(vasya.balance.future, 0)
+        # TODO CHECK DEBT
+        petya = Master.objects.get(first_name='PETYA')
+        self.assertNotEqual(petya.balance.future, 0)
 
     def test_cancel_order_many_services_two_masters(self):
         # TODO test
@@ -168,6 +196,7 @@ class ClientCancelOrderTestCase(APITestCase):
         resp = self.client.delete(
             reverse(OrderCancelView.view_name, args=[order_1.id]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
         # two orders
         with self.assertRaises(Order.DoesNotExist):
             Order.objects.get(pk=order_1.id)

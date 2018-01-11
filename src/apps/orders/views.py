@@ -9,8 +9,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.permissions import IsClient, IsMaster
-from src.apps.masters import master_utils
-from src.apps.masters.filtering import FilteringParams, FilteringFunctions
 from src.apps.orders import cloudpayments, order_utils, notifications
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer, \
@@ -208,6 +206,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
 
         204 No Content
 
+        OK - replacement is found, FAILURE - replacement was not found
         ``` {'result':'OK/FAILURE'} ```
 
         403 Forbidden - If you are trying to delete someone
@@ -236,72 +235,21 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 raise PermissionDenied(detail="You are not allowed to cancel"
                                               "someone else's order")
         else:
-            order_items = order.order_items.filter(master=request.user.master) \
-                .all()
+            # converting to a list because I might delete the order
+            # and I don't want dependency induced crashes
+            order_items = list(order.order_items
+                               .filter(master=request.user.master).all())
             if len(order_items) == 0:
                 raise PermissionDenied(detail='You are not responsible '
                                               'for this order')
-            for order_item in order_items:
-                if order_item.locked:
-                    raise PermissionDenied(detail='You are not allowed '
-                                                  'to cancel a locked order')
-                found = self.find_replacement(order, order_item,
-                                              request.user.master)
-
-                if not found:
-                    response_status = 'FAILURE'
-                    break
+            success = order_utils.find_replacement_masters(
+                order, order_items, request.user.master)
+            if not success:
+                response_status = 'FAILURE'
 
         return Response(status=status.HTTP_204_NO_CONTENT, data={
             'result': response_status
         })
-
-    def find_replacement(self, order, order_item, old_master):
-        order_service_id = order_item.service.id
-        # since order is canceled
-        # the master should not rely on that money
-        client = order.client
-
-        # looking for a replacement
-        location = client.home_address.location
-        params = FilteringParams({
-            'service': order_service_id,
-            'date': str(order.date),
-            'time': order.time.strftime('%H:%M'),
-            'coordinates': f'{location.lat},{location.lon}'
-        }, client=client)
-
-        masters, slots = master_utils.search(
-            params, FilteringFunctions.datetime)
-
-        if len(masters) == 0:
-            # unable to find replacement, cancel altogether
-            order.delete()
-            # TODO add push notification to client and other masters
-            return False
-
-        masters = master_utils.sort_masters(masters, params.coordinates,
-                                            params.distance)
-        # we can't pick the same master
-        masters = list(
-            filter(lambda m: m.id != old_master.id, masters))
-        if len(masters) == 0:
-            # if the old master is the only one who fits - cancel order
-            # TODO add push notification to client and other masters
-            order.delete()
-            return False
-
-        # this money is not yours anymore
-        order_item.master.cancel_order_payment(order, order_item)
-
-        # it's for the new guy
-        master = masters[0]
-        master.create_order_payment(order, order_item)
-
-        order_item.master = master
-        order_item.save()
-
-        return True
 
 
 class CompleteOrderView(generics.GenericAPIView):

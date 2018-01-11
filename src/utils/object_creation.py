@@ -212,10 +212,12 @@ def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
 
 
 def make_order_services(client, services, master, order_time,
-                        status=OrderStatus.ACCEPTED, order_date=timezone.now()
-                        .date(), locked=False):
+                        status=OrderStatus.ACCEPTED,
+                        order_date=timezone.now().date(),
+                        payment_type=PaymentType.CARD, locked=False):
     order = Order.objects.create(client=client, date=order_date,
-                                 time=order_time, status=status)
+                                 time=order_time, status=status,
+                                 payment_type=payment_type)
     schedule = master.get_schedule(order_date)
     order_time = datetime.combine(timezone.now(), order_time)
     for service in services:
