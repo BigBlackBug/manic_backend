@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.core import utils
 from src.apps.masters.models import Master
-from src.apps.orders.models import Order
+from src.apps.orders.models import Order, PaymentType
 from src.apps.orders.views import OrderCancelView
 from src.utils.object_creation import make_everything, make_client, \
     make_order_services, make_order
@@ -110,7 +110,7 @@ class ClientCancelOrderTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def test_cancel_order(self):
+    def test_cancel_order_cash(self):
         master = Master.objects.get(first_name='VASYA')
 
         service = master.services.all()[0]
@@ -118,7 +118,12 @@ class ClientCancelOrderTestCase(APITestCase):
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
                                 order_date=utils.get_date(1),
-                                order_time=datetime.time(hour=12, minute=30))
+                                order_time=datetime.time(hour=12, minute=30),
+                                payment_type=PaymentType.CASH)
+
+        self.assertNotEqual(master.balance.future, 0)
+        self.assertNotEqual(master.balance.debt, 0)
+
         resp = self.client.delete(
             reverse(OrderCancelView.view_name, args=[order_1.id]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
@@ -127,7 +132,9 @@ class ClientCancelOrderTestCase(APITestCase):
             Order.objects.get(pk=order_1.id)
 
         master = Master.objects.get(pk=master.id)
+
         self.assertEqual(master.balance.future, 0)
+        self.assertEqual(master.balance.debt, 0)
 
     def test_cancel_order_too_late(self):
         master = Master.objects.get(first_name='VASYA')

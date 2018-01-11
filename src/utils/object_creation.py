@@ -55,7 +55,8 @@ def make_master(name, lon, user=None, activated=True,
                 about='awesome master!', make_portfolio=True,
                 make_balance=False):
     def _rand():
-        return random.randint(1000, 2000)
+        random.seed()
+        return random.randint(100000, 200000)
 
     if not user:
         user = PhoneAuthUser.objects.create(phone=str(_rand()))
@@ -119,8 +120,8 @@ def make_client(user=None, first_name='client', activated=True, make_card=True):
             is_default=True)
         if make_card:
             PaymentCard.objects.create(client=client, cryptogram='BLABL',
-                                   client_name_on_card='JOHN',
-                                   card_number='190')
+                                       client_name_on_card='JOHN',
+                                       card_number='190')
     else:
         client = Client.objects.create(user=user,
                                        status=ClientStatus.DUMMY)
@@ -203,7 +204,8 @@ def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
                                           master=master,
                                           order=order,
                                           locked=False)
-    master.add_future_balance(service.cost * client.tip_multiplier())
+    master.create_order_payment(service, client.tip_multiplier(),
+                                order.payment_type)
     slot.order_item = order_item
     slot.taken = True
     slot.save()
@@ -223,7 +225,8 @@ def make_order_services(client, services, master, order_time,
                                               master=master,
                                               order=order,
                                               locked=locked)
-        master.add_future_balance(service.cost * client.tip_multiplier())
+        master.create_order_payment(service, client.tip_multiplier(),
+                                    order.payment_type)
         slot.order_item = order_item
         slot.save()
         order_time += delta(minutes=TimeSlot.DURATION)

@@ -99,11 +99,12 @@ class Order(models.Model):
     def total_cost(self):
         """
         Returns a total cost of the order, combined from costs
-        of each individual service times client's tips
+        of each individual service and the client's tips
         """
         # TODO value may be taken from 'special'
         return sum(map(
-            lambda item: int(item.service.cost * self.client.tip_multiplier()),
+            lambda item: int(
+                item.service.cost * (1 + self.client.tip_multiplier())),
             self.order_items.all()))
 
     def start(self):
@@ -118,14 +119,14 @@ class Order(models.Model):
         self.status = OrderStatus.DONE
         self.time_taken = timezone.now() - self.time_started
 
-        tip_multiplier = self.client.tip_multiplier()
         for item in self.order_items.all():
-            value = int(item.service.cost * tip_multiplier)
             # needed by analytics
             TransactionEntry.objects.create(entry_type=TransactionEntryType.IN,
-                                            master=item.master, value=value,
+                                            master=item.master,
+                                            value=item.service.cost,
                                             order=self)
-            item.master.complete_order_payment(value)
+            item.master.complete_order_payment(item.service,
+                                               self.client.tip_multiplier())
             item.master.save()
 
     def __str__(self):

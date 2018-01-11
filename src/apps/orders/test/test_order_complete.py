@@ -54,7 +54,8 @@ class CompleteOrderTestCase(APITestCase):
 
         master = Master.objects.get(first_name='VASYA')
 
-        self.assertEqual(master.balance.on_hold, order_1.total_cost)
+        self.assertEqual(master.balance.on_hold, service.masters_share(
+            self.client_object.tip_multiplier()))
 
     def test_complete_order_cash(self):
         master = Master.objects.get(first_name='VASYA')
@@ -79,7 +80,9 @@ class CompleteOrderTestCase(APITestCase):
 
         master = Master.objects.get(first_name='VASYA')
 
-        self.assertEqual(master.balance.on_hold, order_1.total_cost)
+        self.assertEqual(master.balance.on_hold, service.masters_share(
+            self.client_object.tip_multiplier()))
+        self.assertEqual(master.balance.debt, service.service_share())
 
     def test_complete_order_4hands(self):
         # creating a new master
@@ -141,7 +144,9 @@ class CompleteOrderTestCase(APITestCase):
         sanya = Master.objects.get(first_name='SANYA')
 
         self.assertEqual(vasya.balance.on_hold, int(
-            vasya.services.all()[0].cost * self.client_object.tip_multiplier()))
+            vasya.services.all()[0].masters_share(
+                self.client_object.tip_multiplier())))
         self.assertEqual(sanya.balance.on_hold, int(
-            sanya.services.all()[0].cost * self.client_object.tip_multiplier()))
+            sanya.services.all()[0].masters_share(
+                self.client_object.tip_multiplier())))
         # TODO добавить больше тестов по разруливанию бабоса

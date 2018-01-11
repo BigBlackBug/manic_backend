@@ -23,7 +23,49 @@ class OrderCreateTestCase(TestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
-    def test_create_order__one_master_one_service(self):
+    def test_create_order__one_master_one_service_card(self):
+        master = Master.objects.get(first_name='VASYA')
+        service = master.services.first()
+        # one service 2+1 slots
+        resp = self.client.post(reverse(OrderListCreateView.view_name), data={
+            'date': timezone.now().strftime('%Y-%m-%d'),
+            'payment_type': 'CARD',
+            'time': '11:00',
+            'order_items': [{
+                'locked': False,
+                'master_id': master.id,
+                'service_ids': [service.id]
+            }, ]
+        }, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        master = Master.objects.get(first_name='VASYA')
+        schedule = master.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+
+        # assert timeslots are correctly set
+        slots = schedule.time_slots.filter(
+            time__value__in=['11:00', '11:30', '12:00'], taken=True)
+        self.assertEqual(len(slots), 3)
+
+        # assert order is created
+        orders = Order.objects.all()
+        self.assertTrue(len(orders), 1)
+        order = orders[0]
+        self.assertEqual(order.client, self.client_object)
+        self.assertEqual(order.date, timezone.now().date())
+        self.assertEqual(order.time, datetime.time(hour=11, minute=0))
+        self.assertEqual(len(order.order_items.all()), 1)
+        order_item = order.order_items.all()[0]
+
+        # assert order_items are created
+        self.assertEqual(order_item.master, master)
+        self.assertEqual(order_item.service, service)
+
+        # assert future balance is correct
+        self.assertEqual(master.balance.future,
+                         service.masters_share(
+                             self.client_object.tip_multiplier()))
+
+    def test_create_order__one_master_one_service_cash(self):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.first()
         # one service 2+1 slots
@@ -62,8 +104,10 @@ class OrderCreateTestCase(TestCase):
 
         # assert future balance is correct
         self.assertEqual(master.balance.future,
-                         int(service.cost *
+                         service.masters_share(
                              self.client_object.tip_multiplier()))
+        # assert debt is correct
+        self.assertEqual(master.balance.debt, service.service_share())
 
     def test_create_order__one_master_many_services(self):
         master = Master.objects.get(first_name='VASYA')
@@ -105,7 +149,8 @@ class OrderCreateTestCase(TestCase):
         # assert future balance is correct
         self.assertEqual(master.balance.future,
                          sum(map(lambda s: int(
-                             s.cost * self.client_object.tip_multiplier()),
+                             s.masters_share(
+                                 self.client_object.tip_multiplier())),
                                  services)))
 
     def test_create_order__composite_4hands(self):
@@ -183,8 +228,8 @@ class OrderCreateTestCase(TestCase):
 
         # assert future balance is correct
         self.assertEqual(vasya.balance.future,
-                         int(vasya.services.first().cost *
+                         vasya.services.first().masters_share(
                              self.client_object.tip_multiplier()))
         self.assertEqual(sanya.balance.future,
-                         int(sanya.services.first().cost *
+                         sanya.services.first().masters_share(
                              self.client_object.tip_multiplier()))

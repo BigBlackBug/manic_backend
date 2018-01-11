@@ -289,7 +289,8 @@ class MasterDetailUpdateView(mixins.RetrieveModelMixin,
           'balance':{
             'future':10,
             'on_hold':0,
-            'transferred':1000
+            'transferred':1000,
+            'debt':2000,
           },
           'portfolio':[{
             'id': 100,

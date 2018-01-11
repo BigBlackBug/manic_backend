@@ -29,7 +29,7 @@ class Client(UserProfile):
                               default=ClientStatus.DUMMY)
 
     def tip_multiplier(self):
-        return 1 + self.tip / 100.0
+        return self.tip / 100.0
 
     def activated(self):
         return self.status == ClientStatus.VERIFIED
