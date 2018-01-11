@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from src.apps.devices.views import FCMDeviceViewSet
+from src.apps.devices.views import FCMAddDeviceView
 
 urlpatterns = [
-    url(r'^$', FCMDeviceViewSet.as_view(), name=FCMDeviceViewSet.view_name),
+    url(r'^$', FCMAddDeviceView.as_view(), name=FCMAddDeviceView.view_name),
 ]

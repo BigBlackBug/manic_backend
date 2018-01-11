@@ -4,7 +4,7 @@ from src.apps.devices.models import FCMDevice
 from src.apps.devices.serializers import FCMDeviceSerializer
 
 
-class FCMDeviceViewSet(mixins.CreateModelMixin,
+class FCMAddDeviceView(mixins.CreateModelMixin,
                        generics.GenericAPIView):
     view_name = 'add-device'
     queryset = FCMDevice.objects.all()
@@ -28,5 +28,4 @@ class FCMDeviceViewSet(mixins.CreateModelMixin,
 
         201 Created
         """
-        return super().create(request,*args, **kwargs)
-
+        return super().create(request, *args, **kwargs)
