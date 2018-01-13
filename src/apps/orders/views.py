@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -13,6 +14,8 @@ from src.apps.orders import cloudpayments, order_utils, notifications
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer, \
     OrderUpdateSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
@@ -213,7 +216,6 @@ class OrderCancelView(mixins.DestroyModelMixin,
         else's order, or you're too late, or the order is locked
         """
         order = self.get_object()
-
         order_date = timezone.make_aware(
             datetime.combine(order.date, order.time))
         if order_date - timezone.now() < \
@@ -226,6 +228,9 @@ class OrderCancelView(mixins.DestroyModelMixin,
         if request.user.is_client(request):
             # check is the order belongs to the client
             if order.client == request.user.client:
+                logger.info(
+                    f'Cancelling order {order.id} initiated by '
+                    f'client {order.client.id}')
                 # since order is canceled
                 # the master should not rely on that money
                 for order_item in order.order_items.all():
@@ -235,15 +240,19 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 raise PermissionDenied(detail="You are not allowed to cancel"
                                               "someone else's order")
         else:
+            master = request.user.master
+            logger.info(
+                f'Cancelling order {order.id} initiated by master'
+                f' {master.first_name}')
             # converting to a list because I might delete the order
             # and I don't want dependency induced crashes
             order_items = list(order.order_items
-                               .filter(master=request.user.master).all())
+                               .filter(master=master).all())
             if len(order_items) == 0:
                 raise PermissionDenied(detail='You are not responsible '
                                               'for this order')
             success = order_utils.find_replacement_masters(
-                order, order_items, request.user.master)
+                order, order_items, master)
             if not success:
                 response_status = 'FAILURE'
 
@@ -279,9 +288,14 @@ class CompleteOrderView(generics.GenericAPIView):
         ```
         """
         order = self.get_object()
+        logger.info(f'Completing order {order.id}')
+
         if order.status != OrderStatus.STARTED:
             raise ValidationError("Order must be STARTED by the master")
         if order.payment_type == PaymentType.CARD:
+            logger.info(f'Payment type of order {order.id} is CARD. '
+                        f'Confirming payment with '
+                        f'transaction {order.transaction.transaction_id}')
             cloudpayments.confirm_payment(order.transaction, order.total_cost)
 
         # only one master of the order can complete the order
@@ -289,6 +303,9 @@ class CompleteOrderView(generics.GenericAPIView):
         order.save()
 
         if order.client.device:
+            logger.info(f'Sending ORDER_COMPLETE notification to '
+                        f'client {order.client.first_name}, '
+                        f'order_id={order.id}')
             order.client.device.send_message(
                 notifications.ORDER_COMPLETE_TITLE,
                 notifications.ORDER_COMPLETE_CONTENT(

@@ -395,7 +395,7 @@ class MasterAvatarUpdateView(APIView):
         400 Bad Request
         """
         master = request.user.master
-        logger.info(f'Updating an avatar for'
+        logger.info(f'Updating an avatar for '
                     f'master {master.first_name}, '
                     f'id={master.id}')
 

@@ -1,5 +1,4 @@
 from .settings import FCM_DJANGO_SETTINGS as SETTINGS
-from rest_framework import permissions
 
 from src.apps.devices.models import FCMDevice
 

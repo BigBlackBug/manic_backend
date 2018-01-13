@@ -51,6 +51,7 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     considering `schedule`
     """
     if not settings.USE_GMAPS_API:
+        logger.info(f'GMAPS_API is disabled. can_reach=True')
         return True
 
     dt = datetime.combine(schedule.date, time) - \
@@ -60,12 +61,18 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     if prev_slot:
         # we assume that a person can get anywhere within an hour
         if not prev_slot.taken:
+            logger.info(f'Previous slot for slot at {time} is empty. '
+                        f'can_reach=True')
             return True
         prev_address = prev_slot.order_item.order.client.home_address
         eta = _calculate_eta(prev_address.location.as_tuple(),
                              location.as_tuple(), dt)
         # can get to the point in 30 minutes
-        return eta < TimeSlot.DURATION
+        result = eta < TimeSlot.DURATION
+        logger.info(f'Gmaps produced a result. can_reach={result}')
+        return result
     else:
+        logger.info(f'Slot at {time} is the first slot of the day. '
+                    f'can_reach=True')
         # first slot of the day?
         return True

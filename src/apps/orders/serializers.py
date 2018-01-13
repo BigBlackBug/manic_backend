@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
@@ -7,6 +9,8 @@ from src.apps.masters.models import Master, TimeSlot
 from src.apps.orders import notifications
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction, \
     OrderStatus
+
+logger = logging.getLogger(__name__)
 
 
 # out
@@ -72,15 +76,22 @@ class OrderCreateSerializer(serializers.Serializer):
         order_items = validated_data.pop('order_items')
         client = self.context['request'].user.client
         order = Order.objects.create(client=client, **validated_data)
+        logger.info(f'Creating order for client={client.first_name} at '
+                    f'date={order.date}, time={order.time}')
 
         for item in order_items:
+            master_id = item['master_id']
+            logger.info(f'Creating order_item for order={order.id}, '
+                        f'master_id={master_id}')
+
             master = Master.objects.prefetch_related('schedule').get(
-                pk=item['master_id'])
+                pk=master_id)
             services = Service.objects.filter(pk__in=item['service_ids'])
             if not services:
                 raise ValidationError(
                     f'services with provided ids:{item["service_ids"]} '
                     f'are not found')
+
             schedule = master.get_schedule(validated_data['date'])
             order_item = None
             next_time = None
@@ -91,6 +102,12 @@ class OrderCreateSerializer(serializers.Serializer):
                                                       locked=item['locked'])
 
                 master.create_order_payment(order, order_item)
+                logger.info(f'Filling time_slots for '
+                            f'master={master.first_name}, '
+                            f'service={service.name}, '
+                            f'duration={service.max_duration}'
+                            f'schedule_date={schedule.date}')
+
                 next_time = schedule.assign_time(
                     next_time or validated_data['time'],
                     int(service.max_duration / TimeSlot.DURATION),
@@ -100,6 +117,8 @@ class OrderCreateSerializer(serializers.Serializer):
                 schedule.assign_time(next_time, number_of_slots=1,
                                      order_item=order_item)
             if master.device:
+                logger.info(f'Order created. Sending NEW_ORDER notification '
+                            f'to master {master.first_name}')
                 master.device.send_message(
                     notifications.NEW_ORDER_TITLE,
                     notifications.NEW_ORDER_CONTENT(

@@ -1,10 +1,13 @@
 import heapq
+import logging
 from typing import Iterable
 
 from src.apps.clients.models import Client
 from src.apps.masters.filtering import FilteringParams
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import SimpleMasterSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class MasterComparable:
@@ -50,6 +53,9 @@ def search(params: FilteringParams, filter_function):
     coordinates = params.coordinates
     max_distance = params.distance
 
+    logger.info(f'Initiating master search with params: '
+                f'date_range={date_range}, services={services}, '
+                f'coordinates={coordinates}, max_distance={max_distance}')
     # queryset
     queryset = Master.objects.filter(schedule__date__gte=date_range[0],
                                      schedule__date__lte=date_range[1],
@@ -58,9 +64,13 @@ def search(params: FilteringParams, filter_function):
         .select_related('location')
     # search filter
     masters, slots = filter_function(queryset, params)
+
+    logger.info(f'Found {len(masters)} masters. Running distance filter')
     # distance filter
-    return list(filter(lambda m: m.distance(*coordinates) < max_distance,
+    masters = list(filter(lambda m: m.distance(*coordinates) < max_distance,
                        masters)), slots
+    logger.info(f'Total masters found: {len(masters)}')
+    return masters
 
 
 def split(masters: Iterable[Master], target_client: Client):
@@ -73,6 +83,9 @@ def split(masters: Iterable[Master], target_client: Client):
     """
     regular = []
     favorites = []
+
+    logger.info(f'Splitting {len(masters)}')
+
     for master in masters:
         # TODO cache
         if target_client and master.times_served(target_client) > 0:
@@ -80,6 +93,7 @@ def split(masters: Iterable[Master], target_client: Client):
         else:
             regular.append(master)
 
+    logger.info(f'Favorites {len(favorites)}, regular {len(regular)}')
     return favorites, regular
 
 

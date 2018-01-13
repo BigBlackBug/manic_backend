@@ -20,6 +20,8 @@ class AddressSerializer(serializers.ModelSerializer):
         client = self.context.get('client', None)
 
         is_default = len(client.addresses.all()) == 0
+        logger.debug(f'Creating a new address for client {client.first_name}, '
+                     f'default: {is_default}')
         return Address.objects.create(location=location, client=client,
                                       is_default=is_default,
                                       **validated_data)
@@ -56,6 +58,9 @@ class PaymentCardSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         client = request.user.client
+
+        logger.debug(f'Creating a new payment card for '
+                     f'client {client.first_name}')
         return PaymentCard.objects.create(client=client, **validated_data)
 
     class Meta:
@@ -92,6 +97,9 @@ class ClientSerializer(serializers.ModelSerializer):
             })
             address_serializer.is_valid(raise_exception=True)
             address_serializer.save()
+
+        logger.debug(f'Creating a new client {client.first_name}')
+
         client.save()
         return client
 

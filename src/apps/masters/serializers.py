@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from django.utils import timezone
 from rest_framework import serializers
@@ -14,6 +15,8 @@ from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
 from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback, \
     Balance
+
+logger = logging.getLogger(__name__)
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -53,6 +56,8 @@ class CreateFeedbackSerializer(serializers.ModelSerializer):
                                            master=master,
                                            **validated_data)
         master.add_rating(feedback.rating)
+        logger.info(f'Adding {feedback.rating} star feedback '
+                    f'to master {master.first_name}')
         master.save()
         return feedback
 
@@ -171,7 +176,9 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
             validated_data['time_slots'], include_last=True)
         # TODO that's not fool proof
         # timeslots may not be overwritten
-
+        logging.info(f'Creating schedule on {schedule.date} '
+                     f'for master {master.first_name}. '
+                     f'time_slots={time_tuples}')
         for time_tuple in time_tuples:
             try:
                 target_time = datetime.time(hour=time_tuple.hour,
@@ -229,9 +236,12 @@ class MasterCreateSerializer(serializers.ModelSerializer):
 
         for service in services:
             master.services.add(Service.objects.get(pk=service))
-
+        logger.info(f'Creating master. ID={master.id}, '
+                    f'first_name={master.first_name}, '
+                    f'status={master.status}')
         master.save()
         # initializing balance
+        logger.info(f'Initializing masters {master.first_name} balance')
         Balance.objects.create(master=master)
         return master
 
@@ -255,9 +265,12 @@ class MasterUpdateSerializer(serializers.ModelSerializer):
         new_services = validated_data.pop('services', [])
         new_location = validated_data.pop('location', None)
         if new_services:
+            logger.info(f'Updating masters {instance.first_name} services. '
+                        f'New services={new_services}')
             instance.services = [Service.objects.get(pk=service) for service in
                                  new_services]
         if new_location:
+            logger.info(f'Updating masters location {new_location}')
             serializer = LocationSerializer(data=new_location)
             serializer.is_valid(raise_exception=True)
 

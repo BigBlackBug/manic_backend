@@ -1,3 +1,5 @@
+import logging
+
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, \
@@ -5,6 +7,8 @@ from rest_framework.authentication import BaseAuthentication, \
 
 from .mgmt.models import AdminToken
 from .models import Token as AppToken
+
+logger = logging.getLogger(__name__)
 
 
 class TokenAuthentication(BaseAuthentication):
@@ -42,8 +46,10 @@ class TokenAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed(msg)
 
         if auth[0] == self.keyword:
+            logger.info(f'Logging in an application with token {token}')
             return self.authenticate_application(token)
         elif auth[0] == self.admin_keyword:
+            logger.info(f'Logging in an administrator with token {token}')
             return self.authenticate_admin(token)
 
     def authenticate_admin(self, key):
@@ -62,8 +68,12 @@ class TokenAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
         if token.master:
+            logger.info(f'Token {token} belongs to a master '
+                        f'{token.master.first_name}')
             return token.master.user, token
         elif token.client:
+            logger.info(f'Token {token} belongs to a client '
+                        f'{token.client.first_name}')
             return token.client.user, token
         else:
             raise exceptions.AuthenticationFailed(

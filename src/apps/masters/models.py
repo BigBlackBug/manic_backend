@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 from time import strptime
 
 from django.db import models
@@ -10,6 +11,8 @@ from src.apps.clients.models import Client
 from src.apps.core.exceptions import ApplicationError
 from src.apps.core.models import Location
 from src.apps.core.utils import Folders
+
+logger = logging.getLogger(__name__)
 
 
 class MasterStatus:
@@ -73,8 +76,11 @@ class Master(UserProfile):
         tip_multiplier = order.client.tip_multiplier()
         master_share, service_share = \
             service.calculate_shares(tip_multiplier)
-        self.balance.on_hold += int(master_share)
-        self.balance.future -= int(master_share)
+        logger.info(f'Completing order payment for master {self.first_name}.'
+                    f' on_hold+={master_share}, future-={master_share}')
+
+        self.balance.on_hold += master_share
+        self.balance.future -= master_share
         self.balance.save()
 
     def cancel_order_payment(self, order, order_item):
@@ -87,10 +93,15 @@ class Master(UserProfile):
         tip_multiplier = order.client.tip_multiplier()
         masters_share, service_share = service.calculate_shares(tip_multiplier)
         self.balance.future -= masters_share
+        logger.info(f'Canceling order payment for master {self.first_name} '
+                    f'future-={masters_share}')
+
         # jeez
         from src.apps.orders.models import PaymentType
         if order.payment_type == PaymentType.CASH:
             self.balance.debt -= service_share
+            logger.info(f'Payment was made with CASH. Removing debt '
+                        f'debt-={service_share}')
         self.balance.save()
 
     def create_order_payment(self, order, order_item):
@@ -103,10 +114,14 @@ class Master(UserProfile):
         tip_multiplier = order.client.tip_multiplier()
         masters_share, service_share = service.calculate_shares(tip_multiplier)
         self.balance.future += masters_share
+        logger.info(f'Creating order payment for master {self.first_name} '
+                    f'future+={masters_share}')
         # jeez
         from src.apps.orders.models import PaymentType
         if order.payment_type == PaymentType.CASH:
             self.balance.debt += service_share
+            logger.info(f'Payment was made with CASH. Adding debt '
+                        f'debt+={service_share}')
         self.balance.save()
 
     def get_schedule(self, date):
@@ -269,6 +284,9 @@ class Schedule(models.Model):
         if not time_:
             raise ValueError('time argument should not be None')
 
+        logging.info(f'Setting {number_of_slots} slots to Taken, '
+                     f'starting from {time_}')
+
         time_slots = sorted(self.time_slots.all(), key=lambda slot: slot.value)
 
         # looking for the first timeslot
@@ -289,6 +307,7 @@ class Schedule(models.Model):
 
         next_index = first_slot_index + shift + 1
         if next_index == len(time_slots):
+            logging.info(f'No next slot, last slot of the day is filled')
             return None
 
         return time_slots[next_index].value

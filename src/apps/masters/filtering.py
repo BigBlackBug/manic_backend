@@ -47,6 +47,7 @@ class FilteringParams:
         if not service:
             return None
         try:
+            logger.debug(f'Parsed service {service}')
             service = int(service)
         except ValueError:
             raise ValidationError("'service' parameters must be an integer")
@@ -73,6 +74,7 @@ class FilteringParams:
         services = query_params.get('services')
         if not services:
             # TODO cache
+            logger.debug(f'No services param, returning all services')
             return [service.id for service in Service.objects.all()]
         else:
             services = services.split(',')
@@ -81,6 +83,7 @@ class FilteringParams:
                     int(service_id)
                 except ValueError:
                     raise ValidationError('Invalid service string')
+            logger.debug(f'Parsed services {services}')
             return services
 
     @staticmethod
@@ -95,9 +98,11 @@ class FilteringParams:
                 dates = (
                     datetime.datetime.strptime(dates[0], '%Y-%m-%d'),
                     datetime.datetime.strptime(dates[1], '%Y-%m-%d'))
+                logger.debug(f'Parsed date_range {dates}')
             except ValueError:
                 raise ValidationError('Invalid date format')
         else:
+            logger.debug(f'No date_range param, using default (2 weeks)')
             dates = utils.get_default_date_range()
         return dates
 
@@ -115,11 +120,13 @@ class FilteringParams:
                 times = (
                     datetime.time(hour=time_0.tm_hour, minute=time_0.tm_min),
                     datetime.time(hour=time_1.tm_hour, minute=time_1.tm_min))
+                logger.debug(f'Parsed time_range {times}')
             except ValueError:
                 raise ValidationError('Invalid time format')
         else:
             times = (datetime.time(hour=8, minute=0),
                      datetime.time(hour=22, minute=30))
+            logger.debug(f'No time_range param, using default (8:00-22:30)')
         return times
 
     @staticmethod
@@ -134,7 +141,9 @@ class FilteringParams:
         if len(coordinates) != 2:
             raise ValidationError('Invalid coordinates range')
         try:
-            return float(coordinates[0]), float(coordinates[1])
+            coords = float(coordinates[0]), float(coordinates[1])
+            logger.debug(f'Parsed coordinates {coords}')
+            return coords
         except ValueError:
             raise ValidationError('Invalid coordinates format')
 
@@ -143,15 +152,20 @@ class FilteringParams:
         # считаем расстояние до адреса
         distance = query_params.get('distance')
         if not distance:
+            logger.debug(f'No distance param, using default '
+                         f'{settings.MAX_DISTANCE_KM}')
             return settings.MAX_DISTANCE_KM
         else:
+            logger.debug(f'Parsed distance {distance}')
             return float(distance)
 
     @staticmethod
     def _parse_client(request):
         # hail python magic
         # returns either client or None
-        return request.user.is_client(request) and request.user.client or None
+        client = request.user.is_client(request) and request.user.client or None
+        logger.debug(f'Parsed client {client and client.first_name}')
+        return client
 
     @staticmethod
     def _parse_single_date(query_params):
@@ -163,10 +177,12 @@ class FilteringParams:
                 if date < date_range[0] or date > date_range[1]:
                     raise ValidationError(
                         'Date must be withing two weeks range')
+                logger.debug(f'Parsed single date {date}')
                 return date
             except ValueError:
                 raise ValidationError('Invalid date format')
         else:
+            logger.debug(f'No date param')
             return None
 
     @staticmethod
@@ -175,10 +191,13 @@ class FilteringParams:
         if _time:
             try:
                 _time = time.strptime(_time, '%H:%M')
-                return datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
+                _time = datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
+                logger.debug(f'Parsed single time {_time}')
+                return _time
             except ValueError:
                 raise ValidationError('Invalid time format')
         else:
+            logger.debug(f'No time param')
             return None
 
 
@@ -199,17 +218,27 @@ class FilteringFunctions(Enum):
         time = params.time
         target_client = params.target_client
 
+        logger.info(f'Using a datetime filter on masters {masters} '
+                    f'with params: service={service_id}, date={date}, '
+                    f'time={time}, client_id={target_client.id}, '
+                    f'client_name={target_client.first_name}')
+
         result = set()
         good_slots = defaultdict(list)
         for master in masters:
+            logger.info('Checking master {master.first_name}')
+
             service = master.services.get(pk=service_id)
             schedule = master.get_schedule(date)
             can_service = time_slot_utils \
                 .service_fits_into_slots(service, schedule.time_slots.all(),
                                          time_from=time)
+            logger.info(f'Master {master.first_name} can do service'
+                        f'{service.name} on {date} = {can_service}')
             # checking the closest order that goes before `time`
             if can_service and gmaps_utils.can_reach(
                     schedule, target_client.home_address.location, time):
+                logger.info(f'Selecting master {master.first_name}')
                 result.add(master)
             good_slots[master.id].append({
                 'date': schedule.date.strftime('%Y-%m-%d'),
@@ -232,21 +261,34 @@ class FilteringFunctions(Enum):
         service_id = params.service
         target_client = params.target_client
 
+        logger.info(f'Using an anytime filter on masters {masters} '
+                    f'with params: service={service_id}, '
+                    f'date_range={date_range}, '
+                    f'client_id={target_client.id}, '
+                    f'client_name={target_client.first_name}')
+
         result = set()
         good_slots = defaultdict(list)
         for master in masters:
+            logger.info('Checking master {master.first_name}')
             service = master.services.get(pk=service_id)
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
+                logger.info(f'Checking schedule on {schedule.date}')
                 schedule_slots = []
                 # finding all slots that can be used to do the service
                 start_slots = time_slot_utils.find_available_starting_slots(
                     service, schedule.time_slots.all())
+
+                logger.info(f'Possible starting slots = \"'
+                            f'{[slot.time for slot in start_slots]}\"')
+
                 for slot in start_slots:
                     # checking if the master can get to the next address in time
                     if gmaps_utils.can_reach(schedule,
                                              target_client.home_address.location,
                                              slot.value):
+                        logger.info(f'Selecting slot {slot.time}')
                         result.add(master)
                         schedule_slots.append(
                             datetime.time.strftime(slot.value, '%H:%M'))
@@ -273,17 +315,27 @@ class FilteringFunctions(Enum):
         """
         date_range = params.date_range
         time_range = params.time_range
+
+        logger.info(f'Using an search filter on masters {masters} '
+                    f'with params: date_range={date_range}, '
+                    f'time_range={time_range}, '
+                    f'and all services')
+
         # taking the maximum duration of all services of the master and
         # checking if there exists a required number of adjacent empty slots
         result = set()
         for master in masters:
+            logger.info('Checking master {master.first_name}')
             # checking if a master can do any service during his work day
             service = min(master.services.all(), key=lambda _: _.max_duration)
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
+                logger.info(f'Checking schedule on {schedule.date}')
                 if time_slot_utils.service_fits_into_slots(
                         service, schedule.time_slots.all(),
                         time_from=time_range[0],
                         time_to=time_range[1]):
+                    logger.info(f'Master can do one of the services '
+                                f'on {schedule.date}')
                     result.add(master)
         return result, {}

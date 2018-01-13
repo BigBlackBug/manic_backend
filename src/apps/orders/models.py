@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
@@ -8,6 +9,8 @@ from src.apps.categories.models import Service
 from src.apps.clients.models import Client
 from src.apps.finances.models import TransactionEntry, TransactionEntryType
 from src.apps.masters.models import Master
+
+logger = logging.getLogger(__name__)
 
 
 class OrderStatus:
@@ -108,6 +111,7 @@ class Order(models.Model):
             self.order_items.all()))
 
     def start(self):
+        logger.info(f'Starting order {self.id}')
         self.status = OrderStatus.STARTED
         self.time_started = timezone.now()
 
@@ -116,6 +120,7 @@ class Order(models.Model):
         Sets the `status` and `time_taken` of the order
         and adjusts balance of each involved master
         """
+        logger.info(f'Completing order {self.id}')
         self.status = OrderStatus.DONE
         self.time_taken = timezone.now() - self.time_started
 

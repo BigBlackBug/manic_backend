@@ -9,7 +9,6 @@ from rest_framework.response import Response
 
 from src.apps.authentication import sms_verification
 from src.apps.clients.models import Client
-from src.apps.core.permissions import IsAdmin
 from src.apps.core.views import NamedAPIView
 from src.apps.masters.models import Master
 from .models import Registration, PhoneAuthUser, Token, RegistrationType

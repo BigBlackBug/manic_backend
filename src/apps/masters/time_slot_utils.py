@@ -1,4 +1,5 @@
 import datetime
+import logging
 import time
 from collections import namedtuple
 from typing import Iterator, List
@@ -8,6 +9,8 @@ from django.utils import timezone
 
 from src.apps.categories.models import Service
 from .models import TimeSlot
+
+logger = logging.getLogger(__name__)
 
 
 def find_available_starting_slots(service: Service,
@@ -25,6 +28,10 @@ def find_available_starting_slots(service: Service,
 
     # +1 stands for extra slot, used to get to the next client
     slot_number = int(service.max_duration / TimeSlot.DURATION + 1)
+    logger.info(f'Looking for a slot to start doing {service.name} '
+                f'({slot_number} slots) in '
+                f'{[slot.time for slot in time_slots]}')
+
     indices = []
     for i in range(len(time_slots)):
         slot = time_slots[i]
@@ -42,7 +49,11 @@ def find_available_starting_slots(service: Service,
     # because there can't be subsequent orders
     if block_size >= slot_number - 1:
         indices.append(start_index)
-    return [time_slots[index] for index in indices]
+
+    result = [time_slots[index] for index in indices]
+    logger.info(f'Found {len(result)} slots,  '
+                f'{[slot.time for slot in result]}')
+    return result
 
 
 def add_time(source_time, **kwargs):
@@ -86,8 +97,11 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
         time_to = add_time(time_slots[-1].value, minutes=TimeSlot.DURATION)
 
     if time_to > time_from:
+        logger.info(f'Filtering slots {[slot.time for slot in time_slots]}'
+                    f'that lie between {time_from} and {time_to}')
         good_slots = list(
             filter(lambda slot: time_from <= slot.value < time_to, time_slots))
+        logger.info(f'{len(good_slots)} slots are OK')
     else:
         raise ValueError('time_to argument must be '
                          'greater or equal than time_from')
@@ -110,6 +124,9 @@ def parse_time_slots(slots_string: str, include_last=False):
     :return: list of TimeTuple instances
     """
     # TODO maybe return time struct instead of timetuple?
+    logger.info(f'Parsing time slots from '
+                f'\'{slots_string}\', include_last={include_last}')
+
     result = set()
     pieces = slots_string.split(',')
     for piece in pieces:
@@ -121,6 +138,7 @@ def parse_time_slots(slots_string: str, include_last=False):
 
         for time_object in times:
             result.add(time_object)
+    logger.info(f'Parsed slots: {result}')
     return result
 
 
