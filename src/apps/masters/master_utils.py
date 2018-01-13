@@ -68,7 +68,7 @@ def search(params: FilteringParams, filter_function):
     logger.info(f'Found {len(masters)} masters. Running distance filter')
     # distance filter
     masters = list(filter(lambda m: m.distance(*coordinates) < max_distance,
-                       masters)), slots
+                          masters)), slots
     logger.info(f'Total masters found: {len(masters)}')
     return masters
 
@@ -97,7 +97,7 @@ def split(masters: Iterable[Master], target_client: Client):
     return favorites, regular
 
 
-def sort_and_serialize_masters(masters: Iterable[Master],
+def sort_and_serialize_masters(request, masters: Iterable[Master],
                                params: FilteringParams,
                                slots: dict):
     """
@@ -110,6 +110,7 @@ def sort_and_serialize_masters(masters: Iterable[Master],
     masters = sort_masters(masters, params.coordinates, params.distance)
     # TODO JUNK!!!
     serializer = SimpleMasterSerializer(masters, many=True, context={
+        'request': request,
         'coordinates': params.coordinates,
         'available_slots': slots
     })

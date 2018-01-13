@@ -88,9 +88,9 @@ class MasterListCreateView(generics.ListCreateAPIView):
 
         return Response(data={
             'favorites': master_utils.sort_and_serialize_masters(
-                favorites, params, slots),
+                request, favorites, params, slots),
             'others': master_utils.sort_and_serialize_masters(
-                others, params, slots)
+                request, others, params, slots)
         })
 
     def post(self, request, *args, **kwargs):
@@ -199,9 +199,9 @@ class MasterSearchView(generics.ListAPIView):
 
         return Response(data={
             'favorites': master_utils.sort_and_serialize_masters(
-                favorites, params, slots),
+                request, favorites, params, slots),
             'others': master_utils.sort_and_serialize_masters(
-                others, params, slots)
+                request, others, params, slots)
         })
 
 
@@ -253,7 +253,7 @@ class MasterBestMatchView(generics.ListAPIView):
                                                params.distance)[0]
         # serializing him
         output_data = master_utils.sort_and_serialize_masters(
-            [best_match], params, slots)
+            request, [best_match], params, slots)
 
         return Response(data=output_data[0])
 
