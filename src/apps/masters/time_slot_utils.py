@@ -87,7 +87,8 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
     if isinstance(time_slots, QuerySet):
         time_slots = list(time_slots)
     if len(time_slots) == 0:
-        raise ValueError('time_slots list can not be empty')
+        logger.info(f'time_slots are empty, returning False')
+        return False
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
 
     if time_from is None:
