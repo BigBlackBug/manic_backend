@@ -325,7 +325,7 @@ class FilteringFunctions(Enum):
         # checking if there exists a required number of adjacent empty slots
         result = set()
         for master in masters:
-            logger.info('Checking master {master.first_name}')
+            logger.info(f'Checking master {master.first_name}')
             # checking if a master can do any service during his work day
             service = min(master.services.all(), key=lambda _: _.max_duration)
             for schedule in master.schedule.filter(date__gte=date_range[0],
