@@ -35,19 +35,21 @@ def make_category(category_name):
                                               image=utils.make_in_memory_image(
                                                   'img'))
 
-    Service.objects.create(category=category,
+    simple = Service.objects.create(category=category,
                            name=category_name + ' обычный',
                            description='d',
                            cost=random.randint(10, 90),
                            min_duration=30,
                            max_duration=60)
 
-    Service.objects.create(category=category,
+    complex = Service.objects.create(category=category,
                            name=category_name + ' топовый',
                            description='d',
                            cost=random.randint(10, 90),
                            min_duration=60,
                            max_duration=90)
+    complex.recommendations.add(simple)
+    complex.save()
     return category
 
 

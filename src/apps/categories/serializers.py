@@ -14,21 +14,23 @@ class SimpleServiceCategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'image', 'id')
 
 
+class SimpleServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ('id', 'name', 'description',
+                  'min_duration', 'max_duration', 'cost')
+
+
 class ServiceSerializer(serializers.ModelSerializer):
     category = SimpleServiceCategorySerializer()
+
+    recommendations = SimpleServiceSerializer(many=True)
 
     class Meta:
         model = Service
         fields = '__all__'
         read_only_fields = ('category', 'name', 'description',
                             'min_duration', 'max_duration', 'cost')
-
-
-class SimpleServiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Service
-        fields = ('id', 'name', 'description',
-                  'min_duration', 'max_duration', 'cost')
 
 
 class ServiceCategorySerializer(serializers.ModelSerializer):
