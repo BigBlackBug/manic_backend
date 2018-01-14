@@ -6,7 +6,7 @@ from src.apps.categories.mgmt.serializers import \
     CreateUpdateDisplayItemSerializer
 from src.apps.categories.models import ServiceCategory, Service, DisplayItem
 from src.apps.categories.serializers import ServiceCategorySerializer, \
-    DisplayItemSerializer
+    DisplayItemSerializer, ServiceSerializer
 from src.apps.categories.views import CategoryListView, DisplayItemListView
 from src.apps.core.permissions import IsAdmin
 
@@ -274,3 +274,37 @@ class MgmtUpdateDeleteDisplayItemView(mixins.UpdateModelMixin,
         204 No content
         """
         return super().destroy(request, *args, **kwargs)
+
+
+class MgmtServiceListView(generics.ListAPIView):
+    view_name = 'service-list'
+
+    queryset = Service.objects.all()
+    serializer_class = ServiceSerializer
+    permission_classes = (IsAdmin,)
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns a list of all services.
+
+        Response:
+        200 OK
+        ```
+        [{
+          'id':100,
+          'name':'Slow and steady'
+          'description':'Yeah!"
+          'cost':100,
+          'min_duration':30
+          'max_duration':60,
+          'recommendations':[**Service Model**],
+          'category':{
+            'id':300,
+            'name':'super category',
+            'image':'url-to-image'
+          }
+        }]
+        ```
+
+        """
+        return super().get(request, *args, **kwargs)

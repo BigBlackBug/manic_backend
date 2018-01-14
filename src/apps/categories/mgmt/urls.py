@@ -1,10 +1,9 @@
 from django.conf.urls import url
 
-from src.apps.categories.mgmt.views import MgmtUpdateDeleteServiceCategoryView, \
+from .views import MgmtUpdateDeleteServiceCategoryView, \
     MgmtListCreateServiceCategoryView, MgmtCreateServiceView, \
     MgmtUpdateDeleteServiceView, MgmtListCreateDisplayItemView, \
-    MgmtUpdateDeleteDisplayItemView
-from ..views import ServiceListView
+    MgmtUpdateDeleteDisplayItemView, MgmtServiceListView
 
 urlpatterns = [
     url(r'^$', MgmtListCreateServiceCategoryView.as_view(),
@@ -24,6 +23,6 @@ urlpatterns = [
         MgmtUpdateDeleteDisplayItemView.as_view(),
         name=MgmtUpdateDeleteDisplayItemView.view_name),
 
-    url(r'^services$', ServiceListView.as_view(),
-        name=ServiceListView.view_name),
+    url(r'^services$', MgmtServiceListView.as_view(),
+        name=MgmtServiceListView.view_name),
 ]

@@ -114,34 +114,3 @@ class CategoryListView(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 
-class ServiceListView(generics.ListAPIView):
-    view_name = 'service-list'
-
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request: Request, *args, **kwargs):
-        """
-        Returns a list of all services.
-
-        Response:
-        200 OK
-        ```
-        [{
-          'id':100,
-          'name':'Slow and steady'
-          'description':'Yeah!"
-          'cost':100,
-          'min_duration':30
-          'max_duration':60,
-          'category':{
-            'id':300,
-            'name':'super category',
-            'image':'url-to-image'
-          }
-        }]
-        ```
-
-        """
-        return super().get(request, *args, **kwargs)
