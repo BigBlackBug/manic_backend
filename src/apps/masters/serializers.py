@@ -146,16 +146,6 @@ class SimpleMasterSerializer(FilterEmptyFieldsMixin,
     available_slots = serializers.SerializerMethodField('_available_slots',
                                                         read_only=True)
 
-    def to_representation(self, instance):
-        repr = super().to_representation(instance)
-        request = self.context.get("request", None)
-        if request:
-            logger.info(f'REQUEST_CONTEXT {request}')
-            logger.info(f'{request.build_absolute_uri("/kekeke/masters")}')
-        else:
-            logger.info('NO REQUEST_CONTEXT')
-        return repr
-
     def _distance(self, master: Master):
         coordinates = self.context.get('coordinates')
         if not coordinates:

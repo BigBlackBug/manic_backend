@@ -17,16 +17,6 @@ class SimpleServiceCategorySerializer(serializers.ModelSerializer):
 class ServiceSerializer(serializers.ModelSerializer):
     category = SimpleServiceCategorySerializer()
 
-    def to_representation(self, instance):
-        repr = super().to_representation(instance)
-        request = self.context.get("request", None)
-        if request:
-            logger.info(f'REQUEST_CONTEXT {request}')
-            logger.info(f'{request.build_absolute_uri("/kekeke/cate")}')
-        else:
-            logger.info('NO REQUEST_CONTEXT')
-        return repr
-
     class Meta:
         model = Service
         fields = '__all__'
