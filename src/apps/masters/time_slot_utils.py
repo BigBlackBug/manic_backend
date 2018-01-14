@@ -29,7 +29,7 @@ def find_available_starting_slots(service: Service,
     # +1 stands for extra slot, used to get to the next client
     slot_number = int(service.max_duration / TimeSlot.DURATION + 1)
     logger.info(f'Looking for a slot to start doing {service.name} '
-                f'({slot_number} slots) in '
+                f'({slot_number-1} + 1(extra) slots) in '
                 f'{[slot.time for slot in time_slots]}')
 
     indices = []

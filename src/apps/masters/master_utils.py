@@ -73,7 +73,7 @@ def search(params: FilteringParams, filter_function):
     return masters
 
 
-def split(masters: Iterable[Master], target_client: Client):
+def split(masters, target_client: Client):
     """
     splits `masters` into two lists - favorites, who have served
     `target_client` at least once and those who haven't
@@ -84,7 +84,7 @@ def split(masters: Iterable[Master], target_client: Client):
     regular = []
     favorites = []
 
-    logger.info(f'Splitting {len(masters)}')
+    logger.info(f'Splitting {len(masters)} masters')
 
     for master in masters:
         # TODO cache
