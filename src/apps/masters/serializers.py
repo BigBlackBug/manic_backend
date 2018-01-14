@@ -148,7 +148,9 @@ class SimpleMasterSerializer(FilterEmptyFieldsMixin,
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        logger.info(f'REQUEST_CONTEXT {self.context["request"]}')
+        request = self.context["request"]
+        logger.info(f'REQUEST_CONTEXT {request}')
+        logger.info(f'{request.build_absolute_url("/kekeke")}')
         return repr
 
     def _distance(self, master: Master):

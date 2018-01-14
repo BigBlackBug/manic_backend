@@ -19,7 +19,9 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        logger.info(f'REQUEST_CONTEXT {self.context["request"]}')
+        request = self.context["request"]
+        logger.info(f'REQUEST_CONTEXT {request}')
+        logger.info(f'{request.build_absolute_url("/kekeke/mekeke")}')
         return repr
 
     class Meta:
