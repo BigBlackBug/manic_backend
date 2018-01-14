@@ -65,7 +65,7 @@ jobs:
             docker-compose -f composefiles/compose-build.yml push
             chmod +x deploy.sh
             REMOTE_HOST=dev.4hands2go.bigblackbug.me FORHANDS_PROFILE=dev \
-            DEPLOY_PORT=80 DEPLOY_HTTPS_PORT=433 OWNER_USER_GROUP=ubuntu:ubuntu \
+            DEPLOY_PORT=80 DEPLOY_HTTPS_PORT=443 OWNER_USER_GROUP=ubuntu:ubuntu \
             source deploy.sh
 # TODO add healthcheck
 workflows:
