@@ -1,7 +1,11 @@
+import logging
+
 from rest_framework import serializers
 
 from src.apps.core.mixins import FilterEmptyFieldsMixin
 from .models import ServiceCategory, Service, DisplayItem
+
+logger = logging.getLogger(__name__)
 
 
 class SimpleServiceCategorySerializer(serializers.ModelSerializer):
@@ -12,6 +16,11 @@ class SimpleServiceCategorySerializer(serializers.ModelSerializer):
 
 class ServiceSerializer(serializers.ModelSerializer):
     category = SimpleServiceCategorySerializer()
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        logger.info(f'REQUEST_CONTEXT {self.context["request"]}')
+        return repr
 
     class Meta:
         model = Service

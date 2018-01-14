@@ -145,7 +145,11 @@ class SimpleMasterSerializer(FilterEmptyFieldsMixin,
     # may be omitted
     available_slots = serializers.SerializerMethodField('_available_slots',
                                                         read_only=True)
-    avatar = serializers.ImageField()
+
+    def to_representation(self, instance):
+        repr = super().to_representation(instance)
+        logger.info(f'REQUEST_CONTEXT {self.context["request"]}')
+        return repr
 
     def _distance(self, master: Master):
         coordinates = self.context.get('coordinates')
