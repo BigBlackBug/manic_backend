@@ -123,7 +123,7 @@ class ServiceListView(generics.ListAPIView):
 
     def get(self, request: Request, *args, **kwargs):
         """
-        Returns a list of all categories.
+        Returns a list of all services.
 
         Response:
         200 OK
