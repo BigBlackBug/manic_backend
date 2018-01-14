@@ -109,6 +109,7 @@ def sort_and_serialize_masters(request, masters: Iterable[Master],
     """
     masters = sort_masters(masters, params.coordinates, params.distance)
     # TODO JUNK!!!
+    logging.info(f'Serializing sorted master list len={len(masters)}')
     serializer = SimpleMasterSerializer(masters, many=True, context={
         'request': request,
         'coordinates': params.coordinates,
