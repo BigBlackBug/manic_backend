@@ -125,7 +125,8 @@ class OrderCreateSerializer(serializers.Serializer):
                         order_time=order.time.strftime('%H:%M'),
                         order_date=order.date.strftime('%Y-%m-%d')),
                     data={
-                        'event': notifications.NEW_ORDER_EVENT
+                        'event': notifications.NEW_ORDER_EVENT,
+                        'order_id': order.id
                     })
         return order
 
