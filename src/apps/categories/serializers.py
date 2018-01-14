@@ -19,7 +19,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         repr = super().to_representation(instance)
-        request = self.context.get("request")
+        request = self.context.get("request", None)
         if request:
             logger.info(f'REQUEST_CONTEXT {request}')
             logger.info(f'{request.build_absolute_uri("/kekeke/cate")}')
