@@ -22,7 +22,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request:
             logger.info(f'REQUEST_CONTEXT {request}')
-            logger.info(f'{request.build_absolute_url("/kekeke/mekeke")}')
+            logger.info(f'{request.build_absolute_uri("/kekeke/cate")}')
         else:
             logger.info('NO REQUEST_CONTEXT')
         return repr

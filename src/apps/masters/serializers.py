@@ -151,7 +151,7 @@ class SimpleMasterSerializer(FilterEmptyFieldsMixin,
         request = self.context.get("request")
         if request:
             logger.info(f'REQUEST_CONTEXT {request}')
-            logger.info(f'{request.build_absolute_url("/kekeke/mekeke")}')
+            logger.info(f'{request.build_absolute_uri("/kekeke/masters")}')
         else:
             logger.info('NO REQUEST_CONTEXT')
         return repr
