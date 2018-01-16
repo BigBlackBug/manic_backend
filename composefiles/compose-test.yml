@@ -9,6 +9,10 @@ services:
       - DATABASE_NAME=test
       - DATABASE_USER=test
       - DATABASE_PASSWORD=test
+
+      #logging
+      - LOG_LEVEL=${LOG_LEVEL-DEBUG}
+      - LOG_FOLDER=/code/logs
     command: ["python", "manage.py", "test"]
     links:
       - pg

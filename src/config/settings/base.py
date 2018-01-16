@@ -114,7 +114,7 @@ FCM_DJANGO_SETTINGS = {
 }
 
 RAVEN_CONFIG = {
-    'dsn': get_env_variable('SENTRY_URL'),
+    'dsn': get_env_variable('SENTRY_URL', raise_exception=False, default=None),
     # If you are using git, you can also automatically configure the
     # release based on the git info.
     'release': raven.fetch_git_sha(BASE_DIR.parent),
