@@ -34,6 +34,7 @@ ssh ubuntu@${REMOTE_HOST} -o "StrictHostKeyChecking no" << EOF
     sleep 10
     sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-media/
     sudo chown -R ${OWNER_USER_GROUP} /var/lib/4hands2go/dev-static/
+    sudo chown -R ${OWNER_USER_GROUP} /var/logs/4hands2go/dev/
 EOF
 
 echo "Done!"
