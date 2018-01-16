@@ -153,6 +153,31 @@ class OrderCreateTestCase(TestCase):
                                  self.client_object.tip_multiplier())),
                                  services)))
 
+    def test_create_order__one_master_many_services_does_not_fit(self):
+        master = Master.objects.get(first_name='VASYA')
+        schedule = master.get_schedule(timezone.now())
+        TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
+                                taken=True, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=13, minute=00),
+                                taken=False, schedule=schedule)
+        services = master.services.all()
+        # two services, 5 slots, no+1
+        resp = self.client.post(reverse(OrderListCreateView.view_name), data={
+            'date': timezone.now().strftime('%Y-%m-%d'),
+            'payment_type': 'CARD',
+            'time': '11:00',
+            'order_items': [{
+                'locked': False,
+                'master_id': master.id,
+                'service_ids': [service.id for service in services]
+            }, ]
+        }, format='json')
+        self.assertEqual(resp.status_code,
+                         status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # assert no order is created
+        self.assertEqual(Order.objects.count(), 0)
+
     def test_create_order__composite_4hands(self):
         vasya = Master.objects.get(first_name='VASYA')
         sanya = make_master("SANYA", 12.0)

@@ -11,6 +11,7 @@ class ApplicationError(Exception):
         SMS_ERROR = 100
         PAYMENT_ERROR = 200
         APPLICATION_ERROR = 300
+        ORDER_CREATION_ERROR = 310
 
     def __init__(self, *args,
                  error_type: ErrorTypes = ErrorTypes.UNEXPECTED_ERROR):

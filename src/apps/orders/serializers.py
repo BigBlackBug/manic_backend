@@ -5,7 +5,10 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from src.apps.categories.models import Service
 from src.apps.clients.serializers import OrderClientSerializer
+from src.apps.core.exceptions import ApplicationError
+from src.apps.masters import time_slot_utils
 from src.apps.masters.models import Master, TimeSlot
+from src.apps.masters.time_slot_utils import add_time
 from src.apps.orders import notifications
 from .models import Order, OrderItem, PaymentType, CloudPaymentsTransaction, \
     OrderStatus
@@ -94,8 +97,22 @@ class OrderCreateSerializer(serializers.Serializer):
 
             schedule = master.get_schedule(validated_data['date'])
             order_item = None
-            next_time = None
+            start_time = None
+
             for service in services:
+                start_time = start_time or validated_data['time']
+                end_time = add_time(start_time, minutes=service.max_duration)
+
+                # master's schedule could have changed after the search
+                if not time_slot_utils.service_fits_into_slots(
+                        service, schedule.time_slots.all(),
+                        start_time, end_time):
+                    raise ApplicationError(
+                        'Unable to create order. '
+                        'Master\'s schedule has changed ',
+                        error_type=ApplicationError.ErrorTypes.
+                            ORDER_CREATION_ERROR)
+
                 order_item = OrderItem.objects.create(order=order,
                                                       master=master,
                                                       service=service,
@@ -108,13 +125,14 @@ class OrderCreateSerializer(serializers.Serializer):
                             f'duration={service.max_duration}'
                             f'schedule_date={schedule.date}')
 
-                next_time = schedule.assign_time(
-                    next_time or validated_data['time'],
-                    int(service.max_duration / TimeSlot.DURATION),
-                    order_item)
+                start_time = schedule.assign_time(
+                    start_time, end_time, order_item)
+
             # add +1 if it's not end of the day
-            if next_time:
-                schedule.assign_time(next_time, number_of_slots=1,
+            if start_time:
+                end_time = add_time(start_time, minutes=TimeSlot.DURATION)
+                schedule.assign_time(start_time,
+                                     end_time,
                                      order_item=order_item)
             if master.device:
                 logger.info(f'Order created. Sending NEW_ORDER notification '

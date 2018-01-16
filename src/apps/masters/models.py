@@ -269,29 +269,30 @@ class Schedule(models.Model):
                     f'Slot at {slot.time} can not be deleted '
                     f'because there is an order at that time')
 
-    def assign_time(self, time_: datetime.time, number_of_slots: int,
-                    order_item=None):
+    def assign_time(self, start_time: datetime.time,
+                    end_time: datetime.time, order_item=None):
         """
-        Sets the `number_of_slots` number of time slots
-        to 'taken' starting at 'time'
+        Marks slots between `start_time` and `end_time` as Taken.
+        `end_time` is excluded
 
         :param order_item:
-        :param time_:
-        :param number_of_slots:
+        :param start_time:
+        :param end_time:
         :return: time <datetime> of the next available time slot or None if
         the last processed slot marks the end of the work day
         """
-        if not time_:
-            raise ValueError('time argument should not be None')
+        from src.apps.masters import time_slot_utils
+        if not start_time:
+            raise ValueError('start_time argument should not be None')
 
-        logging.info(f'Setting {number_of_slots} slots to Taken, '
-                     f'starting from {time_}')
+        logging.info(f'Setting slots between [{start_time},{end_time}] '
+                     f'to Taken')
 
         time_slots = sorted(self.time_slots.all(), key=lambda slot: slot.value)
 
         # looking for the first timeslot
         for first_slot_index, time_slot in enumerate(time_slots):
-            if time_slot.value == time_:
+            if time_slot.value == start_time:
                 break
         else:
             raise ValueError('time not found')
@@ -299,13 +300,17 @@ class Schedule(models.Model):
         # TODO index error
         # TODO this method blows, potential performance issues
         shift = 0
-        for shift in range(number_of_slots):
+        cur_time = start_time
+        while cur_time < end_time:
             ts = self.time_slots.get(pk=time_slots[first_slot_index + shift].id)
             ts.taken = True
             ts.order_item = order_item
             ts.save()
 
-        next_index = first_slot_index + shift + 1
+            cur_time = time_slot_utils.add_time(cur_time, minutes=TimeSlot.DURATION)
+            shift += 1
+
+        next_index = first_slot_index + shift
         if next_index == len(time_slots):
             logging.info(f'No next slot, last slot of the day is filled')
             return None
