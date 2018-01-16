@@ -31,9 +31,14 @@ services:
         - ADMIN_USERNAME=${ADMIN_USERNAME}
         # temporarily disabling 'time of commute' calculations
         - USE_GMAPS_API=False
+        # logging
+        - LOG_FOLDER=/code/logs
+        - LOG_LEVEL=${LOG_LEVEL-DEBUG}
+        - SENTRY_URL=https://7dd35167ff334e0a8649804d93b9f90a:8f49d425079343de95ee1a7de50ba1e4@sentry.io/272430
     links:
       - pg
     volumes:
+      - /var/logs/4hands2go/dev:/code/logs
       - /var/lib/4hands2go/dev-media:/code/media
       - /var/lib/4hands2go/dev-static:/code/static
 

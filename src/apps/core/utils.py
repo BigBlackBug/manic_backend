@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from src.apps.core.exceptions import ApplicationError
-
+from raven.contrib.django.raven_compat.models import client
 logger = logging.getLogger(__name__)
 
 # TODO make a separate handler for payment exception logging
@@ -68,6 +68,7 @@ class Folders:
 
 def custom_exception_handler(exc, context):
     set_rollback()
+    client.captureException()
     if isinstance(exc, exceptions.APIException):
         headers = {}
         if getattr(exc, 'auth_header', None):

@@ -30,9 +30,15 @@ services:
         - DJANGO_RUN_COLLECTSTATIC=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
+        # using GMAPS for travel time prediction
+        - USE_GMAPS_API=True
+        # logging
+        - LOG_FOLDER=/code/logs
+        - LOG_LEVEL=${LOG_LEVEL-DEBUG}
     links:
       - pg
     volumes:
+      - /var/logs/4hands2go/prod:/code/logs
       - /var/lib/4hands2go/prod-media:/code/media
       - /var/lib/4hands2go/prod-static:/code/static
 

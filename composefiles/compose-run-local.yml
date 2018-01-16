@@ -15,12 +15,19 @@ services:
         - DJANGO_RUN_CREATESUPERUSER=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
+        # temporarily disabling 'time of commute' calculations
+        - USE_GMAPS_API=False
+        # logging
+        - LOG_LEVEL=${LOG_LEVEL-DEBUG}
+        - LOG_FOLDER=/code/logs
+        - SENTRY_URL=https://7dd35167ff334e0a8649804d93b9f90a:8f49d425079343de95ee1a7de50ba1e4@sentry.io/272430
     ports:
       - "${DEPLOY_PORT-8000}:8000"
     links:
       - pg
     volumes:
       - ~/4hands2go-local-media-data:/code/media
+      - ~/4hands2go-local-logs:/code/logs
 
   pg:
     image: postgres:9.4-alpine

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+import raven
 from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
 
@@ -87,6 +88,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_swagger',
+
+    'raven.contrib.django.raven_compat',
 ]
 
 REST_FRAMEWORK = {
@@ -108,6 +111,13 @@ SWAGGER_SETTINGS = {
 
 FCM_DJANGO_SETTINGS = {
     'FCM_SERVER_KEY': None,
+}
+
+RAVEN_CONFIG = {
+    'dsn': get_env_variable('SENTRY_URL'),
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(BASE_DIR.parent),
 }
 
 MIDDLEWARE = [
@@ -182,7 +192,16 @@ USE_L10N = True
 
 USE_TZ = True
 
-# TODO process logs
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
+LOG_FOLDER = get_env_variable('LOG_FOLDER')
+if not os.path.exists(LOG_FOLDER):
+    os.makedirs(LOG_FOLDER, exist_ok=True)
+
+
+def make_log_path(file_name, log_folder=LOG_FOLDER):
+    return os.path.join(log_folder, file_name)
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -196,14 +215,29 @@ LOGGING = {
         },
     },
     'handlers': {
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {
+                'profile': os.environ.get('DJANGO_SETTINGS_MODULE', None)
+            },
+        },
         'console': {
-            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'error_console': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': make_log_path('regular.log'),
+            'when': 'D',
+            'formatter': 'verbose',
+        },
+        'error_file': {
             'level': 'ERROR',
-            'class': 'logging.StreamHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': make_log_path('error.log'),
+            'when': 'D',
             'formatter': 'verbose',
         },
         'warning_email': {
@@ -215,23 +249,33 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'propagate': True,
+            'handlers': ['console', 'file'],
+            'propagate': False,
         },
         'django.request': {
-            'handlers': ['console'],
+            'handlers': ['console', 'error_file'],
             'level': 'ERROR',
             'propagate': False,
         },
         'src.apps': {
-            'level': 'DEBUG',
-            'handlers': ['console', 'error_console'],
+            'level': LOG_LEVEL,
+            'handlers': ['console', 'sentry', 'file', 'error_file'],
             'propagate': False
+        },
+        'raven': {
+            'level': LOG_LEVEL,
+            'handlers': ['console', 'file'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'ERROR',
+            'handlers': ['console', 'sentry', 'error_file'],
+            'propagate': False,
         },
 
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+        'level': LOG_LEVEL,
     }
 }
