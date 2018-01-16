@@ -10,6 +10,8 @@ services:
       - DATABASE_USER=test
       - DATABASE_PASSWORD=test
 
+      # True, because the tests mock the calls
+      - USE_GMAPS_API = True
       #logging
       - LOG_LEVEL=${LOG_LEVEL-DEBUG}
       - LOG_FOLDER=/code/logs
