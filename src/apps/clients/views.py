@@ -80,9 +80,6 @@ class ClientUpdateView(mixins.UpdateModelMixin, GenericAPIView):
         """
         Updates client info.
 
-        Allowed fields: **phone, tip, address**.
-        Address json may contain any number of fields.
-
         Input:
         ```
         {
