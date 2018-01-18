@@ -66,6 +66,9 @@ MASTER_SHARE_PERCENTAGE = 0.5
 
 ADMIN_APP_USER_MODEL = 'auth.User'
 
+# CORS
+CORS_ORIGIN_ALLOW_ALL = True
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -90,6 +93,8 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
 
     'raven.contrib.django.raven_compat',
+
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -123,6 +128,7 @@ RAVEN_CONFIG = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
