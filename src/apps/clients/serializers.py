@@ -19,7 +19,13 @@ class AddressSerializer(serializers.ModelSerializer):
         location = Location.objects.create(**validated_data.pop('location'))
         client = self.context.get('client', None)
 
-        is_default = len(client.addresses.all()) == 0
+        if len(client.addresses.all()) == 0:
+            # if it's the first address, it should always be the default
+            is_default = True
+        else:
+            # the default for is_default is True (lol)
+            is_default = validated_data.pop('is_default', True)
+
         logger.debug(f'Creating a new address for client {client.first_name}, '
                      f'default: {is_default}')
         return Address.objects.create(location=location, client=client,
