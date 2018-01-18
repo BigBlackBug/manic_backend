@@ -272,7 +272,7 @@ class AddAddressView(generics.CreateAPIView):
           'apt_number': 10,
           'entrance': 6,
           'has_intercom': True,
-          //True by default
+          //False by default
           'is_default': True/False,
           //optional
           'comment': 'please call before knocking'

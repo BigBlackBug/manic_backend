@@ -23,8 +23,12 @@ class AddressSerializer(serializers.ModelSerializer):
             # if it's the first address, it should always be the default
             is_default = True
         else:
-            # the default for is_default is True (lol)
-            is_default = validated_data.pop('is_default', True)
+            # the default for is_default is False (lol)
+            is_default = validated_data.pop('is_default', False)
+            if is_default:
+                for address in client.addresses.all():
+                    address.is_default = False
+                    address.save()
 
         logger.debug(f'Creating a new address for client {client.first_name}, '
                      f'default: {is_default}')
