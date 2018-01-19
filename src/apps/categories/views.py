@@ -1,10 +1,13 @@
-from rest_framework import generics
+from rest_framework import generics, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.response import Response
 
+from src.apps.masters import master_utils
+from src.apps.masters.time_slot_utils import add_time
 from .models import DisplayItem, ServiceCategory, Service
 from .serializers import DisplayItemSerializer, ServiceCategorySerializer, \
-    ServiceSerializer
+    RecommendationInputSerializer
 
 
 class DisplayItemListView(generics.ListAPIView):
@@ -114,3 +117,55 @@ class CategoryListView(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 
+class UpsaleRecommendationsView(views.APIView):
+    view_name = 'upsale-recommendations'
+
+    def post(self, request, *args, **kwargs):
+        """
+        Returns possible upsale options with respect
+        to the provided order configuration
+
+        Input:
+
+        ```
+        {
+          'date': '2017-10-18',
+          'time': '11:00',
+          'order_items': [{
+            'locked': false,
+            'service_ids': [25]
+          }, {
+            'master_id': 11,
+            'service_ids': [16]
+          }]
+        }
+        ```
+
+        Response:
+
+        200 OK
+
+        ```
+        [{
+          'master_id': 10,
+          'service_id': 50
+        }]
+        ```
+        """
+        serializer = RecommendationInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        order_date = serializer.validated_data['date']
+        order_time = serializer.validated_data['time']
+        order_items = serializer.validated_data['order_items']
+
+        for item in order_items:
+            # expected service execution start time
+            item['time'] = add_time(
+                source_time=order_time,
+                minutes=sum(
+                    [service.max_duration for service in
+                     Service.objects.filter(pk__in=item['service_ids'])]))
+
+        result = master_utils.upsale_search(order_items, order_date)
+        return Response(data=result)

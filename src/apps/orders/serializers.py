@@ -49,7 +49,7 @@ class OrderItemCreateSerializer(serializers.Serializer):
     service_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=0)
     )
-    locked = serializers.BooleanField(required=True)
+    locked = serializers.BooleanField()
 
 
 # out

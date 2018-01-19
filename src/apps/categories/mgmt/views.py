@@ -297,7 +297,6 @@ class MgmtServiceListView(generics.ListAPIView):
           'cost':100,
           'min_duration':30
           'max_duration':60,
-          'recommendations':[**Service Model**],
           'category':{
             'id':300,
             'name':'super category',

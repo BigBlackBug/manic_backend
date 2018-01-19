@@ -1,8 +1,8 @@
 from rest_framework.test import APITestCase
 
 from src.apps.core import utils
-from .models import ServiceCategory, Service, DisplayItem
-from .serializers import ServiceCategorySerializer, DisplayItemSerializer
+from ..models import ServiceCategory, Service, DisplayItem
+from ..serializers import ServiceCategorySerializer, DisplayItemSerializer
 
 
 class CategoriesTestCase(APITestCase):

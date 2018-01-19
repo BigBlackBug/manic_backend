@@ -306,8 +306,6 @@ class FilteringFunctions(Enum):
         """
         Returns a list of masters who can do any of his services
         at any time in `time_range` and date in the `date_range`
-        for the specific client, taking into account the possibility
-        to get to the client
 
         :param masters: masters to filter
         :param params:

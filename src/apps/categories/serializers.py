@@ -3,6 +3,7 @@ import logging
 from rest_framework import serializers
 
 from src.apps.core.mixins import FilterEmptyFieldsMixin
+from src.apps.orders.serializers import OrderItemCreateSerializer
 from .models import ServiceCategory, Service, DisplayItem
 
 logger = logging.getLogger(__name__)
@@ -23,8 +24,6 @@ class SimpleServiceSerializer(serializers.ModelSerializer):
 
 class ServiceSerializer(serializers.ModelSerializer):
     category = SimpleServiceCategorySerializer()
-
-    recommendations = SimpleServiceSerializer(many=True)
 
     class Meta:
         model = Service
@@ -50,3 +49,9 @@ class DisplayItemSerializer(FilterEmptyFieldsMixin,
     class Meta:
         model = DisplayItem
         fields = ('id', 'name', 'categories', 'image', 'special')
+
+
+class RecommendationInputSerializer(serializers.Serializer):
+    date = serializers.DateField(required=True)
+    time = serializers.TimeField(required=True)
+    order_items = OrderItemCreateSerializer(many=True, required=True)

@@ -48,8 +48,6 @@ def make_category(category_name):
                            cost=random.randint(10, 90),
                            min_duration=60,
                            max_duration=90)
-    complex.recommendations.add(simple)
-    complex.save()
     return category
 
 

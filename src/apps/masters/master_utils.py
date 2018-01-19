@@ -3,6 +3,7 @@ import logging
 from typing import Iterable
 
 from src.apps.clients.models import Client
+from src.apps.masters import time_slot_utils
 from src.apps.masters.filtering import FilteringParams
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import SimpleMasterSerializer
@@ -71,6 +72,43 @@ def search(params: FilteringParams, filter_function):
                           masters)), slots
     logger.info(f'Total masters found: {len(masters)}')
     return masters
+
+
+def upsale_search(order_items, order_date):
+    """
+    Returns masters and services that they can do on `order_date`
+    with respect to the `order_items`
+
+    :param order_items:
+    :param order_date:
+    :return:
+    """
+    logger.info(f'Using an upsale search filter on items {order_items} '
+                f'with params: date={order_date}')
+
+    # taking the maximum duration of all services of the master and
+    # checking if there exists a required number of adjacent empty slots
+    result = []
+    for item in order_items:
+        master = Master.objects.get(pk=item['master_id'])
+
+        logger.info(f'Checking master {master.first_name}')
+        schedule = master.get_schedule(order_date)
+        logger.info(f'Checking schedule on {schedule.date}')
+
+        for service in master.services.exclude(pk__in=item['service_ids']):
+            # ignoring certain services
+            time = item['time']
+            if time_slot_utils.service_fits_into_slots(
+                    service, schedule.time_slots.all(),
+                    time_from=time):
+                logger.info(f'Master can do service {service.name} '
+                            f'on {schedule.date} at {time}')
+                result.append({
+                    'master_id': master.id,
+                    'service_id': service.id
+                })
+    return result
 
 
 def split(masters, target_client: Client):
