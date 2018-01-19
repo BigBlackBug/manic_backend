@@ -43,6 +43,8 @@ STATIC_URL = '/static/'
 #     BASE_DIR.ancestor(1).child("static"),
 # )
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
