@@ -36,6 +36,7 @@ class OrderItemListSerializer(serializers.BaseSerializer):
                 'cost': obj.service.cost
             },
             'master': {
+                'id': obj.master.id,
                 'first_name': obj.master.first_name,
                 'avatar': avatar_url
             },

@@ -137,6 +137,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 'home_address':{**Address** model}
               },
               'master': {
+                  'id': 100,
                   'first_name': 'Vasya',
                   'avatar': 'url-to-avatar'
               }]
