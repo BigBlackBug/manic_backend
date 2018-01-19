@@ -132,7 +132,7 @@ class UpsaleRecommendationsView(views.APIView):
           'date': '2017-10-18',
           'time': '11:00',
           'order_items': [{
-            'locked': false,
+            'master_id': 11,
             'service_ids': [25]
           }, {
             'master_id': 11,
