@@ -37,6 +37,9 @@ class AddressSerializer(serializers.ModelSerializer):
                                       **validated_data)
 
     def update(self, instance, validated_data):
+        # current client
+        client = self.context.get('client', None)
+
         # manually updating location
         new_location = validated_data.pop('location', None)
         if new_location:
@@ -46,6 +49,12 @@ class AddressSerializer(serializers.ModelSerializer):
                                                      partial=True)
             location_serializer.is_valid(raise_exception=True)
             instance.location = location_serializer.save()
+
+        is_default = validated_data.get('is_default', None)
+        if is_default:
+            old_default = client.addresses.get(is_default=True)
+            old_default.is_default = False
+            old_default.save()
 
         # other fields and handled automatically
         return super().update(instance, validated_data)

@@ -169,7 +169,8 @@ class MeClient(generics.RetrieveAPIView):
             'apt_number': 10,
             'entrance': 6,
             'has_intercom': True,
-            'home_address': True/False,
+            'is_default': True/False,
+            'last_used_date': '2017-10-29',
             'comment': 'please call before knocking'
           }],
           'payment_cards': [{
@@ -295,6 +296,13 @@ class AddressUpdateView(mixins.DestroyModelMixin,
     queryset = Client.objects.all()
     serializer_class = AddressSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # TODO this is a fucking bug of the schema generation module
+        if self.request:
+            context['client'] = self.request.user.client
+        return context
+
     def get_object(self):
         address_id = self.kwargs['address_id']
         client = self.request.user.client
@@ -333,6 +341,7 @@ class AddressUpdateView(mixins.DestroyModelMixin,
           'entrance': 6,
           'has_intercom': True,
           'is_default': True/False,
+          'last_used_date': '2017-10-30',
           'comment': 'please call before knocking'
         }
         ```

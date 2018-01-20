@@ -43,6 +43,7 @@ STATIC_URL = '/static/'
 #     BASE_DIR.ancestor(1).child("static"),
 # )
 
+# https forwarding, oh yeah
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Quick-start development settings - unsuitable for production
@@ -200,7 +201,9 @@ USE_L10N = True
 USE_TZ = True
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
-LOG_FOLDER = get_env_variable('LOG_FOLDER')
+
+LOG_FOLDER = get_env_variable('LOG_FOLDER', default='./default-logs',
+                              raise_exception=False)
 if not os.path.exists(LOG_FOLDER):
     os.makedirs(LOG_FOLDER, exist_ok=True)
 

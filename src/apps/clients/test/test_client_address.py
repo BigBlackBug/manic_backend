@@ -71,6 +71,8 @@ class ClientAddressTestCase(APITestCase):
 
         client_object = Client.objects.first()
         self.assertEqual(len(client_object.addresses.all()), 2)
+        self.assertEqual(len(client_object.addresses.filter(
+            is_default=True)), 1)
         self.assertEqual(client_object.home_address.city, 'NSK')
 
     def test_update_address(self):
@@ -86,7 +88,7 @@ class ClientAddressTestCase(APITestCase):
                                          args=[self.client_object.id,
                                                address.id]),
                                  data={
-                                     'city': 'MOSCOW'
+                                     'city': 'MOSCOW',
                                  }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 

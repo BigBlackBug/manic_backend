@@ -56,7 +56,8 @@ class Address(models.Model):
                                     related_name='+')
     client = models.ForeignKey(Client, on_delete=models.CASCADE,
                                related_name='addresses', null=True)
-
+    creation_date = models.DateTimeField(auto_now_add=True)
+    last_used_date = models.DateTimeField(blank=True, null=True)
     city = models.CharField(max_length=64)
     street_name = models.CharField(max_length=64)
     building = models.CharField(max_length=16)
