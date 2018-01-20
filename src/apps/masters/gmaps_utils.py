@@ -17,14 +17,15 @@ logger = logging.getLogger(__name__)
 def _calculate_eta(coords_from: tuple, coords_to: tuple,
                    departure_time: datetime.date):
     """
-    Calculates estimated time of travel between two pairs of coordinates at specified
-    `departure_time`
+    Calculates estimated time of travel between two pairs of coordinates
+    at specified `departure_time`
     :param coords_from:
     :param coords_to:
     :param departure_time:
     :return:
     """
     try:
+        # TODO time zones??
         logger.info(f'Calling GMaps API to get traffic info. '
                     f'From {coords_from} To {coords_to} at {departure_time}')
         directions_result = gmaps.directions(coords_from,
@@ -53,10 +54,16 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     if not settings.USE_GMAPS_API:
         logger.info(f'GMAPS_API is disabled. can_reach=True')
         return True
-    logger.info(f'checking if a master can reach client at')
+
+    logger.info(f'Checking if a master can reach '
+                f'client on {schedule.date} at {time}')
+
     dt = datetime.combine(schedule.date, time) - \
          timedelta(minutes=TimeSlot.DURATION)
+
     prev_time = dt.time()
+
+    logger.info(f'Selecting previous slot at {prev_time}')
     prev_slot = schedule.get_slot(prev_time)
     if prev_slot:
         # we assume that a person can get anywhere within an hour
@@ -64,6 +71,8 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
             logger.info(f'Previous slot for slot at {time} is empty. '
                         f'can_reach=True')
             return True
+
+        # wow, that's a long call chain
         prev_address = prev_slot.order_item.order.client.home_address
         eta = _calculate_eta(prev_address.location.as_tuple(),
                              location.as_tuple(), dt)
