@@ -1,5 +1,7 @@
 import datetime
+from datetime import timedelta as delta
 
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -8,8 +10,8 @@ from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.apps.masters.serializers import SimpleMasterSerializer
-from src.utils.object_creation import make_everything, make_client, make_order
 from src.apps.masters.views import MasterListCreateView
+from src.utils.object_creation import make_everything, make_client, make_order
 
 
 class MasterListTestCase(APITestCase):
@@ -89,10 +91,11 @@ class MasterListTestCase(APITestCase):
         vasya = Master.objects.get(first_name='VASYA')
         make_order(client=self.client_object, master=vasya,
                    service=vasya.services.all()[0],
+                   order_date=timezone.now() + delta(days=1),
                    order_time=datetime.time(hour=10, minute=30))
 
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"date_range={utils.get_date(0)},{utils.get_date(7)}&" \
+              f"date_range={utils.get_date(1)},{utils.get_date(8)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -109,7 +112,7 @@ class MasterListTestCase(APITestCase):
 
     def test_filtering_date_one_day(self):
         url = f"{reverse(MasterListCreateView.view_name)}?" \
-              f"date_range={utils.get_date(0)},{utils.get_date(0)}&" \
+              f"date_range={utils.get_date(1)},{utils.get_date(1)}&" \
               f"coordinates=10.03,12.43"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

@@ -123,7 +123,7 @@ class OrderCreateSerializer(serializers.Serializer):
                 logger.info(f'Filling time_slots for '
                             f'master={master.first_name}, '
                             f'service={service.name}, '
-                            f'duration={service.max_duration}'
+                            f'duration={service.max_duration}, '
                             f'schedule_date={schedule.date}')
 
                 start_time = schedule.assign_time(

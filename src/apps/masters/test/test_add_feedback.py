@@ -1,3 +1,6 @@
+from datetime import timedelta as delta
+
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -17,7 +20,9 @@ class AddFeedbackTestCase(APITestCase):
         self.client_object = make_client()
         self.order, _ = make_order(self.client_object,
                                    self.master_object.services.all()[0],
-                                   self.master_object, '11:30')
+                                   self.master_object,
+                                   order_date=timezone.now() + delta(days=1),
+                                   order_time='11:30')
         self.user = self.client_object.user
         token, _ = Token.objects.get_or_create(client=self.client_object)
         self.client = APIClient()
@@ -29,7 +34,7 @@ class AddFeedbackTestCase(APITestCase):
             data={
                 'rating': 4.0,
                 'text': 'superb',
-                'date': utils.get_date(0),
+                'date': utils.get_date(1),
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.master_object = Master.objects.get(first_name='VASYA')
@@ -42,7 +47,7 @@ class AddFeedbackTestCase(APITestCase):
         self.assertEqual(feedback_items[0].client, self.client_object)
         self.assertEqual(feedback_items[0].master, self.master_object)
         self.assertEqual(feedback_items[0].date.strftime('%Y-%m-%d'),
-                         utils.get_date(0))
+                         utils.get_date(1))
 
     def test_add_feedback_fail_no_orders(self):
         self.order.delete()
@@ -51,7 +56,7 @@ class AddFeedbackTestCase(APITestCase):
             data={
                 'rating': 4.0,
                 'text': 'superb',
-                'date': utils.get_date(0),
+                'date': utils.get_date(1),
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -68,7 +73,7 @@ class AddFeedbackTestCase(APITestCase):
             data={
                 'rating': 4.0,
                 'text': 'superb',
-                'date': utils.get_date(0),
+                'date': utils.get_date(1),
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.master_object = Master.objects.get(first_name='VASYA')

@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
+from src.apps.core import utils
 from src.apps.masters.models import Master, Schedule, TimeSlot, Time
 from src.apps.orders.models import OrderStatus, Order, CloudPaymentsTransaction, \
     OrderItem, PaymentType
@@ -34,6 +35,7 @@ class CompleteOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00))
         order_1.time_started = timezone.now()
         order_1.status = OrderStatus.STARTED
@@ -63,6 +65,7 @@ class CompleteOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00),
                                 payment_type=PaymentType.CASH)
         order_1.time_started = timezone.now()
@@ -92,8 +95,10 @@ class CompleteOrderTestCase(APITestCase):
         for service in feet.services.all():
             sanya.services.add(service)
         sanya.save()
-        # VASYA works on 0,+1, does manicure, got three slots
-        schedule = Schedule.objects.create(master=sanya, date=timezone.now())
+        # VASYA works on +1,+2 does manicure, got three slots
+        date = utils.get_date(1)
+        schedule = Schedule.objects.create(master=sanya,
+                                           date=date)
         schedule.save()
 
         TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -106,13 +111,13 @@ class CompleteOrderTestCase(APITestCase):
         vasya = Master.objects.get(first_name='VASYA')
         # manually creating an order with two masters and two services
         order_1, _ = make_order(client=self.client_object,
-                                order_date=timezone.now(),
+                                order_date=date,
                                 master=vasya,
                                 service=vasya.services.all()[0],
                                 order_time=datetime.time(hour=11,
                                                          minute=00))
 
-        schedule = sanya.get_schedule(timezone.now())
+        schedule = sanya.get_schedule(date)
         slot = schedule.get_slot(datetime.time(hour=11, minute=00))
 
         order_item = OrderItem.objects.create(service=sanya.services.all()[0],

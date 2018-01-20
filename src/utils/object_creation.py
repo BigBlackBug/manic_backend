@@ -145,7 +145,8 @@ def make_everything():
     petya.save()
 
     # VASYA works on 0,+1, does manicure, got three slots
-    schedule = Schedule.objects.create(master=vasya, date=timezone.now())
+    schedule = Schedule.objects.create(master=vasya, date=timezone.now()
+                                                          + delta(days=1))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -158,7 +159,7 @@ def make_everything():
                             taken=False, schedule=schedule)
 
     schedule = Schedule.objects.create(master=vasya,
-                                       date=timezone.now() + delta(days=1))
+                                       date=timezone.now() + delta(days=2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
@@ -170,7 +171,7 @@ def make_everything():
 
     # PETYA works on +2th, +3th does pedicure, got all slots on +2, none on +3
     schedule = Schedule.objects.create(master=petya,
-                                       date=timezone.now() + delta(days=2))
+                                       date=timezone.now() + delta(days=3))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -183,7 +184,7 @@ def make_everything():
                             taken=True, schedule=schedule)
 
     schedule = Schedule.objects.create(master=petya,
-                                       date=timezone.now() + delta(days=3))
+                                       date=timezone.now() + delta(days=4))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=16, minute=30),

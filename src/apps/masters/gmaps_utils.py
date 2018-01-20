@@ -53,7 +53,7 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
     if not settings.USE_GMAPS_API:
         logger.info(f'GMAPS_API is disabled. can_reach=True')
         return True
-
+    logger.info(f'checking if a master can reach client at')
     dt = datetime.combine(schedule.date, time) - \
          timedelta(minutes=TimeSlot.DURATION)
     prev_time = dt.time()

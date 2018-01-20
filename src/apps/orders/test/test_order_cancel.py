@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta as delta
 
 from django.utils import timezone
 from freezegun import freeze_time
@@ -186,7 +187,7 @@ class ClientCancelOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
-                                order_date=utils.get_date(1),
+                                order_date=utils.get_date(2),
                                 order_time=datetime.time(hour=12, minute=30),
                                 payment_type=PaymentType.CASH)
 
@@ -212,14 +213,15 @@ class ClientCancelOrderTestCase(APITestCase):
         service = master.services.all()[0]
         # manually creating an order
 
+        target_date = timezone.now() + delta(days=1)
         order_1, _ = make_order(client=self.client_object,
                                 master=master,
                                 service=service,
-                                order_date=timezone.now(),
+                                order_date=target_date,
                                 order_time=datetime.time(hour=11,
                                                          minute=00))
 
-        frozen = freeze_time(timezone.now().replace(hour=9, minute=0))
+        frozen = freeze_time(target_date.replace(hour=9, minute=0))
         frozen.start()
         resp = self.client.delete(
             reverse(OrderCancelView.view_name, args=[order_1.id]))
@@ -235,6 +237,7 @@ class ClientCancelOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00))
 
         token, _ = Token.objects.get_or_create(client=make_client())

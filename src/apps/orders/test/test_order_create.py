@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.categories.models import ServiceCategory
+from src.apps.core import utils
 from src.apps.masters.models import Master, TimeSlot, Time, Schedule
 from src.apps.orders.models import Order
 from src.apps.orders.views import OrderListCreateView
@@ -27,8 +28,9 @@ class OrderCreateTestCase(TestCase):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.first()
         # one service 2+1 slots
+        target_date = utils.get_date(1)
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
-            'date': timezone.now().strftime('%Y-%m-%d'),
+            'date': target_date,
             'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
@@ -39,7 +41,7 @@ class OrderCreateTestCase(TestCase):
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+        schedule = master.schedule.get(date=target_date)
 
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(
@@ -51,7 +53,7 @@ class OrderCreateTestCase(TestCase):
         self.assertTrue(len(orders), 1)
         order = orders[0]
         self.assertEqual(order.client, self.client_object)
-        self.assertEqual(order.date, timezone.now().date())
+        self.assertEqual(order.date.strftime('%Y-%m-%d'), target_date)
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 1)
         order_item = order.order_items.all()[0]
@@ -69,8 +71,9 @@ class OrderCreateTestCase(TestCase):
         master = Master.objects.get(first_name='VASYA')
         service = master.services.first()
         # one service 2+1 slots
+        target_date = utils.get_date(1)
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
-            'date': timezone.now().strftime('%Y-%m-%d'),
+            'date': target_date,
             'payment_type': 'CASH',
             'time': '11:00',
             'order_items': [{
@@ -81,7 +84,7 @@ class OrderCreateTestCase(TestCase):
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+        schedule = master.schedule.get(date=target_date)
 
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(
@@ -93,7 +96,7 @@ class OrderCreateTestCase(TestCase):
         self.assertTrue(len(orders), 1)
         order = orders[0]
         self.assertEqual(order.client, self.client_object)
-        self.assertEqual(order.date, timezone.now().date())
+        self.assertEqual(order.date.strftime('%Y-%m-%d'), target_date)
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 1)
         order_item = order.order_items.all()[0]
@@ -111,15 +114,16 @@ class OrderCreateTestCase(TestCase):
 
     def test_create_order__one_master_many_services(self):
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.get_schedule(timezone.now())
+        schedule = master.get_schedule(utils.get_date(1))
         TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                                 taken=False, schedule=schedule)
         TimeSlot.objects.create(time=Time.objects.create(hour=13, minute=00),
                                 taken=False, schedule=schedule)
         services = master.services.all()
         # two services, 5 slots, no+1
+        target_date = utils.get_date(1)
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
-            'date': timezone.now().strftime('%Y-%m-%d'),
+            'date': target_date,
             'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
@@ -130,7 +134,7 @@ class OrderCreateTestCase(TestCase):
         }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+        schedule = master.schedule.get(date=target_date)
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30',
                                                             '12:00', '12:30',
@@ -142,7 +146,7 @@ class OrderCreateTestCase(TestCase):
         self.assertTrue(len(orders), 1)
         order = orders[0]
         self.assertEqual(order.client, self.client_object)
-        self.assertEqual(order.date, timezone.now().date())
+        self.assertEqual(order.date.strftime('%Y-%m-%d'), target_date)
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 2)
 
@@ -155,7 +159,7 @@ class OrderCreateTestCase(TestCase):
 
     def test_create_order__one_master_many_services_does_not_fit(self):
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.get_schedule(timezone.now())
+        schedule = master.get_schedule(utils.get_date(1))
         TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                                 taken=True, schedule=schedule)
         TimeSlot.objects.create(time=Time.objects.create(hour=13, minute=00),
@@ -188,7 +192,8 @@ class OrderCreateTestCase(TestCase):
             sanya.services.add(service)
         sanya.save()
 
-        schedule = Schedule.objects.create(master=sanya, date=timezone.now())
+        target_date = utils.get_date(1)
+        schedule = Schedule.objects.create(master=sanya, date=target_date)
         schedule.save()
 
         TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -200,7 +205,7 @@ class OrderCreateTestCase(TestCase):
 
         # two services, 2+1 for vasya, 2 for sanya
         resp = self.client.post(reverse(OrderListCreateView.view_name), data={
-            'date': timezone.now().strftime('%Y-%m-%d'),
+            'date': target_date,
             'payment_type': 'CARD',
             'time': '11:00',
             'order_items': [{
@@ -219,7 +224,7 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         vasya = Master.objects.get(first_name='VASYA')
-        schedule = vasya.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+        schedule = vasya.schedule.get(date=target_date)
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30',
                                                             '12:00'],
@@ -227,7 +232,7 @@ class OrderCreateTestCase(TestCase):
         self.assertEqual(len(slots), 3)
 
         sanya = Master.objects.get(first_name='SANYA')
-        schedule = sanya.schedule.get(date=timezone.now().strftime('%Y-%m-%d'))
+        schedule = sanya.schedule.get(date=target_date)
         # assert timeslots are correctly set
         slots = schedule.time_slots.filter(time__value__in=['11:00', '11:30'],
                                            taken=True)
@@ -239,7 +244,7 @@ class OrderCreateTestCase(TestCase):
 
         order = orders[0]
         self.assertEqual(order.client, self.client_object)
-        self.assertEqual(order.date, timezone.now().date())
+        self.assertEqual(order.date.strftime('%Y-%m-%d'), target_date)
         self.assertEqual(order.time, datetime.time(hour=11, minute=0))
         self.assertEqual(len(order.order_items.all()), 2)
         order_item = order.order_items.all()[0]

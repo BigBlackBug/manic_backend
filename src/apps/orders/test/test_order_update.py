@@ -7,6 +7,7 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
+from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.apps.orders.models import OrderStatus, Order, PaymentType
 from src.apps.orders.views import OrderUpdateCommentView
@@ -28,6 +29,7 @@ class UpdateOrderCommentTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00),
                                 payment_type=PaymentType.CASH)
         order_1.time_started = timezone.now()
@@ -51,6 +53,7 @@ class UpdateOrderCommentTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00),
                                 payment_type=PaymentType.CASH,
                                 comment='LOL')
@@ -74,6 +77,7 @@ class UpdateOrderCommentTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00),
                                 comment='old')
         order_1.time_started = timezone.now()

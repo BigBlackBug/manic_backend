@@ -1,3 +1,5 @@
+from datetime import timedelta as delta
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -5,6 +7,7 @@ from rest_framework.test import APITestCase, APIClient
 
 from src.apps.authentication.models import PhoneAuthUser, Token
 from src.apps.categories.views import UpsaleRecommendationsView
+from src.apps.core import utils
 from src.apps.masters.models import Master, TimeSlot, Time
 from src.utils.object_creation import make_everything, make_client
 
@@ -20,7 +23,7 @@ class RecommendationTestCase(APITestCase):
 
     def test_recommendation(self):
         master = Master.objects.get(first_name='VASYA')
-        schedule = master.get_schedule(timezone.now())
+        schedule = master.get_schedule(timezone.now() + delta(days=1))
         TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
                                 taken=False, schedule=schedule)
         TimeSlot.objects.create(time=Time.objects.create(hour=13, minute=00),
@@ -28,15 +31,16 @@ class RecommendationTestCase(APITestCase):
         services = list(master.services.all())
         order_service = services[0]
         # assume the order is almost created for 11:00 and 11:30
-        resp = self.client.post(reverse(UpsaleRecommendationsView.view_name), data={
-            'date': timezone.now().strftime('%Y-%m-%d'),
-            'time': '11:00',
-            'order_items': [{
-                'locked': False,
-                'master_id': master.id,
-                'service_ids': [order_service.id]
-            }]
-        }, format='json')
+        resp = self.client.post(reverse(UpsaleRecommendationsView.view_name),
+                                data={
+                                    'date': utils.get_date(1),
+                                    'time': '11:00',
+                                    'order_items': [{
+                                        'locked': False,
+                                        'master_id': master.id,
+                                        'service_ids': [order_service.id]
+                                    }]
+                                }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data, [{
             'master_id': master.id,

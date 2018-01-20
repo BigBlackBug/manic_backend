@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
 from src.apps.authentication.models import PhoneAuthUser, Token
+from src.apps.core import utils
 from src.apps.masters.models import Master
 from src.utils.object_creation import make_everything, make_client, make_order
 from src.apps.orders.models import OrderStatus, Order
@@ -28,6 +29,7 @@ class StartOrderTestCase(APITestCase):
         # manually creating an order
         order_1, _ = make_order(client=self.client_object, master=master,
                                 service=service,
+                                order_date=utils.get_date(1),
                                 order_time=datetime.time(hour=11, minute=00))
         resp = self.client.patch(
             reverse(StartOrderView.view_name, args=[order_1.id]))

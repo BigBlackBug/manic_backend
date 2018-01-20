@@ -1,5 +1,7 @@
 import datetime
+from datetime import timedelta as delta
 
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
@@ -24,6 +26,7 @@ class MasterTestCase(APITestCase):
         order_client = make_client()
         # manually creating an order
         make_order(client=order_client, master=master, service=service,
+                   order_date = timezone.now()+delta(days=1),
                    order_time=datetime.time(hour=10, minute=30))
 
         self.assertEqual(master.times_served(order_client), 1)
@@ -35,6 +38,7 @@ class MasterTestCase(APITestCase):
         order_client = make_client()
         # manually creating an order
         make_order(client=order_client, master=master, service=service,
+                   order_date=timezone.now() + delta(days=1),
                    order_time=datetime.time(hour=10, minute=30))
 
         # different client
