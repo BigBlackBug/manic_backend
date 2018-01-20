@@ -133,7 +133,8 @@ class UserProfile(models.Model):
         default=Gender.FEMALE,
     )
 
-    device = models.OneToOneField(FCMDevice, null=True, on_delete=models.SET_NULL,
+    device = models.OneToOneField(FCMDevice, blank=True,
+                                  null=True, on_delete=models.SET_NULL,
                                   related_name="%(class)s",
                                   related_query_name="%(class)s", )
 
