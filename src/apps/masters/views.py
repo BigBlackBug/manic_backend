@@ -155,6 +155,10 @@ class MasterSearchView(generics.ListAPIView):
 
         `service` - **required** a service id
 
+        `coordinates` **required** - comma separated list of
+        latitude and longitude values. stands for 'current'
+        coordinates of the caller
+
         `date` - format: 2017-10-25
 
         `time` - format 11:30
@@ -224,6 +228,10 @@ class MasterBestMatchView(generics.ListAPIView):
         `date` **required** format: 2017-10-25
 
         `time` **required** format 11:30
+
+        `coordinates` **required** - comma separated list of
+        latitude and longitude values. stands for 'current'
+        coordinates of the caller
 
         Response:
         200 OK - Json with the **Master** model.
