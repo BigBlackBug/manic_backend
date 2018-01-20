@@ -38,8 +38,8 @@ def _make_everything():
         petya.services.add(service)
     petya.save()
 
-    # VASYA works on -2, 0,+1, does manicure, got three slots
-    schedule = Schedule.objects.create(master=vasya, date=utils.get_date(-2))
+    # VASYA works on +1,+2,+3 does manicure, got three slots
+    schedule = Schedule.objects.create(master=vasya, date=utils.get_date(1))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
@@ -47,7 +47,7 @@ def _make_everything():
     TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
                             taken=False, schedule=schedule)
 
-    schedule = Schedule.objects.create(master=vasya, date=timezone.now())
+    schedule = Schedule.objects.create(master=vasya, date=utils.get_date(2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -60,7 +60,7 @@ def _make_everything():
                             taken=False, schedule=schedule)
 
     schedule = Schedule.objects.create(master=vasya,
-                                       date=timezone.now() + delta(days=1))
+                                       date=utils.get_date(3))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=30),
@@ -72,7 +72,7 @@ def _make_everything():
 
     # PETYA works on +2th, +3th does pedicure, got all slots on +2, none on +3
     schedule = Schedule.objects.create(master=petya,
-                                       date=timezone.now() + delta(days=2))
+                                       date=utils.get_date(2))
     schedule.save()
 
     TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -85,7 +85,7 @@ def _make_everything():
                             taken=False, schedule=schedule)
 
     schedule = Schedule.objects.create(master=petya,
-                                       date=timezone.now() + delta(days=3))
+                                       date=utils.get_date(3))
     schedule.save()
 
     client = make_client(first_name='client')
@@ -95,14 +95,16 @@ def _make_everything():
                                               key='client_token')
 
     order, _ = make_order(client=client, service=hands.services.all()[0],
+                          order_date=utils.get_date(2),
                           master=vasya, order_time='10:30')
     order, _ = make_order(client=client2, service=hands.services.all()[1],
-                          master=vasya, order_time='11:00')
+                          order_date=utils.get_date(2),
+                          master=vasya, order_time='11:30')
 
     # still got 2 slots on the first day
     order, _ = make_order(client=client3, service=hands.services.all()[0],
                           master=vasya, order_time='11:00',
-                          order_date=utils.get_date(-2),
+                          order_date=utils.get_date(1),
                           status=OrderStatus.DONE)
     order.start()
     order.complete()
