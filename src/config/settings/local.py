@@ -8,14 +8,6 @@ MAX_DISTANCE_KM = 10 ** 6
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
-def bool_(string):
-    return bool(strtobool(string))
-
-
-USE_GMAPS_API = get_env_variable('USE_GMAPS_API', default=False,
-                                 raise_exception=False,
-                                 type=bool_)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

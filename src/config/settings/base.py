@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from distutils.util import strtobool
 
 import raven
 from django.core.exceptions import ImproperlyConfigured
@@ -29,6 +30,10 @@ def get_env_variable(var_name, raise_exception=True, default=None, type=str):
             return default
     except TypeError:
         raise ImproperlyConfigured('Unexpected Value Type')
+
+
+def bool_(string):
+    return bool(strtobool(string))
 
 
 BASE_DIR = Path(__file__).ancestor(3)
@@ -62,7 +67,9 @@ CLOUDPAYMENTS_API_SECRET = '5e9fb61716880f83b91a6ed928718baf'
 # Application settings
 ORDER_CANCELLATION_WINDOW_HOURS = 3
 MAX_DISTANCE_KM = 20.0
-USE_GMAPS_API = False
+USE_GMAPS_API = get_env_variable('USE_GMAPS_API', default=False,
+                                 raise_exception=False,
+                                 type=bool_)
 ENABLE_SMS_CONFIRMATION = False
 SMS_RU_WARNING_BALANCE_RUB = 500
 MASTER_SHARE_PERCENTAGE = 0.5

@@ -30,7 +30,7 @@ services:
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
         # temporarily disabling 'time of commute' calculations
-        - USE_GMAPS_API=False
+        - USE_GMAPS_API=${USE_GMAPS_API-False}
         # logging
         - LOG_FOLDER=/code/logs
         - LOG_LEVEL=${LOG_LEVEL-DEBUG}
