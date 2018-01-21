@@ -92,9 +92,14 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
 
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
     logger.info(f'Checking if service {service.name}, '
-                f'[{service.max_duration}] slots can fit into {time_slots}')
+                f'duration={service.max_duration} can fit into {time_slots}')
 
-    if time_from is None:
+    if time_from:
+        # invalid input parameters, okay
+        if not time_slots[0].value <= time_from <= time_slots[-1].value:
+            return False
+    else:
+        # otherwise make it default
         time_from = time_slots[0].value
 
     if time_to is None:

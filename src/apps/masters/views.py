@@ -193,6 +193,7 @@ class MasterSearchView(generics.ListAPIView):
         """
         params = FilteringParams(request.query_params, request=request)
         if params.date and params.time:
+            # here default date_range is used
             masters, slots = master_utils.search(
                 params, FilteringFunctions.datetime)
         else:
