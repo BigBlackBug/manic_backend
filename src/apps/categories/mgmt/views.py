@@ -53,6 +53,7 @@ class MgmtListCreateServiceCategoryView(mixins.CreateModelMixin,
 
 class MgmtUpdateDeleteServiceCategoryView(mixins.UpdateModelMixin,
                                           mixins.DestroyModelMixin,
+                                          mixins.RetrieveModelMixin,
                                           generics.GenericAPIView):
     view_name = 'mgmt-update-service-category'
     serializer_class = CreateUpdateServiceCategorySerializer
@@ -64,6 +65,32 @@ class MgmtUpdateDeleteServiceCategoryView(mixins.UpdateModelMixin,
             return [parsers.JSONParser()]
         elif self.request.method == 'PATCH':
             return [parsers.MultiPartParser()]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns category details.
+
+        Response:
+        200 OK
+        ```
+        {
+          'id': 800,
+          'name':'Hand Job',
+          'image':'url-to-image',
+          'services':[{
+            'id':100,
+            'name':'Slow and steady'
+            'description':'Yeah!"
+            'cost':100,
+              'min_duration':30
+              'max_duration':60
+          }]
+        }
+
+        ```
+
+        """
+        return self.retrieve(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
         """
