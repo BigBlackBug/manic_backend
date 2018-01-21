@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+
 from .settings import FCM_DJANGO_SETTINGS as SETTINGS
+
 
 @python_2_unicode_compatible
 class Device(models.Model):
@@ -26,10 +28,11 @@ class Device(models.Model):
         abstract = True
 
     def __str__(self):
-        return (
-            self.name or str(self.device_id or "") or
-            "%s for %s" % (self.__class__.__name__, self.user or "unknown user")
-        )
+        return self.name or \
+               str(self.device_id or "") or \
+               f'{self.__class__.__name__} for ' \
+               f'Master {self.master and self.master.first_name}, ' \
+               f'Client {self.client and self.client.first_name}'
 
 
 class FCMDeviceManager(models.Manager):
