@@ -89,20 +89,26 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
     if len(time_slots) == 0:
         logger.info(f'time_slots are empty, returning False')
         return False
+
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
+    logger.info(f'Checking if service {service.name}, '
+                f'[{service.max_duration}] slots can fit into {time_slots}')
 
     if time_from is None:
         time_from = time_slots[0].value
+
     if time_to is None:
         # because we're using the exclusive comparison '<'
         time_to = add_time(time_slots[-1].value, minutes=TimeSlot.DURATION)
+        logger.info(f'time_to is None, setting to the '
+                    f'last work day slot f{time_to}')
 
     if time_to > time_from:
         logger.info(f'Filtering slots {[slot.time for slot in time_slots]}'
                     f'that lie between {time_from} and {time_to}')
         good_slots = list(
             filter(lambda slot: time_from <= slot.value < time_to, time_slots))
-        logger.info(f'{len(good_slots)} slots are OK')
+        logger.info(f'{len(good_slots)} slots are OK - {good_slots}')
     else:
         raise ValueError('time_to argument must be '
                          'greater or equal than time_from')

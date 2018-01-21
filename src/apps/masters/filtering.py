@@ -226,7 +226,7 @@ class FilteringFunctions(Enum):
         result = set()
         good_slots = defaultdict(list)
         for master in masters:
-            logger.info('Checking master {master.first_name}')
+            logger.info(f'Checking master {master.first_name}')
 
             service = master.services.get(pk=service_id)
             schedule = master.get_schedule(date)
