@@ -96,7 +96,7 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
 
     if time_from:
         # invalid input parameters, okay
-        if not time_slots[0].value <= time_from <= time_slots[-1].value:
+        if time_from > time_slots[-1].value:
             return False
     else:
         # otherwise make it default
