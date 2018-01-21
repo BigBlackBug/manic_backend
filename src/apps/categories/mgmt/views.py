@@ -66,6 +66,16 @@ class MgmtUpdateDeleteServiceCategoryView(mixins.UpdateModelMixin,
         elif self.request.method == 'PATCH':
             return [parsers.MultiPartParser()]
 
+    def get_serializer_class(self):
+        if not self.request:
+            # TODO this is a fucking bug of the schema generation module
+            return CreateUpdateServiceCategorySerializer
+
+        if self.request.method == 'GET':
+            return ServiceCategorySerializer
+        else:
+            return super().get_serializer_class()
+
     def get(self, request, *args, **kwargs):
         """
         Returns category details.
