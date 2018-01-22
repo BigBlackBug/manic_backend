@@ -51,8 +51,8 @@ class MasterSearchViewTestCase(TestCase):
         # two days with slots
         day_one_slots = others[0]['available_slots']
         self.assertEqual(len(day_one_slots), 2)
-        # TODO MORE TESTS
 
+    # TODO MORE TESTS
     @mock.patch.object(gmaps_utils, '_calculate_eta')
     def test_master_search_two_services(self, _calculate_eta):
         master = Master.objects.get(first_name='VASYA')
