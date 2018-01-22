@@ -141,7 +141,8 @@ class OrderCreateSerializer(serializers.Serializer):
                                  next_slot_time,
                                  order_item=order_item)
         if master.device:
-            logger.info(f'Order created. Sending NEW_ORDER notification '
+            logger.info(f'Order {order.id} created. '
+                        f'Sending NEW_ORDER notification '
                         f'to master {master.first_name}')
             master.device.send_message(
                 notifications.NEW_ORDER_TITLE,
