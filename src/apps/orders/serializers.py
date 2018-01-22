@@ -84,70 +84,74 @@ class OrderCreateSerializer(serializers.Serializer):
                     f'date={order.date}, time={order.time}')
 
         for item in order_items:
-            master_id = item['master_id']
-            logger.info(f'Creating order_item for order={order.id}, '
-                        f'master_id={master_id}')
-
-            master = Master.objects.prefetch_related('schedule').get(
-                pk=master_id)
-            services = Service.objects.filter(pk__in=item['service_ids'])
-            if not services:
-                raise ValidationError(
-                    f'services with provided ids:{item["service_ids"]} '
-                    f'are not found')
-
-            schedule = master.get_schedule(validated_data['date'])
-            order_item = None
-            start_time = None
-
-            for service in services:
-                start_time = start_time or validated_data['time']
-                end_time = add_time(start_time, minutes=service.max_duration)
-
-                # master's schedule could have changed after the search
-                if not time_slot_utils.service_fits_into_slots(
-                        service, schedule.time_slots.all(),
-                        start_time, end_time):
-                    raise ApplicationError(
-                        'Unable to create order. '
-                        'Master\'s schedule has changed ',
-                        error_type=ApplicationError.ErrorTypes.
-                            ORDER_CREATION_ERROR)
-
-                order_item = OrderItem.objects.create(order=order,
-                                                      master=master,
-                                                      service=service,
-                                                      locked=item['locked'])
-
-                master.create_order_payment(order, order_item)
-                logger.info(f'Filling time_slots for '
-                            f'master={master.first_name}, '
-                            f'service={service.name}, '
-                            f'duration={service.max_duration}, '
-                            f'schedule_date={schedule.date}')
-
-                start_time = schedule.assign_time(
-                    start_time, end_time, order_item)
-
-            # add +1 if it's not end of the day
-            if start_time:
-                end_time = add_time(start_time, minutes=TimeSlot.DURATION)
-                schedule.assign_time(start_time,
-                                     end_time,
-                                     order_item=order_item)
-            if master.device:
-                logger.info(f'Order created. Sending NEW_ORDER notification '
-                            f'to master {master.first_name}')
-                master.device.send_message(
-                    notifications.NEW_ORDER_TITLE,
-                    notifications.NEW_ORDER_CONTENT(
-                        order_time=order.time.strftime('%H:%M'),
-                        order_date=order.date.strftime('%Y-%m-%d')),
-                    data={
-                        'event': notifications.NEW_ORDER_EVENT,
-                        'order_id': order.id
-                    })
+            self._create_order_item(item, order)
         return order
+
+    def _create_order_item(self, item, order):
+        master_id = item['master_id']
+        logger.info(f'Creating order_item for order={order.id}, '
+                    f'master_id={master_id}')
+
+        master = Master.objects.prefetch_related('schedule').get(
+            pk=master_id)
+
+        services = Service.objects.filter(pk__in=item['service_ids'])
+        if not services:
+            raise ValidationError(
+                f'Services with provided ids:{item["service_ids"]} '
+                f'are not found')
+
+        schedule = master.get_schedule(order.date)
+        order_item = None
+        start_time = None
+
+        for service in services:
+            start_time = start_time or order.time
+            next_slot_time = add_time(start_time, minutes=service.max_duration)
+
+            # master's schedule could have changed after the search
+            if not time_slot_utils.service_fits_into_slots(
+                    service, schedule.time_slots.all(),
+                    start_time, next_slot_time):
+                raise ApplicationError(
+                    'Unable to create order. '
+                    'Master\'s schedule has changed ',
+                    error_type=ApplicationError.ErrorTypes.
+                        ORDER_CREATION_ERROR)
+
+            order_item = OrderItem.objects.create(order=order,
+                                                  master=master,
+                                                  service=service,
+                                                  locked=item['locked'])
+
+            master.create_order_payment(order, order_item)
+            logger.info(f'Filling time_slots for '
+                        f'master={master.first_name}, '
+                        f'service={service.name}, '
+                        f'duration={service.max_duration}, '
+                        f'schedule_date={schedule.date}')
+
+            start_time = schedule.assign_time(
+                start_time, next_slot_time, order_item)
+
+        # add +1 if it's not end of the day
+        if start_time:
+            next_slot_time = add_time(start_time, minutes=TimeSlot.DURATION)
+            schedule.assign_time(start_time,
+                                 next_slot_time,
+                                 order_item=order_item)
+        if master.device:
+            logger.info(f'Order created. Sending NEW_ORDER notification '
+                        f'to master {master.first_name}')
+            master.device.send_message(
+                notifications.NEW_ORDER_TITLE,
+                notifications.NEW_ORDER_CONTENT(
+                    order_time=order.time.strftime('%H:%M'),
+                    order_date=order.date.strftime('%Y-%m-%d')),
+                data={
+                    'event': notifications.NEW_ORDER_EVENT,
+                    'order_id': order.id
+                })
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
