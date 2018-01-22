@@ -213,13 +213,13 @@ class FilteringFunctions(Enum):
         :param params:
         :return:
         """
-        service_id = params.service
+        service_ids = params.services
         date = params.date
         time = params.time
         target_client = params.target_client
 
         logger.info(f'Using a datetime filter on masters {masters} '
-                    f'with params: service={service_id}, date={date}, '
+                    f'with params: services={service_ids}, date={date}, '
                     f'time={time}, client_id={target_client.id}, '
                     f'client_name={target_client.first_name}')
 
@@ -228,13 +228,17 @@ class FilteringFunctions(Enum):
         for master in masters:
             logger.info(f'Checking master {master.first_name}')
 
-            service = master.services.get(pk=service_id)
+            duration = sum([service.max_duration for service in
+                            master.services.filter(pk__in=service_ids)])
             schedule = master.get_schedule(date)
+            if not schedule:
+                continue
+
             can_service = time_slot_utils \
-                .service_fits_into_slots(service, schedule.time_slots.all(),
-                                         time_from=time)
-            logger.info(f'Master {master.first_name} can do service'
-                        f'{service.name} on {date} = {can_service}')
+                .duration_fits_into_slots(duration, schedule.time_slots.all(),
+                                          time_from=time)
+            logger.info(f'Master {master.first_name} can do all services'
+                        f'{service_ids} on {date} = {can_service}')
             # checking the closest order that goes before `time`
             if can_service and gmaps_utils.can_reach(
                     schedule, target_client.home_address.location, time):
@@ -258,11 +262,11 @@ class FilteringFunctions(Enum):
         :return:
         """
         date_range = params.date_range
-        service_id = params.service
+        service_ids = params.services
         target_client = params.target_client
 
         logger.info(f'Using an anytime filter on masters {masters} '
-                    f'with params: service={service_id}, '
+                    f'with params: services={service_ids}, '
                     f'date_range={date_range}, '
                     f'client_id={target_client.id}, '
                     f'client_name={target_client.first_name}')
@@ -271,14 +275,16 @@ class FilteringFunctions(Enum):
         good_slots = defaultdict(list)
         for master in masters:
             logger.info('Checking master {master.first_name}')
-            service = master.services.get(pk=service_id)
+            duration = sum([service.max_duration for service in
+                            master.services.filter(pk__in=service_ids)])
             for schedule in master.schedule.filter(date__gte=date_range[0],
                                                    date__lte=date_range[1]):
                 logger.info(f'Checking schedule on {schedule.date}')
                 schedule_slots = []
                 # finding all slots that can be used to do the service
-                start_slots = time_slot_utils.find_available_starting_slots(
-                    service, schedule.time_slots.all())
+                start_slots = \
+                    time_slot_utils.find_available_starting_slots_for_duration(
+                        duration, schedule.time_slots.all())
 
                 logger.info(f'Possible starting slots = \"'
                             f'{[slot.time for slot in start_slots]}\"')

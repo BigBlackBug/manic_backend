@@ -130,7 +130,10 @@ class Master(UserProfile):
         :param date:
         :return: schedule
         """
-        return self.schedule.get(date=date)
+        try:
+            return self.schedule.get(date=date)
+        except Schedule.DoesNotExist as ex:
+            return None
 
     def times_served(self, client: Client):
         """

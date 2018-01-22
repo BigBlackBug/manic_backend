@@ -63,15 +63,16 @@ def search(params: FilteringParams, filter_function):
                                      services__in=services, ).distinct() \
         .prefetch_related('services').prefetch_related('schedule__time_slots') \
         .select_related('location')
+
     # search filter
     masters, slots = filter_function(queryset, params)
 
     logger.info(f'Found {len(masters)} masters. Running distance filter')
     # distance filter
     masters = list(filter(lambda m: m.distance(*coordinates) < max_distance,
-                          masters)), slots
+                          masters))
     logger.info(f'Total masters found: {len(masters)}')
-    return masters
+    return masters, slots
 
 
 def upsale_search(order_items, order_date):

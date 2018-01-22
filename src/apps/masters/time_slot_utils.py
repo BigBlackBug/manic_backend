@@ -16,19 +16,27 @@ logger = logging.getLogger(__name__)
 def find_available_starting_slots(service: Service,
                                   time_slots: Iterator[TimeSlot]):
     """
-    Returns a list of TimeSlots which can be the first slots for `service` to be
-    served
+    Returns a list of TimeSlots which can be the first slots
+    for `service` to be served
     :param service:
     :param time_slots:
     :return:
     """
+    logger.info(f'Looking for a slot to start doing {service.name}')
+
+    return find_available_starting_slots_for_duration(
+        service.max_duration, time_slots)
+
+
+def find_available_starting_slots_for_duration(max_duration,
+                                               time_slots: Iterator[TimeSlot]):
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
     block_size = 0
     start_index = 0
 
     # +1 stands for extra slot, used to get to the next client
-    slot_number = int(service.max_duration / TimeSlot.DURATION + 1)
-    logger.info(f'Looking for a slot to start doing {service.name} '
+    slot_number = int(max_duration / TimeSlot.DURATION + 1)
+    logger.info(f'Looking for a slot to start doing services that last '
                 f'({slot_number-1} + 1(extra) slots) in '
                 f'{[slot.time for slot in time_slots]}')
 
@@ -83,6 +91,28 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
     :param time_to: if None, equals to the time of the last time_slot
     :return:
     """
+    logger.info(f'Checking if service {service.name}, '
+                f'duration={service.max_duration} can fit into {time_slots}')
+    return duration_fits_into_slots(service.max_duration, time_slots,
+                                    time_from, time_to)
+
+
+def duration_fits_into_slots(max_duration, time_slots: List[TimeSlot],
+                             time_from: datetime.time = None,
+                             time_to: datetime.time = None):
+    """
+    Returns true if `service` can be done in the given list of slots
+    i.e. `time_slots` contains at least one sequence of available slots which is
+    `service.max_duration + TimeSlot.DURATION` minutes long within the given time frame
+
+    *NOTE* slot at `time_to` is excluded because of common sense
+
+    :param service:
+    :param time_slots:
+    :param time_from:
+    :param time_to: if None, equals to the time of the last time_slot
+    :return:
+    """
     # just in case somebody passes the queryset
     if isinstance(time_slots, QuerySet):
         time_slots = list(time_slots)
@@ -91,8 +121,8 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
         return False
 
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
-    logger.info(f'Checking if service {service.name}, '
-                f'duration={service.max_duration} can fit into {time_slots}')
+    logger.info(f'Checking if duration={max_duration} '
+                f'can fit into {time_slots}')
 
     if time_from:
         # invalid input parameters, okay
@@ -118,7 +148,8 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
         raise ValueError('time_to argument must be '
                          'greater or equal than time_from')
 
-    return len(find_available_starting_slots(service, good_slots)) != 0
+    return len(find_available_starting_slots_for_duration(max_duration,
+                                                          good_slots)) != 0
 
 
 TimeTuple = namedtuple('TimeTuple', ['hour', 'minute'])

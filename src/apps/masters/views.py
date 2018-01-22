@@ -147,13 +147,17 @@ class MasterSearchView(generics.ListAPIView):
 
     def get(self, request, **kwargs):
         """
-        Returns masters who can do the selected service
+        Returns masters who can do the selected service(s)
         at the specific date and time, or if not specified, at any time
         in the following two weeks
 
         Query params:
 
-        `service` - **required** a service id
+        Provide either one of `service` or `services`
+
+        `service` - **required** service id
+
+        `services` - **required** service ids
 
         `coordinates` **required** - comma separated list of
         latitude and longitude values. stands for 'current'
