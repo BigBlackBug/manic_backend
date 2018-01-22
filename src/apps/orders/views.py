@@ -147,7 +147,8 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
         """
 
-        active, history = order_utils.split_orders(self.get_queryset())
+        active, history = order_utils.split_orders(
+            self.get_queryset().order_by('-date'))
 
         return Response({
             'active': self.get_serializer(active, many=True).data,
