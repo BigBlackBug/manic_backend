@@ -50,3 +50,7 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - /var/lib/4hands2go/dev-db-data:/var/lib/postgresql/data/pgdata
+  mgmt:
+    image: beinlife/4hands2go-admin
+    ports:
+      - 3000:80
