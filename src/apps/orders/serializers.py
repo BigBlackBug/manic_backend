@@ -81,7 +81,7 @@ class OrderCreateSerializer(serializers.Serializer):
         client = self.context['request'].user.client
         order = Order.objects.create(client=client, **validated_data)
         logger.info(f'Creating order for client={client.first_name} at '
-                    f'date={order.date}, time={order.time}')
+                    f'date={order.date} and time={order.time}')
 
         for item in order_items:
             self._create_order_item(item, order)
