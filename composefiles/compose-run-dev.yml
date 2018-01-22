@@ -53,5 +53,5 @@ services:
 
   mgmt:
     image: beinlife/4hands2go-admin
-    ports:
-      - 3000:80
+#    ports:
+#      - 3000:80
