@@ -94,7 +94,7 @@ class MasterSearchViewTestCase(TestCase):
 
         # one day with 5 slots
         day_one_slots = others[0]['available_slots']
-        self.assertEqual(len(day_one_slots), 2)
+        self.assertEqual(len(day_one_slots), 1)
 
     @mock.patch.object(gmaps_utils, '_calculate_eta')
     def test_master_best_match(self, _calculate_eta):
