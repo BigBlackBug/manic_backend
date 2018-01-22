@@ -37,8 +37,8 @@ class CreateUpdateServiceSerializer(serializers.ModelSerializer):
 class CreateUpdateDisplayItemSerializer(serializers.ModelSerializer):
     categories = IdListField(required=True, write_only=True)
     special = serializers.DictField(required=False)
-    name = serializers.CharField(max_length=64, required=True)
-    image = serializers.ImageField(required=True)
+    name = serializers.CharField(max_length=64, required=False)
+    image = serializers.ImageField(required=False)
 
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])
