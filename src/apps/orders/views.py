@@ -91,15 +91,16 @@ class OrderListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         if self.request.user.is_master(self.request):
             order_items = OrderItem.objects.filter(
-                master=self.request.user.master) \
-                .select_related('order').all()
+                master=self.request.user.master).select_related(
+                'order').order_by('-order__date',
+                                  'order__time').all()
             orders = []
             for item in order_items:
                 orders.append(item.order)
-            return sorted(orders, key=lambda o: o.date, reverse=True)
+            return orders
         else:
             return Order.objects.filter(client=self.request.user.client) \
-                .order_by('-date').all()
+                .order_by('-date', 'time').all()
 
     def get(self, request, *args, **kwargs):
         """
