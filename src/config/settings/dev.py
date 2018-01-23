@@ -2,6 +2,8 @@ from .base import *
 
 DEBUG = True
 
+ENABLE_SMS_CONFIRMATION = True
+
 MAX_DISTANCE_KM = 10 ** 6
 
 # TODO temporary stub
