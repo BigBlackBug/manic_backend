@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from src.apps.categories.models import ServiceCategory, Service, DisplayItem
@@ -36,13 +38,16 @@ class CreateUpdateServiceSerializer(serializers.ModelSerializer):
 
 class CreateUpdateDisplayItemSerializer(serializers.ModelSerializer):
     categories = IdListField(required=True, write_only=True)
-    special = serializers.DictField(required=False)
+    special = serializers.CharField(required=False, write_only=True)
     name = serializers.CharField(max_length=64, required=False)
     image = serializers.ImageField(required=False)
 
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])
+        special = validated_data.pop('special', '{}')
+
         item = DisplayItem.objects.create(**validated_data)
+        item.special = json.loads(special)
 
         for category in categories:
             item.categories.add(ServiceCategory.objects.get(pk=category))
@@ -52,6 +57,10 @@ class CreateUpdateDisplayItemSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         new_categories = validated_data.pop('categories', [])
+        new_special = validated_data.pop('special', '{}')
+
+        if new_special:
+            instance.special = json.loads(new_special)
         if new_categories:
             instance.categories = [ServiceCategory.objects.get(pk=category) for
                                    category in new_categories]
