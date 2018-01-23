@@ -12,6 +12,8 @@ from src.apps.masters.models import Schedule, TimeSlot
 gmaps = googlemaps.Client(key=settings.GMAPS_API_KEY)
 logger = logging.getLogger(__name__)
 
+DURATION_SECONDS = TimeSlot.DURATION * 60
+
 
 # TODO exception handling
 def _calculate_eta(coords_from: tuple, coords_to: tuple,
@@ -32,14 +34,16 @@ def _calculate_eta(coords_from: tuple, coords_to: tuple,
                                              coords_to,
                                              mode="driving", language='en',
                                              departure_time=departure_time)
-        result = directions_result[0]['legs'][0]['duration_in_traffic']['value']
-        logger.info(f'GMaps returned {result}')
+        duration = directions_result[0]['legs'][0]['duration_in_traffic']
+        seconds = duration['value']
+        text = duration['text']
+        logger.info(f'GMaps returned {seconds}, {text}')
     except gmaps_exceptions.ApiError as error:
         raise ApplicationError(error)
     except Exception as ex:
         raise ApplicationError(ex)
     else:
-        return result
+        return seconds
 
 
 def can_reach(schedule: Schedule, location: Location, time: datetime.time):
@@ -74,10 +78,10 @@ def can_reach(schedule: Schedule, location: Location, time: datetime.time):
 
         # wow, that's a long call chain
         prev_address = prev_slot.order_item.order.client.home_address
-        eta = _calculate_eta(prev_address.location.as_tuple(),
-                             location.as_tuple(), dt)
-        # can get to the point in 30 minutes
-        result = eta < TimeSlot.DURATION
+        eta_seconds = _calculate_eta(prev_address.location.as_tuple(),
+                                     location.as_tuple(), dt)
+        # can get to the point in 30 minutes * 60
+        result = eta_seconds < DURATION_SECONDS
         logger.info(f'Gmaps produced a result. can_reach={result}')
         return result
     else:
