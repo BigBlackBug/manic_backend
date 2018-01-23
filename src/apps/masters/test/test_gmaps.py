@@ -82,7 +82,7 @@ class GmapsTestCase(APITestCase):
                                 taken=False, schedule=self.schedule)
         location = Location.objects.create(lat=10, lon=120)
 
-        _calculate_eta.return_value = 100
+        _calculate_eta.return_value = 10000
         self.assertFalse(gmaps_utils.can_reach(self.schedule, location,
                                                datetime.time(hour=11,
                                                              minute=00)))

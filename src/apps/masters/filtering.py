@@ -10,6 +10,7 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
+from src.apps.masters.time_slot_utils import add_time
 from . import time_slot_utils, gmaps_utils, utils
 from .models import Master
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class FilteringParams:
     def __init__(self, query_params: dict, client=None, request=None,
-                 coords_required=True):
+                 coords_required=True, ignore_taken_slots=False):
         logger.info(f'Parsing {query_params}')
 
         self._validate(query_params)
@@ -32,6 +33,7 @@ class FilteringParams:
         self.date = self._parse_single_date(query_params)
         self.time = self._parse_single_time(query_params)
         self.time_range = self._parse_time(query_params)
+        self.ignore_taken_slots = ignore_taken_slots
         if coords_required:
             self.coordinates = self._parse_coordinates(query_params)
         self.distance = self._parse_distance(query_params)
@@ -235,8 +237,11 @@ class FilteringFunctions(Enum):
                 continue
 
             can_service = time_slot_utils \
-                .duration_fits_into_slots(duration, schedule.time_slots.all(),
-                                          time_from=time)
+                .duration_fits_into_slots(
+                    duration, schedule.time_slots.all(),
+                    time_from=time,
+                    time_to=add_time(time, minutes=duration),
+                    ignore_taken_slots=params.ignore_taken_slots)
             logger.info(f'Master {master.first_name} can do all services'
                         f'{service_ids} on {date} = {can_service}')
             # checking the closest order that goes before `time`

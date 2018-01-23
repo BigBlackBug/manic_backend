@@ -1,12 +1,13 @@
+import datetime
 import logging
 from typing import Iterable
 
 from rest_framework.exceptions import PermissionDenied
 
-from src.apps.masters import master_utils
+from src.apps.masters import master_utils, time_slot_utils
 from src.apps.masters.filtering import FilteringParams, FilteringFunctions
 from src.apps.masters.models import Master
-from src.apps.orders.models import Order, OrderStatus, OrderItem
+from src.apps.orders.models import Order, OrderStatus
 
 logger = logging.getLogger(__name__)
 
@@ -29,14 +30,14 @@ def split_orders(orders: Iterable[Order]):
     return active, history
 
 
-def _find_replacement_master(order: Order, order_item: OrderItem,
+def _find_replacement_master(order: Order, time: datetime.time,
+                             order_service_id,
                              old_master: Master):
     """
     Tries to assign a replacement master to the `order_item` of the `order`
 
     :return: replacement `Master` or None
     """
-    order_service_id = order_item.service.id
     # since order is canceled
     # the master should not rely on that money
     client = order.client
@@ -46,13 +47,13 @@ def _find_replacement_master(order: Order, order_item: OrderItem,
 
     logger.info(f'Looking for a replacement for master {old_master.first_name} '
                 f'with params: service={order_service_id}, '
-                f'date={order.date}, time={order.time}, location={location}')
+                f'date={order.date}, time={time}, location={location}')
     params = FilteringParams({
         'service': order_service_id,
         'date': str(order.date),
-        'time': order.time.strftime('%H:%M'),
+        'time': time.strftime('%H:%M'),
         'coordinates': f'{location.lat},{location.lon}'
-    }, client=client)
+    }, client=client, ignore_taken_slots=True)
 
     masters, slots = master_utils.search(
         params, FilteringFunctions.datetime)
@@ -69,8 +70,8 @@ def _find_replacement_master(order: Order, order_item: OrderItem,
     # we can't pick the same master
     masters = list(filter(lambda m: m.id != old_master.id, masters))
     if len(masters) == 0:
-        logger.info(f'Unable to find replacement '
-                    f'for master {old_master.first_name}')
+        logger.info(f'After removing duplicates, no masters can be '
+                    f'a replacement for master {old_master.first_name}')
         # if the old master is the only one who fits
         # TODO add push notification to client and other masters
         return None
@@ -88,20 +89,23 @@ def find_replacement_masters(order, order_items, old_master):
     holder = []
     logger.info(f'Looking for a replacement master '
                 f'for {old_master.first_name}. order_id={order.id}')
-
+    time = order.time
     for order_item in order_items:
         logger.info(f'Checking order_item {order_item.id} '
                     f'with service {order_item.service.id}')
         if order_item.locked:
             raise PermissionDenied(detail='You are not allowed '
                                           'to cancel a locked order')
-        replacement = _find_replacement_master(order, order_item, old_master)
-
-        logger.info(f'Replacement for order_item={order_item.id} found!'
-                    f' New master {replacement.first_name}')
+        replacement = _find_replacement_master(order, time,
+                                               order_item.service.id,
+                                               old_master)
 
         if replacement:
+            logger.info(f'Replacement for order_item={order_item.id} found!'
+                        f' New master {replacement.first_name}')
             holder.append((order, order_item, replacement))
+            time = time_slot_utils.add_time(
+                time, minutes=order_item.service.max_duration)
         else:
             # at least one replacement not found, drop the order
             logger.info(f'Replacement for order_item={order_item.id} '

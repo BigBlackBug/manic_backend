@@ -1,4 +1,5 @@
 import datetime
+import unittest
 from datetime import timedelta as delta
 
 from django.utils import timezone
@@ -68,6 +69,7 @@ class MasterCancelOrderTestCase(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
 
+    @unittest.skip
     def test_cancel_order_many_services_one_master(self):
         services = self.master_object.services.all()
 
@@ -96,6 +98,7 @@ class MasterCancelOrderTestCase(APITestCase):
         petya = Master.objects.get(first_name='PETYA')
         self.assertNotEqual(petya.balance.future, 0)
 
+    @unittest.skip
     def test_cancel_order_many_services_one_master_cash(self):
         services = self.master_object.services.all()
 

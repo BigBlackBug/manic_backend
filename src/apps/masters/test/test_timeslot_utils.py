@@ -6,6 +6,7 @@ from src.apps.categories.models import Service, ServiceCategory
 from src.apps.core import utils
 from src.apps.masters import time_slot_utils
 from src.apps.masters.models import TimeSlot
+from src.apps.masters.time_slot_utils import add_time
 from src.utils.object_creation import _make_time
 
 
@@ -170,6 +171,40 @@ class ScheduleFitTestCase(TestCase):
         result = time_slot_utils.service_fits_into_slots(
             self.service, time_slots,
             datetime.time(hour=11, minute=30))
+        self.assertTrue(result)
+
+    def test_doesnt_fit_duration(self):
+        time_slots = [
+            TimeSlot(time=_make_time(10, 30), taken=True),
+            TimeSlot(time=_make_time(11, 00), taken=False),
+            TimeSlot(time=_make_time(11, 30), taken=False),
+            TimeSlot(time=_make_time(12, 00), taken=False),
+            TimeSlot(time=_make_time(12, 30), taken=False),
+        ]
+        # max - 60 - 2+1 slots
+        time_from = datetime.time(hour=10, minute=30)
+        duration = 5 * TimeSlot.DURATION
+        result = time_slot_utils.duration_fits_into_slots(
+            duration, time_slots,
+            time_from=time_from, time_to=add_time(
+                time_from, minutes=duration))
+        self.assertFalse(result)
+
+    def test_fits_duration(self):
+        time_slots = [
+            TimeSlot(time=_make_time(10, 30), taken=True),
+            TimeSlot(time=_make_time(11, 00), taken=False),
+            TimeSlot(time=_make_time(11, 30), taken=False),
+            TimeSlot(time=_make_time(12, 00), taken=False),
+            TimeSlot(time=_make_time(12, 30), taken=False),
+        ]
+        # max - 60 - 2+1 slots
+        time_from = datetime.time(hour=11, minute=30)
+        duration = 2 * TimeSlot.DURATION
+        result = time_slot_utils.duration_fits_into_slots(
+            duration, time_slots,
+            time_from=time_from, time_to=add_time(
+                time_from, minutes=duration))
         self.assertTrue(result)
 
 

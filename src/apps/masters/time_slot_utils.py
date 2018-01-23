@@ -28,8 +28,11 @@ def find_available_starting_slots(service: Service,
         service.max_duration, time_slots)
 
 
+# TODO one-off error, if looking for a replacement master
+# for non composite orders that have two order_items
 def find_available_starting_slots_for_duration(max_duration,
-                                               time_slots: Iterator[TimeSlot]):
+                                               time_slots: Iterator[TimeSlot],
+                                               ignore_taken_slots=False):
     time_slots = sorted(time_slots, key=lambda slot: slot.value)
     block_size = 0
     start_index = 0
@@ -43,15 +46,22 @@ def find_available_starting_slots_for_duration(max_duration,
     indices = []
     for i in range(len(time_slots)):
         slot = time_slots[i]
-        if slot.taken:
-            start_index = i + 1
-            block_size = 0
-        else:
+        if ignore_taken_slots:
             block_size += 1
             if slot_number == block_size:
                 indices.append(start_index)
                 start_index += 1
                 block_size -= 1
+        else:
+            if slot.taken:
+                start_index = i + 1
+                block_size = 0
+            else:
+                block_size += 1
+                if slot_number == block_size:
+                    indices.append(start_index)
+                    start_index += 1
+                    block_size -= 1
 
     # the last block may ignore +1 slot
     # because there can't be subsequent orders
@@ -99,7 +109,8 @@ def service_fits_into_slots(service: Service, time_slots: List[TimeSlot],
 
 def duration_fits_into_slots(max_duration, time_slots: List[TimeSlot],
                              time_from: datetime.time = None,
-                             time_to: datetime.time = None):
+                             time_to: datetime.time = None,
+                             ignore_taken_slots=False):
     """
     Returns true if `service` can be done in the given list of slots
     i.e. `time_slots` contains at least one sequence of available slots which is
@@ -148,8 +159,8 @@ def duration_fits_into_slots(max_duration, time_slots: List[TimeSlot],
         raise ValueError('time_to argument must be '
                          'greater or equal than time_from')
 
-    return len(find_available_starting_slots_for_duration(max_duration,
-                                                          good_slots)) != 0
+    return len(find_available_starting_slots_for_duration(
+        max_duration, good_slots, ignore_taken_slots)) != 0
 
 
 TimeTuple = namedtuple('TimeTuple', ['hour', 'minute'])

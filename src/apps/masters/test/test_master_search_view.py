@@ -59,7 +59,7 @@ class MasterSearchViewTestCase(TestCase):
         schedule = master.get_schedule(utils.get_date(1))
         schedule.delete()
         schedule = Schedule.objects.create(master=master, date=timezone.now()
-                                                              + delta(days=1))
+                                                               + delta(days=1))
         schedule.save()
 
         TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
@@ -99,6 +99,22 @@ class MasterSearchViewTestCase(TestCase):
     @mock.patch.object(gmaps_utils, '_calculate_eta')
     def test_master_best_match(self, _calculate_eta):
         master = Master.objects.get(first_name='VASYA')
+        schedule = master.get_schedule(utils.get_date(1))
+        schedule.delete()
+
+        schedule = Schedule.objects.create(master=master,
+                                           date=timezone.now() + delta(days=1))
+        schedule.save()
+
+        TimeSlot.objects.create(time=Time.objects.create(hour=10, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=00),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=11, minute=30),
+                                taken=False, schedule=schedule)
+        TimeSlot.objects.create(time=Time.objects.create(hour=12, minute=00),
+                                taken=False, schedule=schedule)
+
         service = master.services.all()[0]
 
         # assume all slots are reachable
@@ -106,7 +122,7 @@ class MasterSearchViewTestCase(TestCase):
 
         url = reverse(MasterBestMatchView.view_name)
         resp = self.client.get(f"{url}?service={service.id}"
-                               f"&date={utils.get_date(1)}&time=10:30"
+                               f"&date={utils.get_date(1)}&time=11:00"
                                f"&coordinates=10,20")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 

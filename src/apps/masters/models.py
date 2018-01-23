@@ -64,7 +64,11 @@ class Master(UserProfile):
         self.rating = (self.rating + new_rating) / self.feedback.count()
 
     def distance(self, lat, lon):
-        return self.location.distance(lat, lon)
+        if self.location:
+            return self.location.distance(lat, lon)
+        else:
+            # TODO REALLY??
+            return 1_000_000_000
 
     # TODO money is stored in ints WHAT?
     def complete_order_payment(self, order, order_item):
