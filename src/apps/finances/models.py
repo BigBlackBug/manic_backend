@@ -19,8 +19,8 @@ class TransactionEntry(models.Model):
         default=TransactionEntryType.IN,
     )
     # TODO what does DO_NOTHING do?
-    master = models.ForeignKey('masters.Master', on_delete=models.DO_NOTHING,
+    master = models.ForeignKey('masters.Master', null=True, on_delete=models.SET_NULL,
                                related_name='+')
     value = models.PositiveIntegerField()
-    order = models.ForeignKey('orders.Order', on_delete=models.DO_NOTHING,
+    order = models.ForeignKey('orders.Order', null=True, on_delete=models.SET_NULL,
                               related_name='+')

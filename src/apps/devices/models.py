@@ -28,11 +28,7 @@ class Device(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or \
-               str(self.device_id or "") or \
-               f'{self.__class__.__name__} for ' \
-               f'Master {self.master and self.master.first_name}, ' \
-               f'Client {self.client and self.client.first_name}'
+        return self.name or str(self.device_id or "")
 
 
 class FCMDeviceManager(models.Manager):

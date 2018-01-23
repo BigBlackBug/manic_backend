@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-ENABLE_SMS_CONFIRMATION = True
+ENABLE_SMS_CONFIRMATION = False
 
 MAX_DISTANCE_KM = 10 ** 6
 
