@@ -27,7 +27,7 @@ _SMS_TEMPLATE = 'Доброго времени суток! Ваш код акт�
 
 def generate_code(phone: str = '88005553535'):
     # why not?
-    random.seed(phone)
+    # random.seed(phone)
     return _id_generator(size=4, chars=string.digits)
 
 
