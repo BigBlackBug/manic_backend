@@ -94,9 +94,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 master=self.request.user.master).select_related(
                 'order').order_by('-order__date',
                                   'order__time').all()
-            orders = []
+            orders = set()
             for item in order_items:
-                orders.append(item.order)
+                orders.add(item.order)
             return orders
         else:
             return Order.objects.filter(client=self.request.user.client) \
