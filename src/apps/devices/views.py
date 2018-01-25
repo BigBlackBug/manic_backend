@@ -1,6 +1,7 @@
 import logging
 
-from rest_framework import permissions, generics, mixins
+from rest_framework import permissions, generics, mixins, status
+from rest_framework.response import Response
 
 from src.apps.devices.models import FCMDevice
 from src.apps.devices.serializers import FCMDeviceSerializer
@@ -61,4 +62,4 @@ class FCMRemoveDeviceView(mixins.DestroyModelMixin,
             logger.info(f'Creating a device for client, id={device.id}, '
                         f'type={device.type}')
             user.client.device.delete()
-        return device
+        return Response(status=status.HTTP_204_NO_CONTENT)
