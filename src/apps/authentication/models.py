@@ -44,11 +44,9 @@ class PhoneAuthUser(models.Model):
     # FK master, client
     def is_client(self, request):
         try:
-            self.client and request.auth == self.client.token
+            return self.client and request.auth == self.client.token
         except AttributeError as e:
             return False
-        else:
-            return True
 
     def delete_token(self, request):
         if self.is_client(request):
@@ -58,11 +56,9 @@ class PhoneAuthUser(models.Model):
 
     def is_master(self, request):
         try:
-            self.master and request.auth == self.master.token
+            return self.master and request.auth == self.master.token
         except AttributeError as e:
             return False
-        else:
-            return True
 
     @property
     def is_active(self):
@@ -116,7 +112,7 @@ class Token(models.Model):
         return binascii.hexlify(os.urandom(20)).decode()
 
     def __str__(self):
-        return self.key
+        return str(self.key)
 
 
 class UserProfile(models.Model):
