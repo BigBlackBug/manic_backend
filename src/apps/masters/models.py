@@ -55,13 +55,13 @@ class Master(UserProfile):
     # schedule - list of 'created schedules'
     # portfolio - list of 'portfolio images'
     # order_items - list of 'order items'
-    # feedback - list of 'feedback' items
+    # feedbacks - list of 'feedback' items
 
     def activated(self):
         return self.status == MasterStatus.VERIFIED
 
     def add_rating(self, new_rating):
-        self.rating = (self.rating + new_rating) / self.feedback.count()
+        self.rating = (self.rating + new_rating) / self.feedbacks.count()
 
     def distance(self, lat, lon):
         if self.location:
@@ -174,9 +174,12 @@ class Feedback(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     text = models.CharField(max_length=1024)
     date = models.DateField()
+    order = models.ForeignKey('orders.Order', null=True,
+                              related_name='feedback',
+                              on_delete=models.CASCADE)
     client = models.ForeignKey(Client, related_name='+', null=True,
                                on_delete=models.SET_NULL)
-    master = models.ForeignKey(Master, related_name='feedback',
+    master = models.ForeignKey(Master, related_name='feedbacks',
                                on_delete=models.CASCADE)
 
 
@@ -317,7 +320,8 @@ class Schedule(models.Model):
             ts.order_item = order_item
             ts.save()
 
-            cur_time = time_slot_utils.add_time(cur_time, minutes=TimeSlot.DURATION)
+            cur_time = time_slot_utils.add_time(cur_time,
+                                                minutes=TimeSlot.DURATION)
             shift += 1
 
         next_index = first_slot_index + shift

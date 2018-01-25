@@ -13,6 +13,7 @@ from src.apps.core.mixins import FilterEmptyFieldsMixin
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
 from src.apps.masters import time_slot_utils
+from src.apps.orders.models import Order
 from .models import Master, Schedule, TimeSlot, Time, MasterStatus, Feedback, \
     Balance
 
@@ -48,12 +49,16 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class CreateFeedbackSerializer(serializers.ModelSerializer):
     rating = serializers.FloatField(max_value=5, min_value=0)
     text = serializers.CharField(max_length=1024)
+    order_id = serializers.IntegerField(min_value=0, required=False)
 
     def create(self, validated_data):
         client = self.context['request'].user.client
         master = self.context['master']
+        order_id = validated_data.pop('order_id', None)
+        order = order_id and Order.objects.filter(pk=order_id).first()
         feedback = Feedback.objects.create(client=client,
                                            master=master,
+                                           order=order,
                                            **validated_data)
         master.add_rating(feedback.rating)
         logger.info(f'Adding {feedback.rating} star feedback '
@@ -63,7 +68,7 @@ class CreateFeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Feedback
-        fields = ('rating', 'text', 'date')
+        fields = ('rating', 'text', 'date', 'order_id')
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -115,9 +120,9 @@ class MasterSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_feedback(self, master: Master):
-        feedback = master.feedback.order_by('added').all()
+        feedbacks = master.feedbacks.order_by('added').all()
         serializer = FeedbackSerializer(many=True,
-                                        instance=feedback,
+                                        instance=feedbacks,
                                         context=self.context)
         return serializer.data
 

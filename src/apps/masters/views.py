@@ -640,7 +640,9 @@ class AddFeedbackView(generics.CreateAPIView):
         {
           'rating': 3.0,
           'text': 'good enough',
-          'date': '2017-10-10'
+          'date': '2017-10-10',
+          //OPTIONAL??
+          'order_id': 10
         }
         ```
         Response:

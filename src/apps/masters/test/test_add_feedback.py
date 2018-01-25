@@ -35,10 +35,11 @@ class AddFeedbackTestCase(APITestCase):
                 'rating': 4.0,
                 'text': 'superb',
                 'date': utils.get_date(1),
+                'order_id': self.order.id
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.master_object = Master.objects.get(first_name='VASYA')
-        feedback_items = list(self.master_object.feedback.all())
+        feedback_items = list(self.master_object.feedbacks.all())
         self.assertEqual(len(feedback_items), 1)
         self.assertEqual(self.master_object.rating, 4.0)
 
@@ -77,6 +78,6 @@ class AddFeedbackTestCase(APITestCase):
             }, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.master_object = Master.objects.get(first_name='VASYA')
-        feedback_items = list(self.master_object.feedback.all())
+        feedback_items = list(self.master_object.feedbacks.all())
         self.assertEqual(len(feedback_items), 2)
         self.assertEqual(self.master_object.rating, 4.5)
