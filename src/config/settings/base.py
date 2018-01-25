@@ -201,7 +201,7 @@ LANGUAGE_CODE = 'en-us'
 
 # TODO obviously we have to support multiple timezones
 # but not now :)
-TIME_ZONE = 'Asia/Novosibirsk'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
