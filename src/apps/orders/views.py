@@ -37,6 +37,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
           // could be CARD or CASH
           'payment_type': 'CARD',
           'time': '11:00',
+          'comment': 'Make it quick!',
           'order_items': [{
             'locked': false,
             'master_id': 10,

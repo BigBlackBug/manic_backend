@@ -75,6 +75,7 @@ class OrderCreateSerializer(serializers.Serializer):
     # if an order is special, contains data for the 'special' order handler
     special = serializers.DictField(required=False)
     payment_type = serializers.ChoiceField(choices=PaymentType.CHOICES)
+    comment = serializers.CharField(required=False, max_length=1024)
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -159,6 +160,8 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     comment = serializers.CharField(max_length=1024, write_only=True)
 
     def update(self, instance, validated_data):
+        # TODO REMOVE??
+        # there was a misunderstanding in what a comment is
         if 'comment' in validated_data:
             if instance.status != OrderStatus.DONE:
                 raise PermissionDenied(
