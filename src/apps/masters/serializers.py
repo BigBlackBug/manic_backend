@@ -103,15 +103,22 @@ class MasterSerializer(serializers.ModelSerializer):
     services = ServiceSerializer(many=True, read_only=True)
     schedule = serializers.SerializerMethodField(read_only=True)
     portfolio = serializers.SerializerMethodField(read_only=True)
-    feedback = FeedbackSerializer(many=True, read_only=True)
+    feedback = serializers.SerializerMethodField(read_only=True)
     balance = BalanceSerializer(read_only=True)
     phone = serializers.CharField(source='user.phone', read_only=True)
 
     def get_portfolio(self, master: Master):
-        portfolio = master.portfolio.order_by('-added').all()
+        portfolio = master.portfolio.order_by('added').all()
         serializer = PortfolioSerializer(many=True,
                                          instance=portfolio,
                                          context=self.context)
+        return serializer.data
+
+    def get_feedback(self, master: Master):
+        feedback = master.feedback.order_by('added').all()
+        serializer = FeedbackSerializer(many=True,
+                                        instance=feedback,
+                                        context=self.context)
         return serializer.data
 
     def get_schedule(self, master: Master):

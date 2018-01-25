@@ -87,6 +87,8 @@ class Master(UserProfile):
         self.balance.future -= master_share
         self.balance.save()
 
+    # TODO in case payments are made with cash
+    # on_hold is not changed, when it should be
     def cancel_order_payment(self, order, order_item):
         """
         Deducts the master's share from completing the service
@@ -169,6 +171,7 @@ class Balance(models.Model):
 
 class Feedback(models.Model):
     rating = models.FloatField(default=0.0)
+    added = models.DateTimeField(auto_now_add=True)
     text = models.CharField(max_length=1024)
     date = models.DateField()
     client = models.ForeignKey(Client, related_name='+', null=True,
