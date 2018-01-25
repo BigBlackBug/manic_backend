@@ -1,8 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from src.apps.texts.models import Text
 from src.apps.texts.serializers import TextSerializer
@@ -16,10 +14,51 @@ class ListCreateTextView(generics.ListCreateAPIView):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name', 'key')
 
-    # YES ALL OF THIS TO AVOID RETURNING A LIST
     def get(self, request, *args, **kwargs):
-        resp = self.list(request, *args, **kwargs)
-        if not resp.data:
-            raise NotFound('Text not found')
+        """
+        Searches for a text, or returns a list of all texts
 
-        return Response(data=resp.data[0])
+        Query params: `key`, `name`
+
+        Response:
+
+        200 OK
+        ```
+        [{
+          'key':'kekeke',
+          'name':'A very large KEK',
+          'text':'This kek is soo big, it's unbelievable'
+        }]
+
+        ```
+        """
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """
+        Creates a text
+
+        Input:
+        ```
+        {
+          //UNIQUE
+          'key':'kekeke',
+          //UNIQUE
+          'name':'A very large KEK',
+          'text':'This kek is soo big, it's unbelievable'
+        }
+
+        ```
+
+        Response:
+
+        200 OK
+        {
+          'key':'kekeke',
+          'name':'A very large KEK',
+          'text':'This kek is soo big, it's unbelievable'
+        }
+
+        400 Bad Request
+        """
+        return self.create(request, *args, **kwargs)
