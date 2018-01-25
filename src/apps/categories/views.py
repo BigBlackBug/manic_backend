@@ -13,7 +13,7 @@ from .serializers import DisplayItemSerializer, ServiceCategorySerializer, \
 class DisplayItemListView(generics.ListAPIView):
     view_name = 'display-item-list'
 
-    queryset = DisplayItem.objects.all()
+    queryset = DisplayItem.objects.order_by('priority').all()
     serializer_class = DisplayItemSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -109,7 +109,6 @@ class CategoryListView(generics.ListAPIView):
               'min_duration':30
               'max_duration':60
             }]
-          }]
         }]
         ```
 

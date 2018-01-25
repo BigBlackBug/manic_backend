@@ -41,6 +41,7 @@ class CreateUpdateDisplayItemSerializer(serializers.ModelSerializer):
     special = serializers.CharField(required=False, write_only=True)
     name = serializers.CharField(max_length=64, required=False)
     image = serializers.ImageField(required=False)
+    priority = serializers.IntegerField(required=False, default=0)
 
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])
@@ -68,4 +69,4 @@ class CreateUpdateDisplayItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DisplayItem
-        fields = ('id', 'name', 'image', 'categories', 'special')
+        fields = ('id', 'name', 'image', 'categories', 'special', 'priority')

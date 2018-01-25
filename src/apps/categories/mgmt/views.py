@@ -252,6 +252,8 @@ class MgmtListCreateDisplayItemView(mixins.CreateModelMixin,
         ```
         {
           'name':'super',
+          //OPTIONAL
+          'priority': 2,
           'image':'multipart-image',
           'categories':'1,2,3',
           'special':{}

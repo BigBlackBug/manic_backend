@@ -72,6 +72,7 @@ class DisplayItem(models.Model):
     image = models.ImageField(upload_to=Folders.display_items, null=True)
     categories = models.ManyToManyField(ServiceCategory, related_name='+')
     special = HStoreField(null=True)
+    priority = models.IntegerField(default=0)
 
     def __str__(self):
         if not self.name:
