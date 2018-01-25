@@ -199,7 +199,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TODO obviously we have to support multiple timezones
+# but not now :)
+TIME_ZONE = 'GMT+7'
 
 USE_I18N = True
 

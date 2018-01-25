@@ -7,6 +7,7 @@ from time import strptime
 from typing import Iterable
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from src.apps.categories.models import Service
@@ -279,7 +280,7 @@ class FilteringFunctions(Enum):
         result = set()
         good_slots = defaultdict(list)
         for master in masters:
-            logger.info('Checking master {master.first_name}')
+            logger.info(f'Checking master {master.first_name}')
             duration = sum([service.max_duration for service in
                             master.services.filter(pk__in=service_ids)])
             for schedule in master.schedule.filter(date__gte=date_range[0],
@@ -287,9 +288,17 @@ class FilteringFunctions(Enum):
                 logger.info(f'Checking schedule on {schedule.date}')
                 schedule_slots = []
                 # finding all slots that can be used to do the service
+                # TODO will break in case of multiple timezones
+
+                if schedule.date == timezone.now().date():
+                    time_slots = schedule.time_slots.filter(
+                        time__gte=timezone.now().time())
+                else:
+                    time_slots = schedule.time_slots.all()
+
                 start_slots = \
                     time_slot_utils.find_available_starting_slots_for_duration(
-                        duration, schedule.time_slots.all())
+                        duration, time_slots)
 
                 logger.info(f'Possible starting slots = \"'
                             f'{[slot.time for slot in start_slots]}\"')
