@@ -28,7 +28,7 @@ class Device(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.name or str(self.device_id or "")
+        return self.name or str(self.device_id or "") or str(self.id)
 
 
 class FCMDeviceManager(models.Manager):
