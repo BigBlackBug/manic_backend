@@ -97,6 +97,8 @@ INSTALLED_APPS = [
     'src.apps.orders',
     'src.apps.finances',
     'src.apps.devices',
+    'src.apps.texts',
+
     'src.utils.admin_commands',
 
     'rest_framework',
