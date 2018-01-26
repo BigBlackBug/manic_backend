@@ -1,6 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
 
 from src.apps.texts.models import Text
 from src.apps.texts.serializers import TextSerializer
@@ -9,7 +8,7 @@ from src.apps.texts.serializers import TextSerializer
 class ListCreateTextView(generics.ListCreateAPIView):
     view_name = 'list-create-text'
     queryset = Text.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = ()
     serializer_class = TextSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name', 'key')
