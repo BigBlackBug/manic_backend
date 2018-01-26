@@ -292,7 +292,7 @@ class FilteringFunctions(Enum):
 
                 if schedule.date == timezone.now().date():
                     time_slots = schedule.time_slots.filter(
-                        time__gte=timezone.now().time())
+                        time__value__gte=timezone.now().time())
                 else:
                     time_slots = schedule.time_slots.all()
 
