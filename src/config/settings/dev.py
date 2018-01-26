@@ -10,9 +10,9 @@ MAX_DISTANCE_KM = 10 ** 6
 ALLOWED_HOSTS = ['dev.4hands2go.bigblackbug.me', '35.195.99.19']
 
 FCM_DJANGO_SETTINGS = {
-    'FCM_SERVER_KEY': "AAAAn_i-bL4:APA91bHJj5gX88W-dMy-u_3JDUf1oSqmp0VOGP8qkl"
-                      "INUegqX2ZavfVg4clL5zfMOshPkr7AODpX8yhmphhsSACPAUxJeZJ7"
-                      "U3E0Fwua4F-8RPYBx5DuE778lYkPvPH7e4MjQzgVY75p",
+    'FCM_SERVER_KEY': "AAAA9VT8jq4:APA91bErqX4Ul10NURZcVXKohbXaif1lx96Er2QVSlj"
+                      "PNKla55NZRBQrE1-W8RQOpCVQN_Olnvql1RohjsIAwAd5BXVFqYiGd4"
+                      "36m7KNgOBuwklg4uuctbBr2yY1joxBSp4YGir39qGS",
 }
 
 DATABASES = {
