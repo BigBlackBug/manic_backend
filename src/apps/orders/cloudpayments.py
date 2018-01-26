@@ -44,7 +44,12 @@ def process_payment(card: PaymentCard, order: Order,
         order.transaction = CloudPaymentsTransaction.objects.create(
             transaction_id=response.id,
             transaction_info=response.__dict__)
+
+        # because mobile developers refused to call an endpoint
+        # I'm putting the same call in three different unrelated places
+        order.activate()
         order.save()
+
         return Response(status=status.HTTP_201_CREATED, data={
             'transaction_id': response.id
         })
@@ -87,6 +92,7 @@ def finish_s3d(order: Order, transaction_id, pa_res):
             transaction_info=transaction.__dict__)
     finally:
         order.save()
+        return order
 
 
 def confirm_payment(transaction: CloudPaymentsTransaction, amount: int):

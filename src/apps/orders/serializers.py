@@ -86,6 +86,13 @@ class OrderCreateSerializer(serializers.Serializer):
 
         for item in order_items:
             self._create_order_item(item, order)
+
+        # because mobile developers refused to call an endpoint
+        # I'm putting the same call in three different unrelated places
+        if order.payment_type == PaymentType.CASH:
+            order.activate()
+            order.save()
+
         return order
 
     def _create_order_item(self, item, order):

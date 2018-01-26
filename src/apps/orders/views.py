@@ -352,24 +352,3 @@ class StartOrderView(generics.GenericAPIView):
         order.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ActivateOrderView(generics.GenericAPIView):
-    view_name = 'activate-order'
-    queryset = Order.objects.all()
-    permission_classes = (IsAuthenticated, IsClient)
-    # TODO needed by swagger
-    serializer_class = OrderListSerializer
-
-    def patch(self, request, *args, **kwargs):
-        """
-        Activates an order and sends notifications
-
-        Response:
-
-        204 No Content
-        """
-        order = self.get_object()
-
-        order.activate()
-        order.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)

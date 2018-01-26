@@ -115,7 +115,7 @@ class Order(models.Model):
 
     def activate(self):
         self.status = OrderStatus.ACTIVATED
-        for item in self.order_items:
+        for item in self.order_items.all():
             if item.master.device:
                 logger.info(f'Order {self.id} created. '
                             f'Sending NEW_ORDER notification '

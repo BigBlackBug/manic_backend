@@ -9,7 +9,7 @@ from src.apps.clients.models import PaymentCard
 from src.apps.core import utils as core_utils
 from src.apps.core.permissions import IsClient
 from . import cloudpayments
-from .models import Order, CloudPaymentsTransaction
+from .models import Order, CloudPaymentsTransaction, CPTransactionStatus
 from .serializers import OrderListSerializer, CloudPaymentsTransactionSerializer
 
 
@@ -99,24 +99,51 @@ class CloudPaymentsTransactionView(generics.RetrieveAPIView):
 class FinishS3DView(generics.GenericAPIView):
     view_name = 'finish-s3d-view'
     # TODO swagger needs this
-    queryset = Order.objects.all()
-    serializer_class = OrderListSerializer
-    parser_classes = (FormParser,)
-    # this endpoint is a callback
-    # so it should be accessible for everyone
-    permission_classes = ()
+    queryset = CloudPaymentsTransaction.objects.all()
+    serializer_class = CloudPaymentsTransactionSerializer
+    permission_classes = (IsAuthenticated, IsClient)
 
     def post(self, request, *args, **kwargs):
         """
-        A callback that finishes the 3D Secure authorization.
-        No need to call it manually.
+        Finish the 3D Secure authorization.
+
+        Input:
+
+        ```
+        {
+          "MD": 100500,
+          "PaRes": "smth",
+          "order_id": 123
+        }
+        ```
+
+        Response:
+
+        200 OK
+        ```
+        {
+          "transaction_id": 500,
+          "transaction_info": {
+            //either an error description, or instance
+            //of an internal transaction in CloudPayments system
+          },
+          "status": "CREATED/FINISHED/S3D_FAILED"
+        }
         """
         # these params will be here. no need to check for
         # existence or validity
         transaction_id = self.request.data['MD']
         pa_res = self.request.data['PaRes']
-        order_id = self.request.query_params['order_id']
-        order = Order.objects.get(pk=order_id)
+        order_id = self.request.data['order_id']
 
-        cloudpayments.finish_s3d(order, transaction_id, pa_res)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        order = Order.objects.get(pk=order_id)
+        order = cloudpayments.finish_s3d(order, transaction_id, pa_res)
+
+        # because mobile developers refused to call an endpoint
+        # I'm putting the same call in three different unrelated places
+        if order.transaction.status == CPTransactionStatus.FINISHED:
+            order.activate()
+            order.save()
+
+        serializer = self.get_serializer(instance=order.transaction)
+        return Response(data=serializer.data)
