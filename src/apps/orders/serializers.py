@@ -141,19 +141,6 @@ class OrderCreateSerializer(serializers.Serializer):
             schedule.assign_time(start_time,
                                  next_slot_time,
                                  order_item=order_item)
-        if master.device:
-            logger.info(f'Order {order.id} created. '
-                        f'Sending NEW_ORDER notification '
-                        f'to master {master.first_name}')
-            master.device.send_message(
-                notifications.NEW_ORDER_TITLE,
-                notifications.NEW_ORDER_CONTENT(
-                    order_time=order.time.strftime('%H:%M'),
-                    order_date=order.date.strftime('%Y-%m-%d')),
-                data={
-                    'event': notifications.NEW_ORDER_EVENT,
-                    'order_id': order.id
-                })
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):

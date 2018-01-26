@@ -9,16 +9,19 @@ from src.apps.categories.models import Service
 from src.apps.clients.models import Client
 from src.apps.finances.models import TransactionEntry, TransactionEntryType
 from src.apps.masters.models import Master
+from src.apps.orders import notifications
 
 logger = logging.getLogger(__name__)
 
 
 class OrderStatus:
-    ACCEPTED = 'ACCEPTED'
+    CREATED = 'CREATED'
+    ACTIVATED = 'ACTIVATED'
     STARTED = 'STARTED'
     DONE = 'DONE'
     CHOICES = (
-        (ACCEPTED, 'Принят Мастером'),
+        (CREATED, 'Создан'),
+        (ACTIVATED, 'Принят Мастером'),
         (STARTED, 'Начат'),
         (DONE, 'Завершён'),
     )
@@ -87,9 +90,9 @@ class Order(models.Model):
                                        null=True, blank=True)
 
     status = models.CharField(
-        max_length=8,
+        max_length=10,
         choices=OrderStatus.CHOICES,
-        default=OrderStatus.ACCEPTED,
+        default=OrderStatus.CREATED,
     )
 
     time_started = models.DateTimeField(null=True)
@@ -109,6 +112,23 @@ class Order(models.Model):
             lambda item: int(
                 item.service.cost * (1 + self.client.tip_multiplier())),
             self.order_items.all()))
+
+    def activate(self):
+        self.status = OrderStatus.ACTIVATED
+        for item in self.order_items:
+            if item.master.device:
+                logger.info(f'Order {self.id} created. '
+                            f'Sending NEW_ORDER notification '
+                            f'to master {item.master.first_name}')
+                item.master.device.send_message(
+                    notifications.NEW_ORDER_TITLE,
+                    notifications.NEW_ORDER_CONTENT(
+                        order_time=self.time.strftime('%H:%M'),
+                        order_date=self.date.strftime('%Y-%m-%d')),
+                    data={
+                        'event': notifications.NEW_ORDER_EVENT,
+                        'order_id': self.id
+                    })
 
     def start(self):
         logger.info(f'Starting order {self.id}')

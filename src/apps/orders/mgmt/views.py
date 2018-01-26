@@ -31,7 +31,7 @@ class OrderListView(generics.ListAPIView):
           'date': '2017-10-18',
           'payment_type':'CASH',
           'time': '11:00',
-          'status': 'ACCEPTED/STARTED/DONE',
+          'status': 'CREATED/ACTIVATED/STARTED/DONE',
           'special': {},
           'comment': '',
           'order_items': [{

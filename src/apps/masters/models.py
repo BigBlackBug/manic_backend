@@ -283,7 +283,8 @@ class Schedule(models.Model):
                     f'because there is an order at that time')
 
     def assign_time(self, start_time: datetime.time,
-                    end_time: datetime.time, order_item=None):
+                    end_time: datetime.time, order_item=None,
+                    taken=True):
         """
         Marks slots between `start_time` and `end_time` as Taken.
         `end_time` is excluded
@@ -291,6 +292,7 @@ class Schedule(models.Model):
         :param order_item:
         :param start_time:
         :param end_time:
+        :param taken:
         :return: time <datetime> of the next available time slot or None if
         the last processed slot marks the end of the work day
         """
@@ -316,7 +318,7 @@ class Schedule(models.Model):
         cur_time = start_time
         while cur_time < end_time:
             ts = self.time_slots.get(pk=time_slots[first_slot_index + shift].id)
-            ts.taken = True
+            ts.taken = taken
             ts.order_item = order_item
             ts.save()
 

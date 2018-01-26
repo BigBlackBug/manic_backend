@@ -191,7 +191,7 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
+def make_order(client, service, master, order_time, status=OrderStatus.ACTIVATED,
                order_date=timezone.now().date(), payment_type=PaymentType.CARD,
                comment=''):
     order = Order.objects.create(client=client, date=order_date,
@@ -213,7 +213,7 @@ def make_order(client, service, master, order_time, status=OrderStatus.ACCEPTED,
 
 
 def make_order_services(client, services, master, order_time,
-                        status=OrderStatus.ACCEPTED,
+                        status=OrderStatus.ACTIVATED,
                         order_date=timezone.now().date(),
                         payment_type=PaymentType.CARD, locked=False):
     order = Order.objects.create(client=client, date=order_date,

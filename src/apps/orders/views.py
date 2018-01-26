@@ -10,6 +10,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from src.apps.core.permissions import IsClient, IsMaster
+from src.apps.masters.models import TimeSlot
 from src.apps.orders import cloudpayments, order_utils, notifications
 from .models import Order, OrderStatus, PaymentType, OrderItem
 from .serializers import OrderCreateSerializer, OrderListSerializer, \
@@ -118,7 +119,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
             'date': '2017-10-18',
             'payment_type':'CASH',
             'time': '11:00',
-            'status': 'ACCEPTED/STARTED/DONE',
+            'status': 'CREATED/ACTIVATED/STARTED/DONE',
             'special': {},
             'comment': '',
             'order_items': [{
@@ -239,6 +240,10 @@ class OrderCancelView(mixins.DestroyModelMixin,
                 # the master should not rely on that money
                 for order_item in order.order_items.all():
                     order_item.master.cancel_order_payment(order, order_item)
+                    slots = TimeSlot.objects.filter(order_item=order_item)
+                    for slot in slots:
+                        slot.taken = False
+                        slot.save()
                 order.delete()
             else:
                 raise PermissionDenied(detail="You are not allowed to cancel"
@@ -340,9 +345,31 @@ class StartOrderView(generics.GenericAPIView):
         204 No Content
         """
         order = self.get_object()
-        if order.status != OrderStatus.ACCEPTED:
-            raise ValidationError("Order must be ACCEPTED by the master")
+        if order.status != OrderStatus.ACTIVATED:
+            raise ValidationError("Order must be ACTIVATED by the master")
 
         order.start()
+        order.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ActivateOrderView(generics.GenericAPIView):
+    view_name = 'activate-order'
+    queryset = Order.objects.all()
+    permission_classes = (IsAuthenticated, IsClient)
+    # TODO needed by swagger
+    serializer_class = OrderListSerializer
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Activates an order and sends notifications
+
+        Response:
+
+        204 No Content
+        """
+        order = self.get_object()
+
+        order.activate()
         order.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
