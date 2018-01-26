@@ -9,10 +9,10 @@ from rest_framework.views import APIView
 
 from src.apps.core.permissions import IsClient
 from src.apps.core.serializers import ImageSerializer
-from .models import Client, PaymentCard, Address, ClientStatus
+from .models import Client, PaymentCard, Address, ClientStatus, Complaint
 from .permissions import IsClientIDCorrect
 from .serializers import ClientSerializer, PaymentCardSerializer, \
-    AddressSerializer
+    AddressSerializer, ComplaintSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -354,3 +354,30 @@ class AddressUpdateView(mixins.DestroyModelMixin,
         return super().partial_update(request, *args, **kwargs)
 
 
+class CreateComplaintView(generics.CreateAPIView):
+    view_name = 'create-complaint'
+    queryset = Complaint.objects.all()
+    permission_classes = (IsClient,)
+    serializer_class = ComplaintSerializer
+
+    def post(self, request, *args, **kwargs):
+        """
+        Files a complaint
+
+        Input:
+        ```
+        {
+          //UNIQUE
+          'title':'kekeke',
+          'content':'A very large KEK'
+        }
+
+        ```
+
+        Response:
+
+        200 OK
+
+        400 Bad Request
+        """
+        return self.create(request, *args, **kwargs)

@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.apps.core.models import Location
 from src.apps.core.serializers import LocationSerializer
-from .models import Client, Address, PaymentCard, ClientStatus
+from .models import Client, Address, PaymentCard, ClientStatus, Complaint
 
 logger = logging.getLogger(__name__)
 
@@ -173,3 +173,15 @@ class OrderClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = ('id', 'avatar', 'first_name', 'phone', 'home_address')
+
+
+class ComplaintSerializer(serializers.ModelSerializer):
+    client = SimpleClientSerializer(read_only=True)
+
+    def create(self, validated_data):
+        client = self.context['request'].user.client
+        return Complaint.objects.create(client=client, **validated_data)
+
+    class Meta:
+        model = Complaint
+        exclude = ('id',)

@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from .views import ClientAvatarUpdateView, ClientCreateView, ClientUpdateView, \
     MeClient, AddPaymentCardView, DeletePaymentCardView, AddAddressView, \
-    AddressUpdateView
+    AddressUpdateView, CreateComplaintView
 
 urlpatterns = [
     url(r'^$', ClientCreateView.as_view(), name=ClientCreateView.view_name),
@@ -13,6 +13,8 @@ urlpatterns = [
         name=ClientAvatarUpdateView.view_name),
     url(r'^(?P<pk>[0-9]+)/payment_cards$', AddPaymentCardView.as_view(),
         name=AddPaymentCardView.view_name),
+    url(r'^(?P<pk>[0-9]+)/complaints$', CreateComplaintView.as_view(),
+        name=CreateComplaintView.view_name),
     url(r'^(?P<pk>[0-9]+)/payment_cards/(?P<card_id>[0-9]+)$',
         DeletePaymentCardView.as_view(),
         name=DeletePaymentCardView.view_name),

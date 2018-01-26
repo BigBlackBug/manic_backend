@@ -83,3 +83,13 @@ class PaymentCard(models.Model):
     def __str__(self):
         return f'Card #{self.id}, **{self.card_number[-4:]}' \
                f' of client_id: {self.client.id}'
+
+
+class Complaint(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    content = models.TextField()
+    client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True,
+                               related_name='complaints')
+
+    def __str__(self):
+        return f'Client: {self.client.id} -> {self.title}'
