@@ -243,6 +243,8 @@ class MasterCreateSerializer(serializers.ModelSerializer):
         services = validated_data.pop('services', [])
         master = self.context['request'].user.master
         master.status = MasterStatus.ON_REVIEW
+        master.location = Location.objects.create(lat=0.0, lon=0.0)
+
         for (key, value) in validated_data.items():
             setattr(master, key, value)
 
