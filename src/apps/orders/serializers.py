@@ -91,8 +91,10 @@ class OrderCreateSerializer(serializers.Serializer):
         # I'm putting the same call in three different unrelated places
         if order.payment_type == PaymentType.CASH:
             order.activate()
-            order.save()
+        else:
+            order.status = OrderStatus.ACTIVATED
 
+        order.save()
         return order
 
     def _create_order_item(self, item, order):
