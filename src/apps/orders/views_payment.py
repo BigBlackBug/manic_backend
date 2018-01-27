@@ -101,7 +101,7 @@ class FinishS3DView(generics.GenericAPIView):
     # TODO swagger needs this
     queryset = CloudPaymentsTransaction.objects.all()
     serializer_class = CloudPaymentsTransactionSerializer
-    permission_classes = (IsAuthenticated, IsClient)
+    permission_classes = ()
     parser_classes = (FormParser,)
 
     def post(self, request, *args, **kwargs):
