@@ -94,7 +94,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
         if self.request.user.is_master(self.request):
             order_items = OrderItem.objects.filter(
                 master=self.request.user.master).select_related(
-                'order').order_by('-order__date',
+                'order').order_by('order__date',
                                   'order__time').all()
             orders = set()
             for item in order_items:
@@ -102,7 +102,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
             return orders
         else:
             return Order.objects.filter(client=self.request.user.client) \
-                .order_by('-date', 'time').all()
+                .order_by('date', 'time').all()
 
     def get(self, request, *args, **kwargs):
         """
@@ -221,6 +221,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
         else's order, or you're too late, or the order is locked
         """
         order = self.get_object()
+        # TODO will break in case of multiple timezones
         order_date = timezone.make_aware(
             datetime.combine(order.date, order.time))
         if order_date - timezone.now() < \
