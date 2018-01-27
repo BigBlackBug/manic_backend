@@ -51,15 +51,4 @@ class FCMRemoveDeviceView(mixins.DestroyModelMixin,
 
         204 No Content
         """
-        device = self.get_object()
-
-        user = request.user
-        if user.is_master(request):
-            logger.info(f'Deleting a device for master, id={device.id}, '
-                        f'type={device.type}')
-            user.master.device.delete()
-        elif user.is_client(request):
-            logger.info(f'Creating a device for client, id={device.id}, '
-                        f'type={device.type}')
-            user.client.device.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, *args, **kwargs)
