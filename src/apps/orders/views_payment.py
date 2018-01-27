@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
@@ -102,6 +102,7 @@ class FinishS3DView(generics.GenericAPIView):
     queryset = CloudPaymentsTransaction.objects.all()
     serializer_class = CloudPaymentsTransactionSerializer
     permission_classes = (IsAuthenticated, IsClient)
+    parser_classes = (FormParser,)
 
     def post(self, request, *args, **kwargs):
         """
@@ -109,11 +110,16 @@ class FinishS3DView(generics.GenericAPIView):
 
         Input:
 
+        Query Params:
+
+        `order_id` - **required
+
+        Body
+
         ```
         {
           "MD": 100500,
           "PaRes": "smth",
-          "order_id": 123
         }
         ```
 
@@ -134,7 +140,7 @@ class FinishS3DView(generics.GenericAPIView):
         # existence or validity
         transaction_id = self.request.data['MD']
         pa_res = self.request.data['PaRes']
-        order_id = self.request.data['order_id']
+        order_id = self.request.query_params['order_id']
 
         order = Order.objects.get(pk=order_id)
         order = cloudpayments.finish_s3d(order, transaction_id, pa_res)
