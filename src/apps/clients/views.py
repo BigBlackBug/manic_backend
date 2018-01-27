@@ -367,9 +367,7 @@ class CreateComplaintView(generics.CreateAPIView):
         Input:
         ```
         {
-          //UNIQUE
-          'title':'kekeke',
-          'content':'A very large KEK'
+          'content': 'Your KEK was too large'
         }
 
         ```
