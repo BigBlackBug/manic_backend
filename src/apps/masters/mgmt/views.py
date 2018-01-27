@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import generics, mixins, parsers, status
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.filters import OrderingFilter
@@ -12,6 +14,8 @@ from .serializers import MgmtMasterListSerializer
 from ..models import Master, PortfolioImage, MasterStatus
 from ..serializers import MasterSerializer, MasterUpdateSerializer
 from ..views import MasterDetailUpdateView
+
+logger = logging.getLogger(__name__)
 
 
 class MgmtMasterSearchView(generics.ListAPIView):
@@ -128,13 +132,14 @@ class MgmtMasterUpdateStatusView(mixins.UpdateModelMixin,
         master.save()
 
         if master.device:
-            master.device.send_message(
+            response = master.device.send_message(
                 notifications.MASTER_STATUS_CHANGED_TITLE,
                 notifications.MASTER_STATUS_MAP[master_status],
                 data={
                     'event': notifications.MASTER_STATUS_CHANGED_EVENT,
                     'status': master_status
                 })
+            logger.info(f'master push returned {response}')
         return Response()
 
 
