@@ -115,20 +115,24 @@ class Order(models.Model):
 
     def activate(self):
         self.status = OrderStatus.ACTIVATED
+        processed_masters = set()
+
         for item in self.order_items.all():
-            if item.master.device:
-                logger.info(f'Order {self.id} created. '
-                            f'Sending NEW_ORDER notification '
-                            f'to master {item.master.first_name}')
-                item.master.device.send_message(
-                    notifications.NEW_ORDER_TITLE,
-                    notifications.NEW_ORDER_CONTENT(
-                        order_time=self.time.strftime('%H:%M'),
-                        order_date=self.date.strftime('%Y-%m-%d')),
-                    data={
-                        'event': notifications.NEW_ORDER_EVENT,
-                        'order_id': self.id
-                    })
+            if item.master not in processed_masters:
+                if item.master.device:
+                    logger.info(f'Order {self.id} created. '
+                                f'Sending NEW_ORDER notification '
+                                f'to master {item.master.first_name}')
+                    item.master.device.send_message(
+                        notifications.NEW_ORDER_TITLE,
+                        notifications.NEW_ORDER_CONTENT(
+                            order_time=self.time.strftime('%H:%M'),
+                            order_date=self.date.strftime('%Y-%m-%d')),
+                        data={
+                            'event': notifications.NEW_ORDER_EVENT,
+                            'order_id': self.id
+                        })
+                    processed_masters.add(item.master)
 
     def start(self):
         logger.info(f'Starting order {self.id}')
