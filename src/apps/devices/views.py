@@ -1,7 +1,6 @@
 import logging
 
-from rest_framework import permissions, generics, mixins, status
-from rest_framework.response import Response
+from rest_framework import permissions, generics, mixins
 
 from src.apps.devices.models import FCMDevice
 from src.apps.devices.serializers import FCMDeviceSerializer

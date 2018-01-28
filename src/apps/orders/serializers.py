@@ -63,7 +63,7 @@ class OrderListSerializer(serializers.Serializer):
     special = serializers.DictField(read_only=True)
     payment_type = serializers.CharField(read_only=True)
     status = serializers.CharField(read_only=True)
-
+    comment = serializers.CharField(max_length=1024, read_only=True)
 
 # in
 class OrderCreateSerializer(serializers.Serializer):
@@ -91,8 +91,6 @@ class OrderCreateSerializer(serializers.Serializer):
         # I'm putting the same call in three different unrelated places
         if order.payment_type == PaymentType.CASH:
             order.activate()
-        else:
-            order.status = OrderStatus.ACTIVATED
 
         order.save()
         return order

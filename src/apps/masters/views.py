@@ -324,7 +324,8 @@ class MasterDetailUpdateView(mixins.RetrieveModelMixin,
           'date':'2017-10-20',
           'time_slots:[{
             'time':'10:30',
-            'taken':False
+            'taken': False,
+            'order_id': 123
           }]
         }
         ```

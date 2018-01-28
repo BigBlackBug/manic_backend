@@ -1,6 +1,5 @@
-from rest_framework import generics
+from rest_framework import generics, parsers
 from rest_framework.exceptions import ValidationError
-from rest_framework.parsers import FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -102,7 +101,7 @@ class FinishS3DView(generics.GenericAPIView):
     queryset = CloudPaymentsTransaction.objects.all()
     serializer_class = CloudPaymentsTransactionSerializer
     permission_classes = ()
-    parser_classes = (FormParser,)
+    parser_classes = (parsers.FormParser,)
 
     def post(self, request, *args, **kwargs):
         """
