@@ -45,10 +45,6 @@ if [ "X$DJANGO_RUN_CREATESUPERUSER" = 'Xyes' ]; then
         echo "Please set the ADMIN_PASSWORD env variable";
         exit 1
     fi
-    ADMIN_EMAIL=admin@example.com
-    python manage.py shell -c "from django.contrib.auth.models import User;\
-      User.objects.filter(email='$ADMIN_EMAIL').delete();\
-      User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')"
+    python manage.py create_superuser --username  ${ADMIN_USERNAME} --password  ${ADMIN_PASSWORD}
 fi
-
 exec "$@"
