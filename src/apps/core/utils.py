@@ -1,5 +1,7 @@
 import io
 import logging
+import random
+import string
 import uuid
 from datetime import timedelta
 
@@ -10,13 +12,14 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import Http404
 from django.utils import timezone
+from raven.contrib.django.raven_compat.models import client
 from rest_framework import status, exceptions
 from rest_framework.compat import set_rollback
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from src.apps.core.exceptions import ApplicationError
-from raven.contrib.django.raven_compat.models import client
+
 logger = logging.getLogger(__name__)
 
 # TODO make a separate handler for payment exception logging
@@ -153,3 +156,12 @@ def get_ip_address(request):
     else:
         ip_address = request.META.get('REMOTE_ADDR')
     return ip_address
+
+
+def _id_generator(size=8,
+                  chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def generate_code():
+    return _id_generator(size=4, chars=string.digits)

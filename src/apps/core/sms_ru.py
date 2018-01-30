@@ -1,6 +1,4 @@
 import logging
-import random
-import string
 from urllib import parse
 
 import requests
@@ -17,36 +15,26 @@ SMS_RU_SERVICE_UNAVAILABLE = 220
 logger = logging.getLogger(__name__)
 
 
-def _id_generator(size=8,
-                  chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-
-
-_SMS_TEMPLATE = 'Доброго времени суток! Ваш код активации: {}'
-
-
-def generate_code(phone: str = '88005553535'):
-    # why not?
-    # random.seed(phone)
-    return _id_generator(size=4, chars=string.digits)
-
-
-def send_code(phone: str, code: str):
+def send_message(phone: str, message: str):
     """
     Sends an sms with `code` to the `phone` number.
     Raises ApplicationError on any failure to send a message
 
     :param phone:
-    :param code:
+    :param message:
     :return:
     """
+    if not settings.ENABLE_SMS_CONFIRMATION:
+        logger.info(f'SMS are disabled. Nothing is sent to {phone}')
+        return
+
     args = parse.urlencode({
         'api_id': settings.SMS_API_KEY,
         'to': phone,
-        'msg': _SMS_TEMPLATE.format(code),
+        'msg': message,
         'json': 1
     })
-    logger.info(f'Sending code {code} to {phone}')
+    logger.info(f'Sending message {message} to {phone}')
 
     url = 'https://sms.ru/sms/send/'
     resp = requests.post(f'{url}?{args}')

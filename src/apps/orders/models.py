@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from src.apps.categories.models import Service
 from src.apps.clients.models import Client
+from src.apps.core import sms_ru, sms_templates
 from src.apps.finances.models import TransactionEntry, TransactionEntryType
 from src.apps.masters.models import Master
 from src.apps.orders import notifications
@@ -123,16 +124,26 @@ class Order(models.Model):
                     logger.info(f'Order {self.id} created. '
                                 f'Sending NEW_ORDER notification '
                                 f'to master {item.master.first_name}')
+                    notification_text = notifications.NEW_ORDER_CONTENT(
+                        order_time=self.time.strftime('%H:%M'),
+                        order_date=self.date.strftime('%Y-%m-%d'),
+                        client_name=self.client.first_name)
+                    # PUSH to master
                     item.master.device.send_message(
                         notifications.NEW_ORDER_TITLE,
-                        notifications.NEW_ORDER_CONTENT(
-                            order_time=self.time.strftime('%H:%M'),
-                            order_date=self.date.strftime('%Y-%m-%d')),
+                        notification_text,
                         data={
                             'event': notifications.NEW_ORDER_EVENT,
                             'order_id': self.id
                         })
+                    # SMS to master
+                    sms_ru.send_message(
+                        item.master.user.phone, notification_text)
                     processed_masters.add(item.master)
+        # SMS to client
+        sms_ru.send_message(
+            self.client.user.phone,
+            sms_templates.NEW_ORDER_TEMPLATE(self, processed_masters))
 
     def start(self):
         logger.info(f'Starting order {self.id}')

@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from src.apps.authentication import sms_verification
 from src.apps.clients.models import Client
+from src.apps.core import sms_ru, utils, sms_templates
 from src.apps.core.views import NamedAPIView
 from src.apps.masters.models import Master
 from .models import Registration, PhoneAuthUser, Token, RegistrationType
@@ -56,10 +56,11 @@ class CreateRegistrationView(NamedAPIView):
 
         phone = serializer.validated_data['phone']
         if settings.ENABLE_SMS_CONFIRMATION:
-            code = sms_verification.generate_code(phone)
+            code = utils.generate_code()
             logger.info(f'Generated code {code} for the phone {phone}')
             # will raise exception
-            sms_verification.send_code(phone, code)
+            sms_ru.send_message(
+                phone, sms_templates.REGISTRATION_TEMPLATE(code))
             logger.info(f'SMS with auth code to phone {phone} '
                         f'has been sent successfully')
         else:
