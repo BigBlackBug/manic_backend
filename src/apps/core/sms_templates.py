@@ -3,6 +3,7 @@ def REGISTRATION_TEMPLATE(code: str):
 
 
 def NEW_ORDER_TEMPLATE(order, masters):
+    masters = list(masters)
     if len(masters) == 1:
         return f'У Вас новая запись на {order.time}, {order.date}. ' \
                f'К вам приедет мастер: {masters[0].first_name}. ' \
