@@ -140,9 +140,10 @@ def custom_exception_handler(exc, context):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def get_date(days: int):
+def get_date(days: int, format_string=True):
     # TODO UNIFY DATE_FORMAT
-    return (timezone.now() + timedelta(days=days)).strftime('%Y-%m-%d')
+    dt = (timezone.now() + timedelta(days=days))
+    return format_string and dt.strftime('%Y-%m-%d') or dt
 
 
 def get_ip_address(request):
