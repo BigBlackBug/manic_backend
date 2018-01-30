@@ -13,6 +13,7 @@ gmaps = googlemaps.Client(key=settings.GMAPS_API_KEY)
 logger = logging.getLogger(__name__)
 
 DURATION_SECONDS = TimeSlot.DURATION * 60
+MAX_DURATION = 1_000_000_000
 
 
 # TODO exception handling
@@ -35,15 +36,19 @@ def _calculate_eta(coords_from: tuple, coords_to: tuple,
                                              mode="driving", language='en',
                                              departure_time=departure_time)
         logger.info(f'GMaps api response {directions_result}')
+        if not directions_result:
+            return MAX_DURATION
         duration = directions_result[0]['legs'][0]['duration_in_traffic']
-        seconds = duration['value']
-        text = duration['text']
-        logger.info(f'GMaps returned {seconds}, {text}')
     except gmaps_exceptions.ApiError as error:
         raise ApplicationError(error)
+    except KeyError as key_error:
+        return MAX_DURATION
     except Exception as ex:
         raise ApplicationError(ex)
     else:
+        seconds = duration['value']
+        text = duration['text']
+        logger.info(f'GMaps returned {seconds}, {text}')
         return seconds
 
 
