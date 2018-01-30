@@ -24,6 +24,10 @@ def send_message(phone: str, message: str):
     :param message:
     :return:
     """
+    if not settings.ENABLE_SMS_CONFIRMATION:
+        logger.info(f'SMS are disabled. Nothing is sent to {phone}')
+        return
+
     args = parse.urlencode({
         'api_id': settings.SMS_API_KEY,
         'to': phone,
