@@ -39,3 +39,6 @@ services:
       - 5432:5432
     volumes:
       - ~/4hands2go-local-data:/var/lib/postgresql/data/pgdata
+
+  mgmt:
+    image: beinlife/4hands2go-admin

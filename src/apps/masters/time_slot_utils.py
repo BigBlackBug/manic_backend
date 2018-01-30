@@ -81,6 +81,7 @@ def add_time(source_time, **kwargs):
     """
     if isinstance(source_time, datetime.datetime):
         source_time = source_time.time()
+    #TODO timezone fails
     source_time = datetime.datetime.combine(timezone.now().date(), source_time)
     return (source_time + datetime.timedelta(**kwargs)).time()
 

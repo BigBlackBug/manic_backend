@@ -130,6 +130,7 @@ class MasterSerializer(serializers.ModelSerializer):
         """
         Only schedules for upcoming dates are returned
         """
+        # TODO timezone fail?
         schedules = master.schedule.filter(date__gte=timezone.now()) \
             .order_by('date').all()
         serializer = ScheduleSerializer(many=True, instance=schedules)
@@ -209,6 +210,7 @@ class CreateScheduleSerializer(serializers.ModelSerializer):
         return schedule
 
     def validate_date(self, date_value):
+        # TODO timezone fail
         if date_value > (timezone.now() +
                              datetime.timedelta(days=14)).date():
             raise ValidationError(detail='You may not create schedules '

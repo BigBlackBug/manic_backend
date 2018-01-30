@@ -208,14 +208,13 @@ LANGUAGE_CODE = 'en-us'
 
 # TODO obviously we have to support multiple timezones
 # but not now :)
-TIME_ZONE = 'UTC'
-DEFAULT_TIMEZONE = pytz.timezone('Asia/Novosibirsk')
+TIME_ZONE = 'Asia/Novosibirsk'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG').upper()
 

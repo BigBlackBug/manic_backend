@@ -157,10 +157,9 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         # TODO REMOVE??
         # there was a misunderstanding in what a comment is
         if 'comment' in validated_data:
-            if instance.status != OrderStatus.DONE:
-                raise PermissionDenied(
-                    detail="You are not allowed to add a comment "
-                           "to an order that is not DONE")
+            raise PermissionDenied(
+                detail="You are not allowed to add a comment "
+                       "to an order that is not DONE")
         return super().update(instance, validated_data)
 
     class Meta:

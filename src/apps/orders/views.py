@@ -169,7 +169,6 @@ class OrderUpdateCommentView(mixins.UpdateModelMixin, generics.GenericAPIView):
     def patch(self, request, *args, **kwargs):
         """
         Creates or updates an order's comment.
-        Can only be called by a client on orders that are DONE
 
         Input:
         ```
