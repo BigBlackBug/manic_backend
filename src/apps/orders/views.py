@@ -221,8 +221,7 @@ class OrderCancelView(mixins.DestroyModelMixin,
         """
         order = self.get_object()
         # TODO will break in case of multiple timezones
-        order_date = timezone.make_aware(
-            datetime.combine(order.date, order.time))
+        order_date = datetime.combine(order.date, order.time)
         if order_date - timezone.now() < \
                 timedelta(hours=settings.ORDER_CANCELLATION_WINDOW_HOURS):
             raise PermissionDenied(detail='You may not delete orders '
