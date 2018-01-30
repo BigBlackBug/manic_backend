@@ -16,8 +16,8 @@ def make_json_body(body):
     return {'data': json.dumps(body), 'content_type': 'application/json'}
 
 
-@mock.patch('src.apps.authentication.sms_verification.send_code',
-            lambda phone, code: True)
+@mock.patch('src.apps.core.sms_ru.send_message',
+            lambda phone, message: True)
 class LoginTest(APITestCase):
     def test_create_registration(self):
         response = self.client.post(reverse(CreateRegistrationView.view_name),
