@@ -34,6 +34,7 @@ def _calculate_eta(coords_from: tuple, coords_to: tuple,
                                              coords_to,
                                              mode="driving", language='en',
                                              departure_time=departure_time)
+        logger.info(f'GMaps api response {directions_result}')
         duration = directions_result[0]['legs'][0]['duration_in_traffic']
         seconds = duration['value']
         text = duration['text']
