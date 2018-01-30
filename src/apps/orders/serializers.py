@@ -153,15 +153,6 @@ class OrderCreateSerializer(serializers.Serializer):
 class OrderUpdateSerializer(serializers.ModelSerializer):
     comment = serializers.CharField(max_length=1024, write_only=True)
 
-    def update(self, instance, validated_data):
-        # TODO REMOVE??
-        # there was a misunderstanding in what a comment is
-        if 'comment' in validated_data:
-            raise PermissionDenied(
-                detail="You are not allowed to add a comment "
-                       "to an order that is not DONE")
-        return super().update(instance, validated_data)
-
     class Meta:
         model = Order
         fields = ('comment',)
