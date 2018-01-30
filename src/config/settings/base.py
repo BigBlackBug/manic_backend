@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 from distutils.util import strtobool
 
+import pytz
 import raven
 from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
@@ -70,7 +71,11 @@ MAX_DISTANCE_KM = 20.0
 USE_GMAPS_API = get_env_variable('USE_GMAPS_API', default=False,
                                  raise_exception=False,
                                  type=bool_)
-ENABLE_SMS_CONFIRMATION = False
+
+ENABLE_SMS_CONFIRMATION = get_env_variable('ENABLE_SMS_CONFIRMATION',
+                                           default=False,
+                                           raise_exception=False,
+                                           type=bool_)
 SMS_RU_WARNING_BALANCE_RUB = 500
 MASTER_SHARE_PERCENTAGE = 0.5
 
@@ -204,6 +209,7 @@ LANGUAGE_CODE = 'en-us'
 # TODO obviously we have to support multiple timezones
 # but not now :)
 TIME_ZONE = 'UTC'
+DEFAULT_TIMEZONE = pytz.timezone('Asia/Novosibirsk')
 
 USE_I18N = True
 
