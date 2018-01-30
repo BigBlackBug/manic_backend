@@ -71,24 +71,24 @@ class UpdateOrderCommentTestCase(APITestCase):
         order = Order.objects.get(pk=order_1.id)
         self.assertEqual(order.comment, 'A new comment')
 
-    def test_unable_to_update(self):
-        master = Master.objects.get(first_name='VASYA')
-        service = master.services.all()[0]
-        # manually creating an order
-        order_1, _ = make_order(client=self.client_object, master=master,
-                                service=service,
-                                order_date=utils.get_date(1),
-                                order_time=datetime.time(hour=11, minute=00),
-                                comment='old')
-        order_1.time_started = timezone.now()
-        order_1.status = OrderStatus.STARTED
-        order_1.save()
-
-        self.assertEqual(order_1.comment, 'old')
-        resp = self.client.patch(
-            reverse(OrderUpdateCommentView.view_name, args=[order_1.id]), data={
-                'comment': 'new'
-            }, format='json')
-
-        # order is not DONE
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_unable_to_update(self):
+    #     master = Master.objects.get(first_name='VASYA')
+    #     service = master.services.all()[0]
+    #     # manually creating an order
+    #     order_1, _ = make_order(client=self.client_object, master=master,
+    #                             service=service,
+    #                             order_date=utils.get_date(1),
+    #                             order_time=datetime.time(hour=11, minute=00),
+    #                             comment='old')
+    #     order_1.time_started = timezone.now()
+    #     order_1.status = OrderStatus.STARTED
+    #     order_1.save()
+    #
+    #     self.assertEqual(order_1.comment, 'old')
+    #     resp = self.client.patch(
+    #         reverse(OrderUpdateCommentView.view_name, args=[order_1.id]), data={
+    #             'comment': 'new'
+    #         }, format='json')
+    #
+    #     # order is not DONE
+    #     self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
