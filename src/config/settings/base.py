@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 from distutils.util import strtobool
 
-import pytz
 import raven
 from django.core.exceptions import ImproperlyConfigured
 from unipath import Path
@@ -67,6 +66,7 @@ CLOUDPAYMENTS_API_SECRET = '5e9fb61716880f83b91a6ed928718baf'
 
 # Application settings
 ORDER_CANCELLATION_WINDOW_HOURS = 3
+ORDER_START_WINDOW_MINUTES = 60
 MAX_DISTANCE_KM = 20.0
 USE_GMAPS_API = get_env_variable('USE_GMAPS_API', default=False,
                                  raise_exception=False,

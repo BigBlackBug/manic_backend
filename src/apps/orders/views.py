@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from src.apps.core.exceptions import ApplicationError
 from src.apps.core.permissions import IsClient, IsMaster
 from src.apps.masters.models import TimeSlot
 from src.apps.orders import cloudpayments, order_utils, notifications
@@ -346,8 +347,18 @@ class StartOrderView(generics.GenericAPIView):
         order = self.get_object()
         if order.status != OrderStatus.ACTIVATED:
             raise ValidationError("Order must be ACTIVATED by the master")
+        now = timezone.now()
+
+        if order.date != now.date():
+            raise ApplicationError(
+                error_type=ApplicationError.ErrorTypes.ORDER_START_WRONG_DAY)
+
+        order_date = datetime.combine(order.date, order.time)
+        if order_date - now > \
+                timedelta(minutes=settings.ORDER_START_WINDOW_MINUTES):
+            raise ApplicationError(
+                error_type=ApplicationError.ErrorTypes.ORDER_START_TOO_EARLY)
 
         order.start()
         order.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-

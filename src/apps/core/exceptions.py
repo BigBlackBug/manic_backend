@@ -12,6 +12,8 @@ class ApplicationError(Exception):
         PAYMENT_ERROR = 200
         APPLICATION_ERROR = 300
         ORDER_CREATION_ERROR = 310
+        ORDER_START_TOO_EARLY = 320
+        ORDER_START_WRONG_DAY = 321
 
     def __init__(self, *args,
                  error_type: ErrorTypes = ErrorTypes.UNEXPECTED_ERROR):
