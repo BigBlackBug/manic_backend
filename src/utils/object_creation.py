@@ -36,23 +36,23 @@ def make_category(category_name):
                                                   'img'))
 
     simple = Service.objects.create(category=category,
-                           name=category_name + ' обычный',
-                           description='d',
-                           cost=random.randint(10, 90),
-                           min_duration=30,
-                           max_duration=60)
+                                    name=category_name + ' обычный',
+                                    description='d',
+                                    cost=random.randint(10, 90),
+                                    min_duration=30,
+                                    max_duration=60)
 
     complex = Service.objects.create(category=category,
-                           name=category_name + ' топовый',
-                           description='d',
-                           cost=random.randint(10, 90),
-                           min_duration=60,
-                           max_duration=90)
+                                     name=category_name + ' топовый',
+                                     description='d',
+                                     cost=random.randint(10, 90),
+                                     min_duration=60,
+                                     max_duration=90)
     return category
 
 
-def make_master(name, lon, user=None, activated=True,
-                about='awesome master!', make_portfolio=True,
+def make_master(name, lon=15, lat=10, user=None, activated=True,
+                about='awesome master!', email='', make_portfolio=True,
                 make_balance=False):
     def _rand():
         random.seed()
@@ -61,15 +61,17 @@ def make_master(name, lon, user=None, activated=True,
     if not user:
         user = PhoneAuthUser.objects.create(phone=str(_rand()))
     if activated:
+        if not email:
+            email = str(_rand()) + 'bigblackbugg@gmail.com'
         master = Master.objects.create(
             user=user, first_name=name,
             about=about,
-            email=str(_rand()) + 'bigblackbugg@gmail.com',
+            email=email,
             avatar=utils.make_in_memory_image('supername'),
             status=MasterStatus.VERIFIED,
-            gender=Gender.MALE,
+            gender=Gender.FEMALE,
             date_of_birth=timezone.now(),
-            location=Location.objects.create(lat=10, lon=lon))
+            location=Location.objects.create(lat=lat, lon=lon))
         if make_portfolio:
             PortfolioImage.objects.create(
                 image=utils.make_in_memory_image('heyho'),
@@ -191,7 +193,8 @@ def make_everything():
                             taken=False, schedule=schedule)
 
 
-def make_order(client, service, master, order_time, status=OrderStatus.ACTIVATED,
+def make_order(client, service, master, order_time,
+               status=OrderStatus.ACTIVATED,
                order_date=timezone.now().date(), payment_type=PaymentType.CARD,
                comment=''):
     order = Order.objects.create(client=client, date=order_date,

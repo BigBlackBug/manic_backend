@@ -163,5 +163,5 @@ def _id_generator(size=8,
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def generate_code():
-    return _id_generator(size=4, chars=string.digits)
+def generate_code(size=4):
+    return _id_generator(size=size, chars=string.digits)

@@ -303,6 +303,7 @@ class FilteringFunctions(Enum):
                 logger.info(f'Possible starting slots = \"'
                             f'{[slot.time for slot in start_slots]}\"')
 
+                # TODO how about a dozen fucking API calls per day per master?
                 for slot in start_slots:
                     # checking if the master can get to the next address in time
                     if gmaps_utils.can_reach(schedule,
