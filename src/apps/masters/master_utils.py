@@ -5,7 +5,7 @@ from typing import Iterable
 from src.apps.clients.models import Client
 from src.apps.masters import time_slot_utils
 from src.apps.masters.filtering import FilteringParams
-from src.apps.masters.models import Master
+from src.apps.masters.models import Master, MasterStatus
 from src.apps.masters.serializers import SimpleMasterSerializer
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,8 @@ def search(params: FilteringParams, filter_function):
     # queryset
     queryset = Master.objects.filter(schedule__date__gte=date_range[0],
                                      schedule__date__lte=date_range[1],
-                                     services__in=services, ).distinct() \
+                                     services__in=services,
+                                     status=MasterStatus.VERIFIED).distinct() \
         .prefetch_related('services').prefetch_related('schedule__time_slots') \
         .select_related('location')
 
