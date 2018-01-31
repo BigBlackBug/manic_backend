@@ -283,6 +283,6 @@ class TestSplitSlots(TestCase):
         self.assertEqual(split[0][0].value, datetime.time(hour=10, minute=30))
         self.assertEqual(split[0][1].value, datetime.time(hour=11, minute=00))
         self.assertEqual(len(split[1]), 3)
-        self.assertEqual(split[1][0].value, datetime.time(hour=12, minute=30))
+        self.assertEqual(split[1][0].value, datetime.time(hour=12, minute=00))
         self.assertEqual(split[1][1].value, datetime.time(hour=12, minute=30))
         self.assertEqual(split[1][2].value, datetime.time(hour=13, minute=00))

@@ -305,7 +305,7 @@ class FilteringFunctions(Enum):
                 groups = time_slot_utils.split_slots(start_slots)
                 for group in groups:
                     # checking if the master can get to the next address in time
-                    logger.info(f'Checking first slot {slot.time} '
+                    logger.info(f'Checking first slot {group[0].value} '
                                 f'in a group {group}')
                     if gmaps_utils.can_reach(schedule,
                                              target_client.home_address.location,
