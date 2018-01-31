@@ -302,17 +302,19 @@ class FilteringFunctions(Enum):
 
                 logger.info(f'Possible starting slots = \"'
                             f'{[slot.time for slot in start_slots]}\"')
-
-                # TODO how about a dozen fucking API calls per day per master?
-                for slot in start_slots:
+                groups = time_slot_utils.split_slots(start_slots)
+                for group in groups:
                     # checking if the master can get to the next address in time
+                    logger.info(f'Checking first slot {slot.time} '
+                                f'in a group {group}')
                     if gmaps_utils.can_reach(schedule,
                                              target_client.home_address.location,
-                                             slot.value):
-                        logger.info(f'Selecting slot {slot.time}')
+                                             group[0].value):
                         result.add(master)
-                        schedule_slots.append(
-                            datetime.time.strftime(slot.value, '%H:%M'))
+                        for slot in group:
+                            logger.info(f'Selecting slot {slot.time}')
+                            schedule_slots.append(
+                                datetime.time.strftime(slot.value, '%H:%M'))
 
                 if schedule_slots:
                     good_slots[master.id].append({

@@ -81,7 +81,7 @@ def add_time(source_time, **kwargs):
     """
     if isinstance(source_time, datetime.datetime):
         source_time = source_time.time()
-    #TODO timezone fails
+    # TODO timezone fails
     source_time = datetime.datetime.combine(timezone.now().date(), source_time)
     return (source_time + datetime.timedelta(**kwargs)).time()
 
@@ -222,3 +222,25 @@ def _get_times(start_time_s: str, end_time_s: str, include_last=False):
 
 def _get_time(_time):
     return datetime.time(hour=_time.tm_hour, minute=_time.tm_min)
+
+
+def split_slots(slots):
+    #TODO docs
+    groups = []
+    group = []
+    if not slots:
+        return []
+    last_group_time = datetime.datetime.combine(timezone.now().date(),
+                                                slots[0].value)
+    for i in range(0, len(slots)):
+        source_time = datetime.datetime.combine(timezone.now().date(),
+                                                slots[i].value)
+        if source_time - last_group_time > datetime.timedelta(
+                minutes=TimeSlot.DURATION):
+            groups.append(group)
+            group = []
+        group.append(slots[i])
+        last_group_time = source_time
+    if group:
+        groups.append(group)
+    return groups

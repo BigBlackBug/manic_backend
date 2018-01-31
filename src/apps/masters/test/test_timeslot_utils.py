@@ -251,3 +251,38 @@ class TestParseTimeSlots(TestCase):
 
         self.assertEqual(slots[3].hour, 12)
         self.assertEqual(slots[3].minute, 30)
+
+
+class TestSplitSlots(TestCase):
+    def test_ok_split(self):
+        time_slots = [
+            TimeSlot(time=_make_time(10, 30), taken=False),
+            TimeSlot(time=_make_time(11, 00), taken=False),
+            TimeSlot(time=_make_time(11, 30), taken=False),
+            TimeSlot(time=_make_time(12, 00), taken=False),
+            TimeSlot(time=_make_time(12, 30), taken=False),
+        ]
+        split = time_slot_utils.split_slots(time_slots)
+        self.assertEqual(len(split), 1)
+
+    def tets_ok_empty(self):
+        split = time_slot_utils.split_slots([])
+        self.assertEqual(len(split), 0)
+
+    def test_split_two_groups(self):
+        time_slots = [
+            TimeSlot(time=_make_time(10, 30), taken=False),
+            TimeSlot(time=_make_time(11, 00), taken=False),
+            TimeSlot(time=_make_time(12, 00), taken=False),
+            TimeSlot(time=_make_time(12, 30), taken=False),
+            TimeSlot(time=_make_time(13, 00), taken=False),
+        ]
+        split = time_slot_utils.split_slots(time_slots)
+        self.assertEqual(len(split), 2)
+        self.assertEqual(len(split[0]), 2)
+        self.assertEqual(split[0][0].value, datetime.time(hour=10, minute=30))
+        self.assertEqual(split[0][1].value, datetime.time(hour=11, minute=00))
+        self.assertEqual(len(split[1]), 3)
+        self.assertEqual(split[1][0].value, datetime.time(hour=12, minute=30))
+        self.assertEqual(split[1][1].value, datetime.time(hour=12, minute=30))
+        self.assertEqual(split[1][2].value, datetime.time(hour=13, minute=00))
