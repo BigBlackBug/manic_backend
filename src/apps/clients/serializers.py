@@ -131,9 +131,9 @@ class ClientSerializer(serializers.ModelSerializer):
         new_tip = validated_data.pop('tip', None)
         new_name = validated_data.pop('first_name', None)
 
-        if len(validated_data) != 0:
-            raise ValidationError(f'The following fields may not be changed: '
-                                  f'{list(validated_data.keys())}')
+        # if len(validated_data) != 0:
+        #     raise ValidationError(f'The following fields may not be changed: '
+        #                           f'{list(validated_data.keys())}')
 
         if new_name:
             logger.debug(f'Updating name for '
