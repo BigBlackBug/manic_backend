@@ -31,6 +31,7 @@ def _calculate_eta(coords_from: tuple, coords_to: tuple,
         # TODO time zones??
         logger.info(f'Calling GMaps API to get traffic info. '
                     f'From {coords_from} To {coords_to} at {departure_time}')
+        departure_time = departure_time - timedelta(hours=7)
         directions_result = gmaps.directions(coords_from,
                                              coords_to,
                                              mode="driving", language='en',
