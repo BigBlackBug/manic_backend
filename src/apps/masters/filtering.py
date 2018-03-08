@@ -312,9 +312,9 @@ class FilteringFunctions(Enum):
                                              group[0].value):
                         result.add(master)
                         for slot in group:
-                            logger.info(f'Selecting slot {slot.time}')
                             schedule_slots.append(
                                 datetime.time.strftime(slot.value, '%H:%M'))
+                    logger.info(f'Selected slots {schedule_slots}')
 
                 if schedule_slots:
                     good_slots[master.id].append({

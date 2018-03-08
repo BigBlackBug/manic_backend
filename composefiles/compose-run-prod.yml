@@ -14,7 +14,6 @@ services:
       - /var/lib/4hands2go/prod-media:/var/lib/4hands2go/media
       - /var/lib/4hands2go/prod-static:/var/lib/4hands2go/static
 
-# TODO gotta change ownership of the media folder on the host to the current user
 # app is available on port 8000 by default
   app:
     image: bigblackbug/4hands2go-app:latest
@@ -26,15 +25,27 @@ services:
         - DATABASE_PASSWORD=4hands2go
         - DJANGO_RUN_MIGRATIONS=${DJANGO_RUN_MIGRATIONS:-no}
         - DJANGO_RUN_CREATESUPERUSER=yes
+        - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
         # needed for admin pages
         - DJANGO_RUN_COLLECTSTATIC=yes
         - ADMIN_PASSWORD=${ADMIN_PASSWORD}
         - ADMIN_USERNAME=${ADMIN_USERNAME}
         # using GMAPS for travel time prediction
         - USE_GMAPS_API=${USE_GMAPS_API-True}
+        - GMAPS_API_KEY=${GMAPS_API_KEY}
+        - SMS_API_KEY=${SMS_API_KEY}
         # logging
         - LOG_FOLDER=/code/logs
         - LOG_LEVEL=${LOG_LEVEL-DEBUG}
+        # sentry
+        - SENTRY_URL=${SENTRY_URL}
+        # notifications
+        - FCM_SERVER_KEY=${FCM_SERVER_KEY}
+        # sms
+        - ENABLE_SMS_CONFIRMATION=${ENABLE_SMS_CONFIRMATION}
+        # cloudpayments
+        - CLOUDPAYMENTS_PUBLIC_ID=${CLOUDPAYMENTS_PUBLIC_ID}
+        - CLOUDPAYMENTS_API_SECRET=${CLOUDPAYMENTS_API_SECRET}
     links:
       - pg
     volumes:
@@ -48,5 +59,10 @@ services:
       - POSTGRES_USER=4hands2go
       - POSTGRES_PASSWORD=4hands2go
       - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
     volumes:
       - /var/lib/4hands2go/prod-db-data:/var/lib/postgresql/data/pgdata
+
+  mgmt:
+    image: beinlife/4hands2go-admin

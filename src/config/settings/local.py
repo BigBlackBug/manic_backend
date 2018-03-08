@@ -6,7 +6,7 @@ DEBUG = True
 
 MAX_DISTANCE_KM = 10 ** 6
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 DATABASES = {
     'default': {
